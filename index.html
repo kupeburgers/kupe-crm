@@ -120,23 +120,19 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;padd
 .bt{background:#e8e8e8;border-radius:4px;height:6px;overflow:hidden}
 .bf{height:100%;border-radius:4px}
 
-/* ESTADOS DE CONTACTO */
-.estado-row{display:flex;gap:6px;margin-top:8px;align-items:center}
-.est-btn{font-size:10px;font-weight:700;padding:5px 12px;border-radius:20px;border:1px solid;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;background:none;letter-spacing:.3px}
-.est-btn:hover{opacity:.8}
-.est-respondio  {border-color:#e6a800;color:#b07800}
-.est-compro     {border-color:#00a865;color:#007a48}
-.est-active-respondio  {background:rgba(230,168,0,.15);border-color:#e6a800;color:#a07000}
-.est-active-compro     {background:rgba(0,168,101,.2);border-color:#00a865;color:#006a3a}
-
-/* PANEL CONVERSIÓN */
-.conv-panel{background:#fff;border:1px solid #e8e8e8;border-radius:11px;padding:13px;margin-bottom:13px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-.conv-title{font-size:11px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
-.conv-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.conv-item{text-align:center;padding:8px 4px;border-radius:8px;border:1px solid #eee}
-.conv-num{font-family:'Bebas Neue',sans-serif;font-size:26px;line-height:1}
-.conv-lbl{font-size:9px;color:#888;margin-top:2px;letter-spacing:.3px}
-.conv-pct{font-size:10px;font-weight:600;margin-top:3px}
+/* CONTACTO */
+.cbtn{display:inline-block;border:1px solid #e0e0e0;border-radius:7px;padding:4px 10px;font-size:10px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;background:#f5f5f5;color:#999;margin-top:5px;margin-right:4px;transition:all .15s}
+.cbtn.on-contactado{background:#ddeeff;color:#1a6fb5;border-color:#90c0f0}
+.cbtn.on-respondio{background:#fff5cc;color:#9a6600;border-color:#e8d060}
+.cbtn.on-compro{background:#d6f5e6;color:#006635;border-color:#80d4a0}
+.cbtn.on-no-respondio{background:#fde8e8;color:#c02020;border-color:#f0a0a0}
+.cg-stats{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:7px;margin-bottom:12px}
+.cg-stat{background:#fff;border:1px solid #e8e8e8;border-radius:9px;padding:9px 8px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.cg-num{font-family:'Bebas Neue',sans-serif;font-size:24px;line-height:1}
+.cg-lbl{font-size:8px;color:#aaa;text-transform:uppercase;letter-spacing:.8px;margin-top:2px}
+.cg-item{background:#fff;border:1px solid #e8e8e8;border-radius:9px;padding:10px 12px;margin-bottom:7px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.cg-badge{font-size:9px;font-weight:700;padding:2px 8px;border-radius:8px}
+.cg-empty{text-align:center;padding:40px 16px;color:#bbb;font-size:13px;line-height:1.8}
 </style>
 </head>
 <body>
@@ -199,6 +195,7 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;padd
   <div class="tab" onclick="goTab('mar',this)"><span class="ti">🔥</span>Marzo</div>
   <div class="tab" onclick="goTab('seg',this)"><span class="ti">🎯</span>Segmentos</div>
   <div class="tab" onclick="goTab('crm',this)"><span class="ti">📱</span>CRM</div>
+  <div class="tab" onclick="goTab('gestion',this)"><span class="ti">✅</span>Gestión</div>
   <div class="tab" onclick="goTab('prod',this)"><span class="ti">🍔</span>Productos</div>
 </div>
 
@@ -251,24 +248,6 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;padd
 </div>
 
 <div id="pg-crm" class="pg">
-
-  <!-- PANEL CONVERSIÓN -->
-  <div class="conv-panel" id="conv-panel">
-    <div class="conv-title">📊 Seguimiento de campaña</div>
-    <div class="conv-grid" style="grid-template-columns:1fr 1fr;gap:10px">
-      <div class="conv-item" style="border-color:#e6a800">
-        <div class="conv-num" id="c-resp" style="color:#b07800">0</div>
-        <div class="conv-lbl">RESPONDIERON</div>
-        <div class="conv-pct" id="c-resp-pct" style="color:#b07800">-</div>
-      </div>
-      <div class="conv-item" style="border-color:#00a865">
-        <div class="conv-num" id="c-comp" style="color:#007a48">0</div>
-        <div class="conv-lbl">COMPRARON</div>
-        <div class="conv-pct" id="c-comp-pct" style="color:#007a48">-</div>
-      </div>
-    </div>
-  </div>
-
   <div class="sec">SEGMENTO</div>
   <div class="fr" id="seg-filters"></div>
   <div class="msg-editor">
@@ -401,7 +380,7 @@ new Chart(document.getElementById('cSg'),{
 
 const filterDiv=document.getElementById('seg-filters');
 [{key:'todos',label:'Todos'},{key:'Activo',label:'🟢 Activos'},{key:'Tibio',label:'🎯 Tibios'},
- {key:'Enfriando',label:'🟠 Enfriando'},{key:'En riesgo',label:'🔴 En riesgo'},{key:'Perdido',label:'⬛ Perdidos'},{key:'__contactados',label:'📋 Con estado'}
+ {key:'Enfriando',label:'🟠 Enfriando'},{key:'En riesgo',label:'🔴 En riesgo'},{key:'Perdido',label:'⬛ Perdidos'}
 ].forEach(f=>{
   const btn=document.createElement('button');
   btn.className='fb'+(f.key===filtro?' active':'');
@@ -493,6 +472,122 @@ new Chart(document.getElementById('cPie'),{
     datasets:[{data:PRODS.slice(0,8).map(p=>p.unidades),backgroundColor:['#e03a00','#e05a00','#d97700','#c09000','#a07800','#1a73e8','#00a65a','#7c3aed'],borderColor:'#fff',borderWidth:3}]},
   options:{responsive:true,cutout:'45%',plugins:{legend:{position:'bottom',labels:{color:'#777',font:{size:9},padding:6,boxWidth:10}}}}
 });
+
+
+// ── CONTACTO TRACKING ──
+const CK='kupe_v1';
+function cargar(){try{return JSON.parse(localStorage.getItem(CK)||'{}')}catch(e){return{}}}
+function guardar(d){localStorage.setItem(CK,JSON.stringify(d))}
+
+const ECFG={
+  'contactado':  {lb:'Contactado',   cl:'on-contactado',  co:'#1a6fb5'},
+  'respondio':   {lb:'Respondió',    cl:'on-respondio',   co:'#9a6600'},
+  'compro':      {lb:'Compró 🎉',    cl:'on-compro',      co:'#006635'},
+  'no-resp':     {lb:'No respondió', cl:'on-no-respondio',co:'#c02020'},
+};
+
+function marcarContactado(tel,nombre,seg,ticket){
+  const d=cargar();
+  if(d[tel]) return;
+  const now=new Date();
+  d[tel]={nombre,seg,ticket,estado:'contactado',
+    fecha:now.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}),
+    hora:now.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})};
+  guardar(d);
+  document.getElementById('cbtn-'+tel).innerHTML=renderBotones(tel);
+  renderGestion();
+}
+
+function setEstado(tel,estado){
+  const d=cargar();
+  if(!d[tel]) return;
+  d[tel].estado=estado;
+  guardar(d);
+  document.getElementById('cbtn-'+tel).innerHTML=renderBotones(tel);
+  renderGestion();
+}
+
+function renderBotones(tel){
+  const d=cargar();
+  const actual=d[tel]?d[tel].estado:null;
+  if(!actual) return '';
+  return Object.entries(ECFG).map(([k,v])=>
+    `<button class="cbtn ${actual===k?v.cl:''}" onclick="setEstado('${tel}','${k}')">${v.lb}</button>`
+  ).join('');
+}
+
+function renderGestion(){
+  const d=cargar();
+  const tels=Object.keys(d);
+  const cnt={contactado:0,respondio:0,compro:0,'no-resp':0};
+  tels.forEach(t=>{if(d[t].estado) cnt[d[t].estado]=(cnt[d[t].estado]||0)+1;});
+  ['c','r','v','n'].forEach((id,i)=>{
+    const keys=['contactado','respondio','compro','no-resp'];
+    const el=document.getElementById('st-'+id);
+    if(el) el.textContent=cnt[keys[i]]||0;
+  });
+  const cont=document.getElementById('gestion-list');
+  if(!cont) return;
+  if(!tels.length){
+    cont.innerHTML='<div class="cg-empty">Todavía no contactaste a nadie.<br>Usá el botón 💬 en el CRM.</div>';
+    return;
+  }
+  const orden=['compro','respondio','contactado','no-resp'];
+  tels.sort((a,b)=>orden.indexOf(d[a].estado)-orden.indexOf(d[b].estado));
+  cont.innerHTML=tels.map(tel=>{
+    const c=d[tel];
+    const cfg=ECFG[c.estado]||{lb:c.estado,cl:'',co:'#999'};
+    const nom=(c.nombre||'').toLowerCase().replace(/\w/g,l=>l.toUpperCase());
+    return `<div class="cg-item">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <div style="flex:1;font-size:13px;font-weight:600;text-transform:capitalize">${nom}</div>
+        <span class="cg-badge ${cfg.cl}" style="color:${cfg.co}">${cfg.lb}</span>
+      </div>
+      <div style="font-size:10px;color:#aaa">Seg: ${c.seg} · Ticket $${Number(c.ticket).toLocaleString('es-AR')} · ${c.fecha} ${c.hora}</div>
+      <div style="margin-top:6px">
+        ${Object.entries(ECFG).map(([k,v])=>
+          `<button class="cbtn ${c.estado===k?v.cl:''}" onclick="setEstadoHist('${tel}','${k}')" style="font-size:9px;padding:3px 8px">${v.lb}</button>`
+        ).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setEstadoHist(tel,estado){
+  const d=cargar();
+  if(!d[tel]) return;
+  d[tel].estado=estado;
+  guardar(d);
+  renderGestion();
+  const el=document.getElementById('cbtn-'+tel);
+  if(el) el.innerHTML=renderBotones(tel);
+}
+
+function limpiarContactos(){
+  if(confirm('¿Limpiar todo el historial?')){
+    localStorage.removeItem(CK);
+    renderGestion();
+    renderCRM();
+  }
+}
+
+renderGestion();
+
 </script>
+
+<div id="pg-gestion" class="pg">
+  <div class="sec">RESUMEN</div>
+  <div class="cg-stats">
+    <div class="cg-stat"><div class="cg-num" id="st-c" style="color:#1a6fb5">0</div><div class="cg-lbl">Contactados</div></div>
+    <div class="cg-stat"><div class="cg-num" id="st-r" style="color:#9a6600">0</div><div class="cg-lbl">Respondieron</div></div>
+    <div class="cg-stat"><div class="cg-num" id="st-v" style="color:#006635">0</div><div class="cg-lbl">Compraron</div></div>
+    <div class="cg-stat"><div class="cg-num" id="st-n" style="color:#c02020">0</div><div class="cg-lbl">Sin resp.</div></div>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+    <div class="sec" style="margin:0">HISTORIAL</div>
+    <span style="font-size:10px;color:#bbb;cursor:pointer;text-decoration:underline" onclick="limpiarContactos()">Limpiar todo</span>
+  </div>
+  <div id="gestion-list"></div>
+</div>
 </body>
 </html>
