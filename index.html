@@ -119,6 +119,24 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;padd
 .pnew{font-size:9px;background:#e8f8f0;color:var(--grn);padding:1px 6px;border-radius:8px;font-weight:700}
 .bt{background:#e8e8e8;border-radius:4px;height:6px;overflow:hidden}
 .bf{height:100%;border-radius:4px}
+
+/* ESTADOS DE CONTACTO */
+.estado-row{display:flex;gap:6px;margin-top:8px;align-items:center}
+.est-btn{font-size:10px;font-weight:700;padding:5px 12px;border-radius:20px;border:1px solid;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;background:none;letter-spacing:.3px}
+.est-btn:hover{opacity:.8}
+.est-respondio  {border-color:#e6a800;color:#b07800}
+.est-compro     {border-color:#00a865;color:#007a48}
+.est-active-respondio  {background:rgba(230,168,0,.15);border-color:#e6a800;color:#a07000}
+.est-active-compro     {background:rgba(0,168,101,.2);border-color:#00a865;color:#006a3a}
+
+/* PANEL CONVERSIÓN */
+.conv-panel{background:#fff;border:1px solid #e8e8e8;border-radius:11px;padding:13px;margin-bottom:13px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.conv-title{font-size:11px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+.conv-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.conv-item{text-align:center;padding:8px 4px;border-radius:8px;border:1px solid #eee}
+.conv-num{font-family:'Bebas Neue',sans-serif;font-size:26px;line-height:1}
+.conv-lbl{font-size:9px;color:#888;margin-top:2px;letter-spacing:.3px}
+.conv-pct{font-size:10px;font-weight:600;margin-top:3px}
 </style>
 </head>
 <body>
@@ -233,6 +251,24 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;padd
 </div>
 
 <div id="pg-crm" class="pg">
+
+  <!-- PANEL CONVERSIÓN -->
+  <div class="conv-panel" id="conv-panel">
+    <div class="conv-title">📊 Seguimiento de campaña</div>
+    <div class="conv-grid" style="grid-template-columns:1fr 1fr;gap:10px">
+      <div class="conv-item" style="border-color:#e6a800">
+        <div class="conv-num" id="c-resp" style="color:#b07800">0</div>
+        <div class="conv-lbl">RESPONDIERON</div>
+        <div class="conv-pct" id="c-resp-pct" style="color:#b07800">-</div>
+      </div>
+      <div class="conv-item" style="border-color:#00a865">
+        <div class="conv-num" id="c-comp" style="color:#007a48">0</div>
+        <div class="conv-lbl">COMPRARON</div>
+        <div class="conv-pct" id="c-comp-pct" style="color:#007a48">-</div>
+      </div>
+    </div>
+  </div>
+
   <div class="sec">SEGMENTO</div>
   <div class="fr" id="seg-filters"></div>
   <div class="msg-editor">
@@ -365,7 +401,7 @@ new Chart(document.getElementById('cSg'),{
 
 const filterDiv=document.getElementById('seg-filters');
 [{key:'todos',label:'Todos'},{key:'Activo',label:'🟢 Activos'},{key:'Tibio',label:'🎯 Tibios'},
- {key:'Enfriando',label:'🟠 Enfriando'},{key:'En riesgo',label:'🔴 En riesgo'},{key:'Perdido',label:'⬛ Perdidos'}
+ {key:'Enfriando',label:'🟠 Enfriando'},{key:'En riesgo',label:'🔴 En riesgo'},{key:'Perdido',label:'⬛ Perdidos'},{key:'__contactados',label:'📋 Con estado'}
 ].forEach(f=>{
   const btn=document.createElement('button');
   btn.className='fb'+(f.key===filtro?' active':'');
