@@ -10,7 +10,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap');
 :root{
 --bg:#f5f5f5;--sur:#ffffff;--card:#ffffff;--bor:#e0e0e0;
---acc:#e03a00;--yel:#d97700;--grn:#00a65a;--org:#c05a00;--red:#cc2222;--blu:#1a73e8;
+--acc:#e03a00;--yel:#d97700;--grn:#00a65a;--red:#cc2222;--blu:#1a73e8;
 --txt:#1a1a1a;--mu:#aaa;--mu2:#777;--shadow:0 1px 4px rgba(0,0,0,.08)
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -20,16 +20,15 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;padd
 .logo{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--acc);letter-spacing:3px;line-height:1}
 .logo em{color:var(--yel);font-style:normal}
 .tag{background:var(--acc);color:#fff;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;letter-spacing:1.5px;text-transform:uppercase}
-.sync-btn{margin-left:auto;background:none;border:1px solid var(--bor);border-radius:8px;padding:4px 10px;font-size:10px;color:var(--mu2);cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:5px}
+.sync-btn{margin-left:auto;background:none;border:1px solid var(--bor);border-radius:8px;padding:5px 12px;font-size:11px;color:var(--mu2);cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:5px;transition:all .2s}
 .sync-btn:hover{border-color:var(--acc);color:var(--acc)}
-.sync-btn.syncing{opacity:.6;pointer-events:none}
+.sync-btn.syncing{opacity:.5;pointer-events:none}
 .status-bar{display:flex;gap:7px;flex-wrap:wrap}
-.status-pill{display:flex;align-items:center;gap:5px;background:var(--bg);border:1px solid var(--bor);border-radius:8px;padding:4px 9px;font-size:10px;cursor:default;transition:border-color .2s}
-.status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;background:var(--mu)}
+.status-pill{display:flex;align-items:center;gap:5px;background:var(--bg);border:1px solid var(--bor);border-radius:8px;padding:4px 9px;font-size:10px}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--mu);flex-shrink:0}
 .status-dot.ok{background:var(--grn)}
-.status-dot.warn{background:var(--yel)}
-.status-dot.loading{background:var(--mu);animation:pulse 1s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.status-dot.loading{animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
 .status-label{color:var(--mu2)}
 .status-val{color:var(--txt);font-weight:600}
 .tabs{display:flex;background:#fff;border-bottom:1px solid var(--bor);position:sticky;top:96px;z-index:199;overflow-x:auto;scrollbar-width:none;box-shadow:var(--shadow)}
@@ -40,24 +39,14 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;padd
 .pg{display:none;padding:14px}.pg.active{display:block}
 .sec{font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:2px;color:var(--mu2);margin:16px 0 10px;border-left:3px solid var(--acc);padding-left:9px}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}
-.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:12px}
-.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:12px}
 .card{background:var(--sur);border:1px solid var(--bor);border-radius:11px;padding:12px 13px;box-shadow:var(--shadow)}
 .cl{font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:3px}
 .cv{font-family:'Bebas Neue',sans-serif;font-size:28px;line-height:1}
 .cs{font-size:10px;color:var(--mu2);margin-top:3px}
-.cva{color:var(--acc)}.cvy{color:var(--yel)}.cvg{color:var(--grn)}.cvr{color:var(--red)}.cvb{color:var(--blu)}
-.dt{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 6px;border-radius:5px;margin-top:4px}
-.dp{background:#e8f8f0;color:var(--grn)}.dn{background:#fdecea;color:var(--red)}.dy{background:#fff3dc;color:var(--yel)}
-.ale{background:#fff3ef;border:1px solid #ffc5b0;border-radius:10px;padding:11px 13px;margin-bottom:12px;font-size:12px;line-height:1.65;color:#7a2a00}
-.ale b{color:var(--acc)}
-.ale-g{background:#edfbf4;border:1px solid #a3e6c5;border-radius:10px;padding:11px 13px;margin-bottom:12px;font-size:12px;line-height:1.65;color:#00532c}
-.ale-g b{color:var(--grn)}
+.cva{color:var(--acc)}.cvy{color:var(--yel)}.cvg{color:var(--grn)}.cvb{color:var(--blu)}
 .cb{background:var(--sur);border:1px solid var(--bor);border-radius:11px;padding:13px;margin-bottom:12px;box-shadow:var(--shadow)}
-.ct{font-size:11px;font-weight:600;color:var(--mu2);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
 .seg-list{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
-.seg-row{background:var(--sur);border:1px solid var(--bor);border-radius:11px;padding:12px 14px 12px 18px;cursor:pointer;transition:border-color .2s,box-shadow .2s;position:relative;overflow:hidden;box-shadow:var(--shadow)}
-.seg-row:hover{box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.seg-row{background:var(--sur);border:1px solid var(--bor);border-radius:11px;padding:12px 14px 12px 18px;position:relative;overflow:hidden;box-shadow:var(--shadow)}
 .seg-stripe{position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:11px 0 0 11px}
 .seg-top{display:flex;align-items:center;gap:10px;margin-bottom:7px}
 .seg-ic{font-size:20px}
@@ -78,23 +67,21 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;padd
 .cliente-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:16px;color:#fff;flex-shrink:0}
 .cliente-nombre{font-weight:600;font-size:14px;line-height:1.2}
 .cliente-tel{font-size:11px;color:var(--mu2);margin-top:2px}
-.cliente-seg{font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:auto;text-transform:uppercase;letter-spacing:.8px}
+.cliente-seg{font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:auto;text-transform:uppercase;letter-spacing:.8px;white-space:nowrap}
 .cliente-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px}
 .cstat-l{font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px}
 .cstat-v{font-family:'Bebas Neue',sans-serif;font-size:19px;line-height:1}
-.wa-btn{display:flex;align-items:center;justify-content:center;gap:7px;background:#25d366;color:#fff;border:none;border-radius:9px;padding:10px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;width:100%;transition:opacity .15s}
+.wa-btn{display:flex;align-items:center;justify-content:center;gap:7px;background:#25d366;color:#fff;border:none;border-radius:9px;padding:10px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;width:100%;text-decoration:none;transition:opacity .15s}
 .wa-btn:hover{opacity:.9}
 .prod-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bor)}
 .prod-row:last-child{border-bottom:none}
-.prod-rank{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--mu);width:24px;text-align:center}
+.prod-rank{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--mu);width:24px;text-align:center;flex-shrink:0}
 .prod-cat{font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px}
 .prod-name{font-size:12px;font-weight:600}
-.prod-qty{font-family:'Bebas Neue',sans-serif;font-size:20px;margin-left:auto;color:var(--acc)}
+.prod-qty{font-family:'Bebas Neue',sans-serif;font-size:20px;margin-left:auto;color:var(--acc);flex-shrink:0}
 .prod-rev{font-size:10px;color:var(--mu2);text-align:right}
-.loading-skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;border-radius:6px;height:28px}
-@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 .empty{text-align:center;padding:30px 20px;color:var(--mu);font-size:13px}
-.counter{font-family:'Bebas Neue',sans-serif}
+.err{background:#fdecea;border:1px solid #f5c6c6;border-radius:9px;padding:10px 13px;font-size:11px;color:#a00;margin-bottom:10px}
 </style>
 </head>
 <body>
@@ -105,10 +92,10 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;padd
     <div class="tag">CRM</div>
     <button class="sync-btn" id="syncBtn" onclick="syncData()">⟳ Actualizar</button>
   </div>
-  <div class="status-bar" id="statusBar">
-    <div class="status-pill"><div class="status-dot loading" id="dotDB"></div><span class="status-label">Base de datos</span><span class="status-val" id="statusDB">—</span></div>
-    <div class="status-pill"><div class="status-dot loading" id="dotClientes"></div><span class="status-label">Clientes</span><span class="status-val" id="statusClientes">—</span></div>
-    <div class="status-pill"><div class="status-dot loading" id="dotMes"></div><span class="status-label">Mes actual</span><span class="status-val" id="statusMes">—</span></div>
+  <div class="status-bar">
+    <div class="status-pill"><div class="status-dot loading" id="dotDB"></div><span class="status-label">Pedidos</span><span class="status-val" id="statusDB">—</span></div>
+    <div class="status-pill"><div class="status-dot loading" id="dotCli"></div><span class="status-label">Clientes</span><span class="status-val" id="statusCli">—</span></div>
+    <div class="status-pill"><div class="status-dot loading" id="dotMes"></div><span class="status-label">Último mes</span><span class="status-val" id="statusMes">—</span></div>
   </div>
 </header>
 
@@ -121,6 +108,7 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;padd
 
 <!-- EVOLUCIÓN -->
 <div class="pg active" id="pg-evolucion">
+  <div id="errEvo"></div>
   <div class="sec">RESUMEN GENERAL</div>
   <div class="g2">
     <div class="card"><div class="cl">Total pedidos</div><div class="cv cva" id="evo-pedidos">—</div><div class="cs">Entregados</div></div>
@@ -130,34 +118,26 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;padd
     <div class="card"><div class="cl">Ticket promedio</div><div class="cv cvg" id="evo-ticket">—</div><div class="cs">Por pedido</div></div>
     <div class="card"><div class="cl">Clientes únicos</div><div class="cv cvb" id="evo-clientes">—</div><div class="cs">Identificados</div></div>
   </div>
-
   <div class="sec">PEDIDOS POR MES</div>
-  <div class="cb"><canvas id="chartPedidos" height="160"></canvas></div>
-
-  <div class="sec">REVENUE POR MES</div>
-  <div class="cb"><canvas id="chartRevenue" height="160"></canvas></div>
-
+  <div class="cb" style="height:200px"><canvas id="chartPedidos"></canvas></div>
+  <div class="sec">REVENUE POR MES ($K)</div>
+  <div class="cb" style="height:200px"><canvas id="chartRevenue"></canvas></div>
   <div class="sec">TICKET PROMEDIO</div>
-  <div class="cb"><canvas id="chartTicket" height="140"></canvas></div>
+  <div class="cb" style="height:180px"><canvas id="chartTicket"></canvas></div>
 </div>
 
 <!-- SEGMENTOS -->
 <div class="pg" id="pg-segmentos">
   <div class="sec">RFM — ESTADO DE CLIENTES</div>
-  <div class="seg-list" id="segList">
-    <div class="loading-skeleton" style="height:90px"></div>
-    <div class="loading-skeleton" style="height:90px"></div>
-    <div class="loading-skeleton" style="height:90px"></div>
-  </div>
-
+  <div class="seg-list" id="segList"><div class="empty">Cargando…</div></div>
   <div class="sec">DISTRIBUCIÓN</div>
-  <div class="cb"><canvas id="chartSeg" height="180"></canvas></div>
+  <div class="cb" style="height:220px"><canvas id="chartSeg"></canvas></div>
 </div>
 
 <!-- CRM -->
 <div class="pg" id="pg-crm">
   <div class="sec">LISTA DE CLIENTES</div>
-  <div class="fr" id="filtrosSeg">
+  <div class="fr">
     <button class="fb active" onclick="filtrarCRM('todos',this)">Todos</button>
     <button class="fb" onclick="filtrarCRM('Activo',this)">🟢 Activos</button>
     <button class="fb" onclick="filtrarCRM('Tibio',this)">🟡 Tibios</button>
@@ -165,215 +145,148 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;padd
     <button class="fb" onclick="filtrarCRM('En riesgo',this)">🔴 En riesgo</button>
     <button class="fb" onclick="filtrarCRM('Perdido',this)">⚫ Perdidos</button>
   </div>
-  <input class="si2" id="searchCRM" placeholder="🔍 Buscar por nombre o teléfono..." oninput="renderClientes()">
+  <input class="si2" id="searchCRM" placeholder="🔍 Buscar por nombre o teléfono…" oninput="renderClientes()">
   <div id="clientesList"></div>
 </div>
 
 <!-- PRODUCTOS -->
 <div class="pg" id="pg-productos">
   <div class="sec">RANKING POR UNIDADES</div>
-  <div class="cb" id="prodList">
-    <div class="loading-skeleton" style="margin-bottom:8px"></div>
-    <div class="loading-skeleton" style="margin-bottom:8px"></div>
-    <div class="loading-skeleton"></div>
-  </div>
-
+  <div class="cb" id="prodList"><div class="empty">Cargando…</div></div>
   <div class="sec">TOP 10 POR REVENUE</div>
-  <div class="cb"><canvas id="chartProd" height="220"></canvas></div>
+  <div class="cb" style="height:240px"><canvas id="chartProd"></canvas></div>
 </div>
 
 <script>
-// ============================================================
-// SUPABASE CONFIG
-// ============================================================
 const SUPA_URL = 'https://lqpzhzworncmcuptesjh.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxxcHpoendvcm5jbWN1cHRlc2poIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NDI2NDYsImV4cCI6MjA4OTUxODY0Nn0.sa4SrtesQLLpP898P4zKUGeYbbILxQ2PUoaOy-dXFjI';
 const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
 
-// ============================================================
-// ESTADO GLOBAL
-// ============================================================
 let DATA = { evolucion: [], segmentos: [], clientes: [], productos: [] };
 let filtroActivo = 'todos';
-let chartPedidos, chartRevenue, chartTicket, chartSeg, chartProd;
+let charts = {};
 
-// ============================================================
-// HELPERS
-// ============================================================
+const SEG_COL = {'Activo':'#00a65a','Tibio':'#d97700','Enfriando':'#e07a00','En riesgo':'#cc2222','Perdido':'#999'};
+const SEG_IC  = {'Activo':'🟢','Tibio':'🟡','Enfriando':'🟠','En riesgo':'🔴','Perdido':'⚫'};
+
 const fmt = n => {
-  if (!n) return '0';
-  if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
-  if (n >= 1000) return (n/1000).toFixed(0) + 'K';
-  return Math.round(n).toLocaleString('es-AR');
+  n = parseFloat(n)||0;
+  if(n>=1000000) return '$'+(n/1000000).toFixed(1)+'M';
+  if(n>=1000)    return '$'+(n/1000).toFixed(0)+'K';
+  return '$'+Math.round(n).toLocaleString('es-AR');
 };
-const fmtCurrency = n => '$' + fmt(n);
-const SEG_COLORS = {
-  'Activo': '#00a65a', 'Tibio': '#d97700',
-  'Enfriando': '#e07a00', 'En riesgo': '#cc2222', 'Perdido': '#999'
-};
-const SEG_IC = { 'Activo':'🟢','Tibio':'🟡','Enfriando':'🟠','En riesgo':'🔴','Perdido':'⚫' };
 
-// ============================================================
-// TABS
-// ============================================================
-function showTab(id, el) {
-  document.querySelectorAll('.pg').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('pg-' + id).classList.add('active');
+function showTab(id,el){
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('pg-'+id).classList.add('active');
   el.classList.add('active');
 }
 
-// ============================================================
-// CARGA DE DATOS
-// ============================================================
-async function syncData() {
-  const btn = document.getElementById('syncBtn');
-  btn.classList.add('syncing');
-  btn.textContent = '⟳ Cargando...';
+// ── SYNC ──────────────────────────────────────────────
+async function syncData(){
+  const btn=document.getElementById('syncBtn');
+  btn.classList.add('syncing'); btn.textContent='⟳ Cargando…';
+  await Promise.allSettled([loadEvolucion(), loadSegmentos(), loadClientes(), loadProductos()]);
+  btn.classList.remove('syncing'); btn.textContent='⟳ Actualizar';
+}
+
+// ── EVOLUCIÓN — usa RPC para evitar límite de filas ──
+async function loadEvolucion(){
+  const errEl = document.getElementById('errEvo');
+  errEl.innerHTML='';
   try {
-    await Promise.all([loadEvolucion(), loadSegmentos(), loadClientes(), loadProductos()]);
-    updateStatusBar();
-  } catch(e) {
-    console.error(e);
+    const { data, error } = await sb.rpc('evolucion_mensual');
+    if(error) throw error;
+    if(!data||!data.length){ errEl.innerHTML='<div class="err">Sin datos de evolución</div>'; return; }
+    DATA.evolucion = data;
+    renderEvolucion();
+    // status
+    const last = data[data.length-1];
+    document.getElementById('dotDB').className='status-dot ok';
+    document.getElementById('statusDB').textContent=data.reduce((s,r)=>s+(parseInt(r.pedidos)||0),0).toLocaleString('es-AR');
+    document.getElementById('dotMes').className='status-dot ok';
+    document.getElementById('statusMes').textContent=last.mes+' · '+last.pedidos+' peds';
+  } catch(e){
+    errEl.innerHTML='<div class="err">Error Evolución: '+e.message+'</div>';
+    console.error('evolucion_mensual error',e);
   }
-  btn.classList.remove('syncing');
-  btn.textContent = '⟳ Actualizar';
 }
 
-async function loadEvolucion() {
-  const { data, error } = await sb.rpc('evolucion_mensual').catch(() => ({ data: null, error: true }));
-  
-  // Si no existe la función RPC, hacemos la query directamente
-  let rows;
-  if (error || !data) {
-    // Query via REST filter
-    const { data: raw } = await sb.from('deliverys')
-      .select('fecha,total')
-      .eq('estado', 'Entregado');
-    
-    if (!raw) return;
-    
-    // Agrupar por mes en JS
-    const byMes = {};
-    raw.forEach(r => {
-      const mes = r.fecha.slice(0,7);
-      if (!byMes[mes]) byMes[mes] = { mes, pedidos: 0, revenue: 0 };
-      byMes[mes].pedidos++;
-      byMes[mes].revenue += parseFloat(r.total) || 0;
-    });
-    rows = Object.values(byMes).sort((a,b) => a.mes.localeCompare(b.mes));
-    rows.forEach(r => r.ticket = r.pedidos ? r.revenue / r.pedidos : 0);
-  } else {
-    rows = data;
-  }
-  
-  DATA.evolucion = rows;
-  renderEvolucion();
-}
-
-async function loadSegmentos() {
-  const { data } = await sb.from('clientes')
-    .select('segmento,frecuencia,valor_total,ticket_promedio');
-  if (!data) return;
-  
-  const byS = {};
-  data.forEach(c => {
-    if (!byS[c.segmento]) byS[c.segmento] = { segmento: c.segmento, n: 0, revenue: 0, ticket: 0 };
-    byS[c.segmento].n++;
-    byS[c.segmento].revenue += parseFloat(c.valor_total) || 0;
-    byS[c.segmento].ticket += parseFloat(c.ticket_promedio) || 0;
-  });
-  Object.values(byS).forEach(s => s.ticket = s.n ? s.ticket / s.n : 0);
-  
-  const order = ['Activo','Tibio','Enfriando','En riesgo','Perdido'];
-  DATA.segmentos = order.map(s => byS[s] || { segmento: s, n: 0, revenue: 0, ticket: 0 });
-  renderSegmentos();
-}
-
-async function loadClientes() {
-  const { data } = await sb.from('clientes')
-    .select('*')
-    .order('recencia_dias', { ascending: true })
-    .limit(500);
-  if (!data) return;
-  DATA.clientes = data;
-  renderClientes();
-}
-
-async function loadProductos() {
-  const { data } = await sb.from('articulos_vendidos')
-    .select('*')
-    .order('cantidad', { ascending: false });
-  if (!data) return;
-  DATA.productos = data;
-  renderProductos();
-}
-
-// ============================================================
-// RENDER — EVOLUCIÓN
-// ============================================================
-function renderEvolucion() {
+function renderEvolucion(){
   const rows = DATA.evolucion;
-  if (!rows.length) return;
-  
-  const totalPeds = rows.reduce((s,r) => s + (r.pedidos||0), 0);
-  const totalRev = rows.reduce((s,r) => s + (r.revenue||0), 0);
-  const avgTicket = totalPeds ? totalRev / totalPeds : 0;
-  
-  document.getElementById('evo-pedidos').textContent = totalPeds.toLocaleString('es-AR');
-  document.getElementById('evo-revenue').textContent = fmtCurrency(totalRev);
-  document.getElementById('evo-ticket').textContent = fmtCurrency(avgTicket);
-  document.getElementById('evo-clientes').textContent = DATA.clientes.length.toLocaleString('es-AR');
+  const totPed = rows.reduce((s,r)=>s+(parseInt(r.pedidos)||0),0);
+  const totRev = rows.reduce((s,r)=>s+(parseFloat(r.revenue)||0),0);
+  const avgTick= totPed ? totRev/totPed : 0;
+  document.getElementById('evo-pedidos').textContent=totPed.toLocaleString('es-AR');
+  document.getElementById('evo-revenue').textContent=fmt(totRev);
+  document.getElementById('evo-ticket').textContent=fmt(avgTick);
+  document.getElementById('evo-clientes').textContent=DATA.clientes.length.toLocaleString('es-AR');
 
-  const labels = rows.map(r => r.mes.slice(5) + '/' + r.mes.slice(2,4));
-  const pedData = rows.map(r => r.pedidos || 0);
-  const revData = rows.map(r => Math.round(r.revenue / 1000));
-  const tickData = rows.map(r => Math.round(r.ticket || 0));
+  const labels = rows.map(r=>r.mes.slice(5)+'/'+r.mes.slice(2,4));
+  const pedData = rows.map(r=>parseInt(r.pedidos)||0);
+  const revData = rows.map(r=>Math.round((parseFloat(r.revenue)||0)/1000));
+  const tickData= rows.map(r=>Math.round(parseFloat(r.ticket)||0));
 
-  const chartOpts = {
-    responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { display: false } },
-    scales: {
-      x: { grid: { display: false }, ticks: { font: { size: 9 } } },
-      y: { grid: { color: '#f0f0f0' }, ticks: { font: { size: 9 } } }
+  const base = {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{display:false}},
+    scales:{
+      x:{grid:{display:false},ticks:{font:{size:9},maxRotation:0}},
+      y:{grid:{color:'#f0f0f0'},ticks:{font:{size:9}}}
     }
   };
 
-  if (chartPedidos) chartPedidos.destroy();
-  chartPedidos = new Chart(document.getElementById('chartPedidos'), {
-    type: 'bar', data: {
-      labels, datasets: [{ data: pedData, backgroundColor: '#e03a0022', borderColor: '#e03a00', borderWidth: 2, borderRadius: 4 }]
-    }, options: chartOpts
-  });
+  mkChart('chartPedidos','bar',labels,pedData,'#e03a00',base);
+  mkChart('chartRevenue','bar',labels,revData,'#d97700',{...base,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'$'+c.raw+'K'}}}});
+  const lineOpts={...base,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'$'+c.raw.toLocaleString('es-AR')}}}};
+  mkChart('chartTicket','line',labels,tickData,'#00a65a',lineOpts,true);
+}
 
-  if (chartRevenue) chartRevenue.destroy();
-  chartRevenue = new Chart(document.getElementById('chartRevenue'), {
-    type: 'bar', data: {
-      labels, datasets: [{ data: revData, backgroundColor: '#d9770022', borderColor: '#d97700', borderWidth: 2, borderRadius: 4, label: 'Revenue (K$)' }]
-    }, options: { ...chartOpts, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => '$' + ctx.raw + 'K' } } } }
-  });
-
-  if (chartTicket) chartTicket.destroy();
-  chartTicket = new Chart(document.getElementById('chartTicket'), {
-    type: 'line', data: {
-      labels, datasets: [{ data: tickData, borderColor: '#00a65a', backgroundColor: '#00a65a15', borderWidth: 2, tension: .35, fill: true, pointRadius: 3 }]
-    }, options: { ...chartOpts, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => '$' + ctx.raw.toLocaleString('es-AR') } } } }
+function mkChart(id,type,labels,data,color,opts,fill=false){
+  if(charts[id]) charts[id].destroy();
+  const isLine=type==='line';
+  charts[id]=new Chart(document.getElementById(id),{
+    type,
+    data:{labels,datasets:[{
+      data,
+      backgroundColor: isLine ? color+'20' : color+'33',
+      borderColor:color,
+      borderWidth:2,
+      borderRadius: isLine ? 0 : 4,
+      tension: isLine ? .35 : 0,
+      fill: isLine ? fill : false,
+      pointRadius: isLine ? 3 : 0
+    }]},
+    options:opts
   });
 }
 
-// ============================================================
-// RENDER — SEGMENTOS
-// ============================================================
-function renderSegmentos() {
-  const segs = DATA.segmentos;
-  const total = segs.reduce((s,x) => s + x.n, 0);
-  
-  const list = document.getElementById('segList');
-  list.innerHTML = segs.map(s => {
-    const pct = total ? Math.round(s.n * 100 / total) : 0;
-    const col = SEG_COLORS[s.segmento] || '#999';
-    return `
-    <div class="seg-row">
+// ── SEGMENTOS ─────────────────────────────────────────
+async function loadSegmentos(){
+  const { data } = await sb.from('clientes').select('segmento,frecuencia,valor_total,ticket_promedio');
+  if(!data) return;
+  const byS={};
+  data.forEach(c=>{
+    const s=c.segmento||'Perdido';
+    if(!byS[s]) byS[s]={segmento:s,n:0,revenue:0,ticket:0};
+    byS[s].n++;
+    byS[s].revenue+=parseFloat(c.valor_total)||0;
+    byS[s].ticket+=parseFloat(c.ticket_promedio)||0;
+  });
+  Object.values(byS).forEach(s=>s.ticket=s.n?s.ticket/s.n:0);
+  const order=['Activo','Tibio','Enfriando','En riesgo','Perdido'];
+  DATA.segmentos=order.map(s=>byS[s]||{segmento:s,n:0,revenue:0,ticket:0});
+  renderSegmentos();
+}
+
+function renderSegmentos(){
+  const segs=DATA.segmentos;
+  const total=segs.reduce((s,x)=>s+x.n,0)||1;
+  document.getElementById('segList').innerHTML=segs.map(s=>{
+    const pct=Math.round(s.n*100/total);
+    const col=SEG_COL[s.segmento]||'#999';
+    return `<div class="seg-row">
       <div class="seg-stripe" style="background:${col}"></div>
       <div class="seg-top">
         <span class="seg-ic">${SEG_IC[s.segmento]||'○'}</span>
@@ -383,159 +296,123 @@ function renderSegmentos() {
       <div class="seg-bar-wrap"><div class="seg-bar" style="width:${pct}%;background:${col}"></div></div>
       <div class="seg-meta">
         <span>${pct}% del total</span>
-        <span>Ticket prom: <b>${fmtCurrency(s.ticket)}</b></span>
-        <span>Revenue: <b>${fmtCurrency(s.revenue)}</b></span>
+        <span>Ticket: <b>${fmt(s.ticket)}</b></span>
+        <span>Revenue: <b>${fmt(s.revenue)}</b></span>
       </div>
     </div>`;
   }).join('');
 
-  if (chartSeg) chartSeg.destroy();
-  chartSeg = new Chart(document.getElementById('chartSeg'), {
-    type: 'doughnut',
-    data: {
-      labels: segs.map(s => s.segmento),
-      datasets: [{ data: segs.map(s => s.n), backgroundColor: segs.map(s => SEG_COLORS[s.segmento] || '#ccc'), borderWidth: 0 }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { position: 'bottom', labels: { font: { size: 10 } } } }
-    }
+  if(charts.chartSeg) charts.chartSeg.destroy();
+  charts.chartSeg=new Chart(document.getElementById('chartSeg'),{
+    type:'doughnut',
+    data:{labels:segs.map(s=>s.segmento),datasets:[{data:segs.map(s=>s.n),backgroundColor:segs.map(s=>SEG_COL[s.segmento]||'#ccc'),borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10}}}}}
   });
 }
 
-// ============================================================
-// RENDER — CRM
-// ============================================================
-function filtrarCRM(seg, el) {
-  filtroActivo = seg;
-  document.querySelectorAll('.fb').forEach(b => b.classList.remove('active'));
+// ── CLIENTES ──────────────────────────────────────────
+async function loadClientes(){
+  const { data } = await sb.from('clientes').select('*').order('recencia_dias',{ascending:true}).limit(500);
+  if(!data) return;
+  DATA.clientes=data;
+  renderClientes();
+  document.getElementById('dotCli').className='status-dot ok';
+  document.getElementById('statusCli').textContent=data.length.toLocaleString('es-AR');
+  // actualizar el número en evolución si ya cargó
+  document.getElementById('evo-clientes').textContent=data.length.toLocaleString('es-AR');
+}
+
+function filtrarCRM(seg,el){
+  filtroActivo=seg;
+  document.querySelectorAll('.fb').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
   renderClientes();
 }
 
-function renderClientes() {
-  const search = (document.getElementById('searchCRM').value || '').toLowerCase();
-  let lista = DATA.clientes;
-  
-  if (filtroActivo !== 'todos') lista = lista.filter(c => c.segmento === filtroActivo);
-  if (search) lista = lista.filter(c =>
-    (c.nombre||'').toLowerCase().includes(search) ||
-    (c.telefono||'').includes(search)
-  );
-  
-  const container = document.getElementById('clientesList');
-  if (!lista.length) { container.innerHTML = '<div class="empty">Sin resultados</div>'; return; }
-  
-  // Mostrar máx 50 para no saturar
-  const visible = lista.slice(0, 50);
-  container.innerHTML = visible.map(c => {
-    const col = SEG_COLORS[c.segmento] || '#999';
-    const inicial = (c.nombre || '?')[0].toUpperCase();
-    const tel = (c.telefono || '').replace(/\D/g,'');
-    const msg = encodeURIComponent(`Hola ${c.nombre || ''}! Te escribimos desde Kupe Burgers 🍔`);
-    const waUrl = `https://wa.me/549${tel}?text=${msg}`;
-    
-    return `
-    <div class="cliente-card">
+function renderClientes(){
+  const q=(document.getElementById('searchCRM').value||'').toLowerCase();
+  let lista=DATA.clientes;
+  if(filtroActivo!=='todos') lista=lista.filter(c=>c.segmento===filtroActivo);
+  if(q) lista=lista.filter(c=>(c.nombre||'').toLowerCase().includes(q)||(c.telefono||'').includes(q));
+  const cont=document.getElementById('clientesList');
+  if(!lista.length){cont.innerHTML='<div class="empty">Sin resultados</div>';return;}
+  const visible=lista.slice(0,50);
+  cont.innerHTML=visible.map(c=>{
+    const col=SEG_COL[c.segmento]||'#999';
+    const ini=(c.nombre||'?')[0].toUpperCase();
+    const tel=(c.telefono||'').replace(/\D/g,'');
+    const msg=encodeURIComponent('Hola '+(c.nombre||'')+', te escribimos desde Kupe Burgers 🍔');
+    const wa='https://wa.me/549'+tel+'?text='+msg;
+    return `<div class="cliente-card">
       <div class="cliente-stripe" style="background:${col}"></div>
       <div class="cliente-header">
-        <div class="cliente-avatar" style="background:${col}">${inicial}</div>
-        <div style="flex:1">
-          <div class="cliente-nombre">${c.nombre || 'Sin nombre'}</div>
-          <div class="cliente-tel">${c.telefono || '—'}</div>
+        <div class="cliente-avatar" style="background:${col}">${ini}</div>
+        <div style="flex:1;min-width:0">
+          <div class="cliente-nombre">${c.nombre||'Sin nombre'}</div>
+          <div class="cliente-tel">${c.telefono||'—'}</div>
         </div>
         <span class="cliente-seg" style="background:${col}22;color:${col}">${SEG_IC[c.segmento]||''} ${c.segmento}</span>
       </div>
       <div class="cliente-stats">
-        <div><div class="cstat-l">Pedidos</div><div class="cstat-v cva">${c.frecuencia || 0}</div></div>
-        <div><div class="cstat-l">LTV</div><div class="cstat-v cvy">${fmtCurrency(c.valor_total)}</div></div>
-        <div><div class="cstat-l">Ticket</div><div class="cstat-v cvg">${fmtCurrency(c.ticket_promedio)}</div></div>
+        <div><div class="cstat-l">Pedidos</div><div class="cstat-v cva">${c.frecuencia||0}</div></div>
+        <div><div class="cstat-l">LTV</div><div class="cstat-v cvy">${fmt(c.valor_total)}</div></div>
+        <div><div class="cstat-l">Ticket</div><div class="cstat-v cvg">${fmt(c.ticket_promedio)}</div></div>
       </div>
-      <div style="font-size:10px;color:var(--mu2);margin-bottom:8px">
-        Última compra: <b>${c.ultima_compra || '—'}</b> · Hace <b>${c.recencia_dias || '?'} días</b>
+      <div style="font-size:10px;color:var(--mu2);margin-bottom:9px">
+        Última compra: <b>${c.ultima_compra||'—'}</b> · Hace <b>${c.recencia_dias||'?'} días</b>
       </div>
-      <a href="${waUrl}" target="_blank">
-        <button class="wa-btn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-          Contactar por WhatsApp
-        </button>
+      <a href="${wa}" target="_blank" class="wa-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Contactar por WhatsApp
       </a>
     </div>`;
   }).join('');
-  
-  if (lista.length > 50) {
-    container.innerHTML += `<div class="empty">Mostrando 50 de ${lista.length}. Usá el filtro para ver más.</div>`;
-  }
+  if(lista.length>50) cont.innerHTML+=`<div class="empty">Mostrando 50 de ${lista.length}. Filtrá para ver más.</div>`;
 }
 
-// ============================================================
-// RENDER — PRODUCTOS
-// ============================================================
-function renderProductos() {
-  const prods = DATA.productos;
-  const list = document.getElementById('prodList');
-  
-  list.innerHTML = prods.slice(0,15).map((p,i) => `
+// ── PRODUCTOS ─────────────────────────────────────────
+async function loadProductos(){
+  const { data } = await sb.from('articulos_vendidos').select('*').order('cantidad',{ascending:false});
+  if(!data) return;
+  DATA.productos=data;
+  renderProductos();
+}
+
+function renderProductos(){
+  const prods=DATA.productos;
+  document.getElementById('prodList').innerHTML=prods.slice(0,15).map((p,i)=>`
     <div class="prod-row">
       <span class="prod-rank">${i+1}</span>
-      <div style="flex:1">
+      <div style="flex:1;min-width:0">
         <div class="prod-cat">${p.categoria||'—'}</div>
         <div class="prod-name">${p.articulo}</div>
       </div>
-      <div>
+      <div style="text-align:right">
         <div class="prod-qty">${Math.round(p.cantidad)}</div>
-        <div class="prod-rev">${fmtCurrency(p.total)}</div>
+        <div class="prod-rev">${fmt(p.total)}</div>
       </div>
-    </div>
-  `).join('');
+    </div>`).join('');
 
-  const top10 = prods.slice(0,10);
-  if (chartProd) chartProd.destroy();
-  chartProd = new Chart(document.getElementById('chartProd'), {
-    type: 'bar',
-    data: {
-      labels: top10.map(p => p.articulo.length > 18 ? p.articulo.slice(0,18)+'…' : p.articulo),
-      datasets: [{
-        data: top10.map(p => Math.round(p.total / 1000)),
-        backgroundColor: '#e03a0033',
-        borderColor: '#e03a00',
-        borderWidth: 2,
-        borderRadius: 4
-      }]
+  const top=prods.slice(0,10);
+  if(charts.chartProd) charts.chartProd.destroy();
+  charts.chartProd=new Chart(document.getElementById('chartProd'),{
+    type:'bar',
+    data:{
+      labels:top.map(p=>p.articulo.length>16?p.articulo.slice(0,16)+'…':p.articulo),
+      datasets:[{data:top.map(p=>Math.round((parseFloat(p.total)||0)/1000)),backgroundColor:'#e03a0033',borderColor:'#e03a00',borderWidth:2,borderRadius:4}]
     },
-    options: {
-      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => '$' + ctx.raw + 'K' } } },
-      scales: {
-        x: { grid: { color: '#f0f0f0' }, ticks: { font: { size: 9 }, callback: v => '$' + v + 'K' } },
-        y: { grid: { display: false }, ticks: { font: { size: 9 } } }
+    options:{
+      indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'$'+c.raw+'K'}}},
+      scales:{
+        x:{grid:{color:'#f0f0f0'},ticks:{font:{size:9},callback:v=>'$'+v+'K'}},
+        y:{grid:{display:false},ticks:{font:{size:9}}}
       }
     }
   });
 }
 
-// ============================================================
-// STATUS BAR
-// ============================================================
-function updateStatusBar() {
-  const rows = DATA.evolucion;
-  const mesActual = rows.length ? rows[rows.length-1] : null;
-  
-  document.getElementById('dotDB').className = 'status-dot ok';
-  document.getElementById('statusDB').textContent = DATA.evolucion.length + ' meses';
-  
-  document.getElementById('dotClientes').className = 'status-dot ok';
-  document.getElementById('statusClientes').textContent = DATA.clientes.length;
-  
-  if (mesActual) {
-    document.getElementById('dotMes').className = 'status-dot ok';
-    document.getElementById('statusMes').textContent = mesActual.mes + ' · ' + mesActual.pedidos + ' peds';
-  }
-}
-
-// ============================================================
-// INIT
-// ============================================================
+// ── INIT ──────────────────────────────────────────────
 syncData();
 </script>
 </body>
