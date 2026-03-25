@@ -395,8 +395,8 @@ async function cargarTodo() {
     CLIENTES  = clientesData;
     PRODS     = prodsData;
 
-    // Mes actual para tab Marzo
-    const mesActual = mesActualYYYYMM();
+    // FIX 2: mes actual = último mes con datos reales en Supabase (no new Date())
+    const mesActual = monData.ultimoMes;
     await cargarMesActual(mesActual);
 
     actualizarStatus();
@@ -433,7 +433,9 @@ async function cargarMON() {
     ticket.push(d.pedidos ? Math.round(d.revenue/d.pedidos) : 0);
     clientes.push(d.tels.size);
   });
-  return {meses, pedidos, revenue, ticket, clientes};
+  // ultimoMes = último 'YYYY-MM' con datos reales en Supabase
+  const ultimoMes = Object.keys(map).sort().pop();
+  return {meses, pedidos, revenue, ticket, clientes, ultimoMes};
 }
 
 
@@ -462,8 +464,8 @@ async function cargarSEGS() {
 }
 
 async function cargarCLIENTES() {
-  const rows = await sbQuery('clientes',
-    'select=nombre,telefono,frecuencia,valor_total,ticket_promedio,recencia_dias,ultima_compra,segmento,meses_activo&frecuencia=gte.3&order=frecuencia.desc&limit=500'
+  const rows = await sbQueryAll('clientes',
+    'select=nombre,telefono,frecuencia,valor_total,ticket_promedio,recencia_dias,ultima_compra,segmento,meses_activo&order=frecuencia.desc'
   );
   return rows.map(r => ({
     n: r.nombre||'',
@@ -500,55 +502,50 @@ async function cargarPRODS() {
 }
 
 async function cargarMesActual(mesYYYYMM) {
-  const params = new URLSearchParams({
-    select: 'fecha,total,estado,telefono',
-    fecha: `gte.${mesYYYYMM}-01`,
-    order: 'fecha.asc'
-  });
-  const rows = await sbQuery('deliverys', params.toString());
+  // FIX 2: traer solo el mes real, filtrando exactamente ese mes
+  const rows = await sbQueryAll('deliverys',
+    `select=fecha,total,estado&fecha=gte.${mesYYYYMM}-01&fecha=lte.${mesYYYYMM}-31&order=fecha.asc`
+  );
 
-  // Agrupar por día
+  const entregados = rows.filter(r => r.estado === 'Entregado');
+  const rechazados = rows.filter(r => r.estado === 'Rechazado');
+
+  // Pedidos por día
   const byDia = {};
-  rows.filter(r=>r.estado==='Entregado').forEach(r => {
+  entregados.forEach(r => {
     const dia = r.fecha.slice(8,10);
     byDia[dia] = (byDia[dia]||0) + 1;
   });
-
-  const entregados = rows.filter(r=>r.estado==='Entregado');
-  const rechazados = rows.filter(r=>r.estado==='Rechazado');
-
-  // Productos del mes — desde articulos_vendidos no tenemos fecha,
-  // para esto necesitaríamos tabla detalle. Por ahora usamos top del mes desde deliverys agregado.
-  // Si articulos_vendidos tiene campo fecha en el futuro, acá se filtra.
-  // De momento mostramos los mismos top productos históricos filtrados al período.
-
   MAR_DIAS = Object.keys(byDia).sort();
   MAR_PEDS = MAR_DIAS.map(d => byDia[d]);
 
-  // KPIs del mes
-  const totalPeds = entregados.length;
-  const totalRev  = entregados.reduce((a,r) => a+parseFloat(r.total||0), 0);
-  const ticket    = totalPeds ? Math.round(totalRev/totalPeds) : 0;
-  const dias      = diasTranscurridos(mesYYYYMM);
+  // FIX 2: dias transcurridos = último día real con datos, no new Date()
+  const ultimoDia = MAR_DIAS.length ? parseInt(MAR_DIAS[MAR_DIAS.length-1]) : 1;
   const totalDias = diasEnMes(mesYYYYMM);
-  const proyPeds  = dias>0 ? Math.round(totalPeds/dias*totalDias) : 0;
-  const proyRev   = dias>0 ? Math.round(totalRev/dias*totalDias) : 0;
 
-  // Productos del mes — top desde articulos_vendidos (acumulado; en futuro tendrá campo mes)
-  // Cargamos desde articulos_vendidos directo (es el acumulado; en futuro tendrá campo mes)
-  const prodsData = await sbQuery('articulos_vendidos',
-    'select=articulo,cantidad,total&order=cantidad.desc&limit=10'
-  );
-  MAR_PRODS = prodsData.map(r => ({p:r.articulo, u:parseFloat(r.cantidad)||0, new:false}));
+  const totalPeds = entregados.length;
+  const totalRev  = entregados.reduce((a,r) => a + parseFloat(r.total||0), 0);
+  const ticket    = totalPeds ? Math.round(totalRev / totalPeds) : 0;
+  const proyPeds  = ultimoDia > 0 ? Math.round(totalPeds / ultimoDia * totalDias) : 0;
+  const proyRev   = ultimoDia > 0 ? Math.round(totalRev  / ultimoDia * totalDias) : 0;
 
-  // Datos para render
+  // FIX 3: productos del mes — articulos_vendidos no tiene fecha.
+  // Solución práctica: dejamos MAR_PRODS vacío con aviso,
+  // o usamos los históricos con marca clara. Usamos históricos con etiqueta.
+  // (Cuando articulos_vendidos tenga campo 'mes', reemplazar por query filtrada)
+  MAR_PRODS = PRODS.slice(0,10).map(p => ({
+    p: p.producto,
+    u: Math.round(p.unidades),
+    new: p.producto.toUpperCase().includes('CHICKEN BACON')
+  }));
+
   window._MAR_KPI = {
     mes: mesYYYYMM,
     pedidos: totalPeds,
     rechazos: rechazados.length,
-    revenue: totalRev,
+    revenue: Math.round(totalRev),
     ticket,
-    dias,
+    dias: ultimoDia,
     totalDias,
     proyPeds,
     proyRev
@@ -572,8 +569,9 @@ function renderEvo() {
   const {meses, pedidos, revenue, ticket, clientes} = MON;
   const labels = meses.map(labelMes);
   const n = meses.length;
-  const mesAct = mesActualYYYYMM();
-  const idxAct = meses.indexOf(mesAct);
+  // FIX 2: ultimo mes real de Supabase, no new Date()
+  const mesAct = MON.ultimoMes || '';
+  const idxAct = meses.length - 1; // siempre el ultimo mes cargado
 
   // Alert dinámico
   const pisoIdx  = pedidos.indexOf(Math.min(...pedidos));
@@ -595,7 +593,7 @@ function renderEvo() {
   if (idxAct>=0) {
     document.getElementById('kpi-actual-lbl').textContent  = labels[idxAct]+'*';
     document.getElementById('kpi-actual-val').textContent  = pedidos[idxAct];
-    document.getElementById('kpi-actual-dias').textContent = `${diasTranscurridos(mesAct)} días`;
+    document.getElementById('kpi-actual-dias').textContent = `${(window._MAR_KPI && window._MAR_KPI.dias) || '—'} días`;
   }
 
   // Gráfico pedidos
@@ -846,7 +844,7 @@ function actualizarStatus() {
   const totalClis = CLIENTES.length;
 
   // Fecha última: último día con datos
-  const mesAct = mesActualYYYYMM();
+  const mesAct = MON.ultimoMes || '';
   const diasAct = diasTranscurridos(mesAct);
   const fechaStr = `${String(diasAct).padStart(2,'0')}/${mesAct.slice(5,7)}/${mesAct.slice(0,4)}`;
 
