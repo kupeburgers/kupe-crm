@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kupe · CRM</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap');
+:root{
+  --bg:#f5f5f5;--sur:#ffffff;--card:#ffffff;--bor:#e0e0e0;
+  --acc:#e03a00;--yel:#d97700;--grn:#00a65a;--org:#c05a00;--red:#cc2222;--blu:#1a73e8;
+  --txt:#1a1a1a;--mu:#aaa;--mu2:#777;--shadow:0 1px 4px rgba(0,0,0,.08)
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;padding-bottom:40px}
+
+.hdr{background:var(--sur);border-bottom:2px solid var(--acc);padding:12px 18px 10px;position:sticky;top:0;z-index:200;box-shadow:var(--shadow)}
+.hdr-top{display:flex;align-items:center;gap:10px;margin-bottom:7px}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--acc);letter-spacing:3px;line-height:1}
+.logo em{color:var(--yel);font-style:normal}
+.tag{background:var(--acc);color:#fff;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;letter-spacing:1.5px;text-transform:uppercase}
+
+.status-bar{display:flex;gap:7px;flex-wrap:wrap}
+.status-pill{display:flex;align-items:center;gap:5px;background:var(--bg);border:1px solid var(--bor);border-radius:8px;padding:4px 9px;font-size:10px;cursor:pointer;transition:border-color .2s}
+.status-pill:hover{border-color:#bbb}
+.status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.status-label{color:var(--mu2)}
+.status-val{color:var(--txt);font-weight:600}
+.status-pill.warn .status-dot{background:var(--yel)}
+.status-pill.ok .status-dot{background:var(--grn)}
+.status-pill.info .status-dot{background:var(--blu)}
+.status-pill.loading .status-dot{background:#ccc;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;align-items:flex-end}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-top:2px solid var(--acc);border-radius:16px 16px 0 0;padding:20px 18px 32px;width:100%;max-height:85vh;overflow-y:auto}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;margin-bottom:3px;color:var(--acc)}
+.modal-sub{font-size:11px;color:var(--mu2);margin-bottom:14px}
+.modal-close{float:right;background:none;border:none;color:var(--mu2);font-size:22px;cursor:pointer;margin-top:-4px}
+.file-row{background:var(--bg);border:1px solid var(--bor);border-radius:10px;padding:11px 13px;margin-bottom:8px}
+.file-name{font-size:12px;font-weight:600;color:var(--txt);margin-bottom:3px}
+.file-period{font-size:11px;color:var(--mu2)}
+.file-period b{color:var(--yel)}
+.file-rows{font-size:10px;color:var(--mu);margin-top:2px}
+.modal-hint{background:#fff8ec;border:1px solid #ffd580;border-radius:8px;padding:10px 12px;font-size:11px;color:#7a5000;line-height:1.6;margin-top:12px}
+
+.tabs{display:flex;background:#fff;border-bottom:1px solid var(--bor);position:sticky;top:96px;z-index:199;overflow-x:auto;scrollbar-width:none;box-shadow:var(--shadow)}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:1;min-width:64px;padding:10px 4px 8px;text-align:center;font-size:9px;font-weight:600;color:var(--mu2);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap}
+.tab.active{color:var(--acc);border-bottom-color:var(--acc)}
+.ti{display:block;font-size:16px;margin-bottom:2px}
+.pg{display:none;padding:14px}.pg.active{display:block}
+.sec{font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:2px;color:var(--mu2);margin:16px 0 10px;border-left:3px solid var(--acc);padding-left:9px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:12px}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.card{background:var(--sur);border:1px solid var(--bor);border-radius:11px;padding:12px 13px;box-shadow:var(--shadow)}
+.cl{font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:3px}
+.cv{font-family:'Bebas Neue',sans-serif;font-size:28px;line-height:1}
+.cs{font-size:10px;color:var(--mu2);margin-top:3px}
+.cva{color:var(--acc)}.cvy{color:var(--yel)}.cvg{color:var(--grn)}.cvr{color:var(--red)}.cvb{color:var(--blu)}
+.dt{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 6px;border-radius:5px;margin-top:4px}
+.dp{background:#e8f8f0;color:var(--grn)}.dn{background:#fdecea;color:var(--red)}.dy{background:#fff3dc;color:var(--yel)}
+.ale{background:#fff3ef;border:1px solid #ffc5b0;border-radius:10px;padding:11px 13px;margin-bottom:12px;font-size:12px;line-height:1.65;color:#7a2a00}
+.ale b{color:var(--acc)}
+.ale-g{background:#edfbf4;border:1px solid #a3e6c5;border-radius:10px;padding:11px 13px;margin-bottom:12px;font-size:12px;line-height:1.65;color:#00532c}
+.ale-g b{color:var(--grn)}
+.cb{background:var(--sur);border:1px solid var(--bor);border-radius:11px;padding:13px;margin-bottom:12px;box-shadow:var(--shadow)}
+.ct{font-size:11px;font-weight:600;color:var(--mu2);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+
+.seg-list{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.seg-row{background:var(--sur);border:1px solid var(--bor);border-radius:11px;padding:12px 14px 12px 18px;cursor:pointer;transition:border-color .2s,box-shadow .2s;position:relative;overflow:hidden;box-shadow:var(--shadow)}
+.seg-row:hover{box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.seg-stripe{position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:11px 0 0 11px}
+.seg-top{display:flex;align-items:center;gap:10px;margin-bottom:7px}
+.seg-ic{font-size:20px}
+.seg-name{font-family:'Bebas Neue',sans-serif;font-size:21px;letter-spacing:1px;flex:1}
+.seg-count{font-family:'Bebas Neue',sans-serif;font-size:28px}
+.seg-bar-wrap{background:#e8e8e8;border-radius:3px;height:5px;margin-bottom:6px}
+.seg-bar{height:100%;border-radius:3px}
+.seg-meta{display:flex;justify-content:space-between;font-size:10px;color:var(--mu2)}
+.seg-meta b{color:var(--txt);font-weight:600}
+
+.fr{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:11px}
+.fb{background:#fff;border:1px solid var(--bor);color:var(--mu2);border-radius:20px;padding:5px 12px;font-size:10px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.fb.active{background:var(--acc);border-color:var(--acc);color:#fff}
+.si2{width:100%;background:#fff;border:1px solid var(--bor);border-radius:10px;padding:10px 13px;color:var(--txt);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;margin-bottom:11px}
+.si2:focus{border-color:var(--acc)}.si2::placeholder{color:var(--mu)}
+
+.msg-editor{background:#fff;border:1px solid var(--bor);border-radius:10px;padding:12px 13px;margin-bottom:12px;box-shadow:var(--shadow)}
+.msg-editor-title{font-size:10px;font-weight:600;color:var(--mu2);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.msg-reset{font-size:9px;color:var(--mu);cursor:pointer;font-weight:400;text-decoration:underline}
+.msg-reset:hover{color:var(--mu2)}
+.msg-ta{width:100%;background:var(--bg);border:1px solid var(--bor);border-radius:8px;padding:10px 12px;color:var(--txt);font-family:'DM Sans',sans-serif;font-size:12px;line-height:1.6;outline:none;resize:vertical;min-height:90px}
+.msg-ta:focus{border-color:var(--yel)}
+.msg-hint{font-size:10px;color:var(--mu2);margin-top:6px}
+.msg-hint b{color:var(--yel)}
+
+.ci{background:var(--sur);border:1px solid var(--bor);border-radius:10px;padding:11px 13px;margin-bottom:7px;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow)}
+.rk{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--mu);min-width:26px;text-align:center;flex-shrink:0}
+.rk.gld{color:var(--yel)}.rk.ac{color:var(--acc)}
+.cib{flex:1;min-width:0}
+.cn{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:capitalize;color:var(--txt)}
+.cm{font-size:10px;color:var(--mu2);margin-top:2px;line-height:1.5}
+.cm b{color:var(--yel);font-weight:600}
+.cr{display:flex;gap:4px;margin-top:5px;flex-wrap:wrap;align-items:center}
+.sp{font-size:9px;font-weight:700;padding:3px 8px;border-radius:10px;letter-spacing:.5px;text-transform:uppercase}
+.rec-bar{flex:1;background:#e0e0e0;border-radius:3px;height:4px;max-width:60px}
+.rec-fill{height:100%;border-radius:3px}
+.bw{background:#22c55e;color:#fff;border:none;border-radius:8px;padding:8px 10px;font-size:15px;cursor:pointer;text-decoration:none;display:flex;align-items:center;flex-shrink:0}
+.bw:hover{background:#16a34a}
+.ht{text-align:center;font-size:10px;color:var(--mu);padding:8px}
+
+.pr{background:var(--sur);border:1px solid var(--bor);border-radius:10px;padding:11px 13px;margin-bottom:7px;box-shadow:var(--shadow)}
+.pt{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:7px}
+.pn{font-size:12px;font-weight:600;max-width:60%;line-height:1.3;color:var(--txt)}
+.pu{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--acc);text-align:right}
+.pi{font-size:10px;color:var(--mu2);text-align:right}
+.pnew{font-size:9px;background:#e8f8f0;color:var(--grn);padding:1px 6px;border-radius:8px;font-weight:700}
+.bt{background:#e8e8e8;border-radius:4px;height:6px;overflow:hidden}
+.bf{height:100%;border-radius:4px}
+
+/* CONTACTO */
+.cbtn{display:inline-block;border:1px solid #e0e0e0;border-radius:7px;padding:4px 10px;font-size:10px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;background:#f5f5f5;color:#999;margin-top:5px;margin-right:4px;transition:all .15s}
+.cbtn.on-contactado{background:#ddeeff;color:#1a6fb5;border-color:#90c0f0}
+.cbtn.on-respondio{background:#fff5cc;color:#9a6600;border-color:#e8d060}
+.cbtn.on-compro{background:#d6f5e6;color:#006635;border-color:#80d4a0}
+.cbtn.on-no-respondio{background:#fde8e8;color:#c02020;border-color:#f0a0a0}
+.cg-stats{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:7px;margin-bottom:12px}
+.cg-stat{background:#fff;border:1px solid #e8e8e8;border-radius:9px;padding:9px 8px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.cg-num{font-family:'Bebas Neue',sans-serif;font-size:24px;line-height:1}
+.cg-lbl{font-size:8px;color:#aaa;text-transform:uppercase;letter-spacing:.8px;margin-top:2px}
+.cg-item{background:#fff;border:1px solid #e8e8e8;border-radius:9px;padding:10px 12px;margin-bottom:7px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.cg-badge{font-size:9px;font-weight:700;padding:2px 8px;border-radius:8px}
+.cg-empty{text-align:center;padding:40px 16px;color:#bbb;font-size:13px;line-height:1.8}
+
+/* LOADING */
+.loading-overlay{display:flex;align-items:center;justify-content:center;padding:60px 20px;flex-direction:column;gap:12px}
+.loading-spinner{width:32px;height:32px;border:3px solid var(--bor);border-top-color:var(--acc);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-txt{font-size:12px;color:var(--mu2)}
+.error-msg{background:#fdecea;border:1px solid #f0a0a0;border-radius:10px;padding:12px;font-size:12px;color:#c02020;margin:12px 0}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-top">
+    <div class="logo">KUPE<em>.</em></div>
+    <span class="tag" id="hdr-tag">CRM · cargando…</span>
+  </div>
+  <div class="status-bar">
+    <div class="status-pill loading" id="pill-fecha" onclick="openModal()">
+      <div class="status-dot"></div>
+      <span class="status-label">Datos al</span>
+      <span class="status-val" id="pill-fecha-val">—</span>
+    </div>
+    <div class="status-pill loading" id="pill-periodo" onclick="openModal()">
+      <div class="status-dot"></div>
+      <span class="status-label">Período</span>
+      <span class="status-val" id="pill-periodo-val">—</span>
+    </div>
+    <div class="status-pill loading" id="pill-resumen" onclick="openModal()">
+      <div class="status-dot"></div>
+      <span class="status-label" id="pill-pedidos-lbl">…</span>
+      <span class="status-val" id="pill-clientes-val">—</span>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-bg" onclick="closeModalBg(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title">Estado de datos</div>
+    <div class="modal-sub">Fuente: Supabase · actualización en tiempo real</div>
+    <div class="file-row">
+      <div class="file-name">📋 deliverys</div>
+      <div class="file-period" id="modal-deliverys-period">—</div>
+      <div class="file-rows" id="modal-deliverys-rows">—</div>
+    </div>
+    <div class="file-row">
+      <div class="file-name">👥 clientes</div>
+      <div class="file-period" id="modal-clientes-period">—</div>
+      <div class="file-rows" id="modal-clientes-rows">—</div>
+    </div>
+    <div class="file-row">
+      <div class="file-name">🍔 articulos_vendidos</div>
+      <div class="file-period" id="modal-articulos-period">—</div>
+      <div class="file-rows" id="modal-articulos-rows">—</div>
+    </div>
+    <div class="modal-hint">
+      ℹ️ <b>Para actualizar los datos:</b><br>
+      1. Cargá los SQL de deliverys en Supabase SQL Editor<br>
+      2. Ejecutá <b>SELECT recalcular_clientes();</b><br>
+      3. Recargá esta página — los datos se actualizan solos.
+    </div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="goTab('evo',this)"><span class="ti">📈</span>Evolución</div>
+  <div class="tab" onclick="goTab('mar',this)"><span class="ti">🔥</span>Mes actual</div>
+  <div class="tab" onclick="goTab('seg',this)"><span class="ti">🎯</span>Segmentos</div>
+  <div class="tab" onclick="goTab('crm',this)"><span class="ti">📱</span>CRM</div>
+  <div class="tab" onclick="goTab('gestion',this)"><span class="ti">✅</span>Gestión</div>
+  <div class="tab" onclick="goTab('prod',this)"><span class="ti">🍔</span>Productos</div>
+</div>
+
+<div id="pg-evo" class="pg active">
+  <div id="evo-alert" class="ale"><b>📊 Cargando datos...</b></div>
+  <div class="sec">PEDIDOS / MES</div>
+  <div class="cb"><div class="ct">Histórico mensual · *mes en curso parcial</div><canvas id="cP" height="175"></canvas></div>
+  <div class="sec">REVENUE</div>
+  <div class="cb"><div class="ct">Facturación ARS mensual</div><canvas id="cR" height="155"></canvas></div>
+  <div class="g4">
+    <div class="card"><div class="cl">Revenue total</div><div class="cv cva" id="kpi-revenue-total">—</div><div class="cs" id="kpi-revenue-meses">—</div></div>
+    <div class="card"><div class="cl">Pico</div><div class="cv cvy" id="kpi-pico-val">—</div><div class="cs" id="kpi-pico-mes">—</div></div>
+    <div class="card"><div class="cl">Piso</div><div class="cv cvr" id="kpi-piso-val">—</div><div class="cs" id="kpi-piso-mes">—</div></div>
+    <div class="card"><div class="cl" id="kpi-actual-lbl">Mes actual*</div><div class="cv cvg" id="kpi-actual-val">—</div><div class="cs" id="kpi-actual-dias">—</div></div>
+  </div>
+  <div class="sec">CLIENTES ÚNICOS / MES</div>
+  <div class="cb"><div class="ct">Retención mes a mes</div><canvas id="cC" height="155"></canvas></div>
+</div>
+
+<div id="pg-mar" class="pg">
+  <div id="mar-alert" class="ale-g"><b>🔥 Cargando mes actual...</b></div>
+  <div class="sec" id="mar-sec-titulo">MES ACTUAL</div>
+  <div class="g4">
+    <div class="card"><div class="cl">Pedidos</div><div class="cv cvg" id="mar-pedidos">—</div><div class="cs" id="mar-dias-txt">—</div></div>
+    <div class="card"><div class="cl">Revenue</div><div class="cv cvg" id="mar-revenue">—</div></div>
+    <div class="card"><div class="cl">Ticket</div><div class="cv cvy" id="mar-ticket">—</div><div class="dt dy" id="mar-ticket-badge"></div></div>
+    <div class="card"><div class="cl">Rechazos</div><div class="cv" id="mar-rechazos">—</div><div class="cs" id="mar-rechazos-pct">—</div></div>
+  </div>
+  <div class="g2">
+    <div class="card"><div class="cl">Proy. pedidos</div><div class="cv cvg" id="mar-proy-ped">—</div></div>
+    <div class="card"><div class="cl">Proy. revenue</div><div class="cv cvg" id="mar-proy-rev">—</div></div>
+  </div>
+  <div class="sec">PRODUCTOS DEL MES</div>
+  <div id="plist-mar"></div>
+  <div class="sec">PEDIDOS POR DÍA</div>
+  <div class="cb"><div class="ct" id="mar-chart-titulo">Mes en curso</div><canvas id="cMar" height="165"></canvas></div>
+</div>
+
+<div id="pg-seg" class="pg">
+  <div class="ale"><b>Segmentación por días reales.</b> Ciclo esperado: 2–3 veces por mes. Más de 14 días sin comprar ya es señal. Tocá un segmento para ir al CRM.</div>
+  <div class="sec">ESTADO DE LA BASE</div>
+  <div class="seg-list" id="seglist"></div>
+  <div class="cb"><div class="ct">Revenue histórico acumulado por segmento</div><canvas id="cSg" height="195"></canvas></div>
+</div>
+
+<div id="pg-crm" class="pg">
+  <div class="sec">SEGMENTO</div>
+  <div class="fr" id="seg-filters"></div>
+  <div class="msg-editor">
+    <div class="msg-editor-title">
+      <span>✏️ Mensaje de WhatsApp</span>
+      <span class="msg-reset" onclick="resetMsg()">restaurar original</span>
+    </div>
+    <textarea class="msg-ta" id="msg-ta" oninput="saveMsg()" placeholder="Escribí el mensaje..."></textarea>
+    <div class="msg-hint">Usá <b>[Nombre]</b> para insertar el nombre automáticamente.</div>
+  </div>
+  <input class="si2" type="text" placeholder="🔍 Buscar por nombre..." oninput="setS(this.value)">
+  <div id="clist"></div>
+  <div class="ht" id="chint"></div>
+</div>
+
+<div id="pg-prod" class="pg">
+  <div id="prod-alert" class="ale"><b>🍔 Cargando productos...</b></div>
+  <div class="sec" id="prod-sec-titulo">TOP PRODUCTOS · HISTÓRICO</div>
+  <div id="plist"></div>
+  <div class="cb"><div class="ct">Participación top 8</div><canvas id="cPie" height="220"></canvas></div>
+</div>
+
+<script>
+// ── CONFIG SUPABASE ──────────────────────────────────────────────────────────
+const SB_URL = 'https://lqpzhzworncmcuptesjh.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxxcHpoendvcm5jbWN1cHRlc2poIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NDI2NDYsImV4cCI6MjA4OTUxODY0Nn0.sa4SrtesQLLpP898P4zKUGeYbbILxQ2PUoaOy-dXFjI';
+
+async function sbQuery(table, params='') {
+  const r = await fetch(`${SB_URL}/rest/v1/${table}?${params}`, {
+    headers: {
+      'apikey': SB_KEY,
+      'Authorization': `Bearer ${SB_KEY}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  if (!r.ok) throw new Error(`Supabase error ${r.status} en ${table}`);
+  return r.json();
+}
+
+async function sbRpc(fn, body={}) {
+  const r = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, {
+    method: 'POST',
+    headers: {
+      'apikey': SB_KEY,
+      'Authorization': `Bearer ${SB_KEY}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) throw new Error(`Supabase RPC error ${r.status} en ${fn}`);
+  return r.json();
+}
+
+// ── ESTADO GLOBAL ────────────────────────────────────────────────────────────
+let MON={}, SEGS=[], CLIENTES=[], PRODS=[], MAR_PRODS=[], MAR_PEDS=[], MAR_DIAS=[];
+let chartP=null, chartR=null, chartC=null, chartMar=null, chartSg=null, chartPie=null;
+
+const SCFG={
+  'Activo':    {col:'#00a65a', bg:'#edfbf4'},
+  'Tibio':     {col:'#d97700', bg:'#fff8ec'},
+  'Enfriando': {col:'#c05a00', bg:'#fff3e8'},
+  'En riesgo': {col:'#cc2222', bg:'#fdecea'},
+  'Perdido':   {col:'#999',    bg:'#f5f5f5'},
+};
+const SCFG_IC={'Activo':'🟢','Tibio':'🎯','Enfriando':'🟠','En riesgo':'🔴','Perdido':'⬛'};
+const SCFG_LABEL={
+  'Activo':'0–14 días',
+  'Tibio':'15–30 días · TARGET WhatsApp',
+  'Enfriando':'31–60 días',
+  'En riesgo':'61–90 días',
+  'Perdido':'90+ días',
+};
+
+const MSGS_DEFAULT={
+  'todos':     'Hola [Nombre]! Tenemos algo nuevo en Kupe: el Chicken Bacon, nuestro crispy de pollo. Ya disponible en BCN 🍔',
+  'Activo':    'Hola [Nombre]! Ya que sos de los nuestros... ¿probaste el Chicken Bacon? Nuestro nuevo crispy de pollo está en el menú 🍔🔥',
+  'Tibio':     'Hola [Nombre]! Hace unos días que no pedís. Esta semana tenemos el Chicken Bacon, nuestro nuevo crispy de pollo. ¿Pedimos? 🍔',
+  'Enfriando': 'Hola [Nombre]! Hace más de un mes que no sabemos de vos. El Chicken Bacon nuevo es una buena excusa para volver 🍔',
+  'En riesgo': 'Hola [Nombre]! Hace casi 3 meses que no pedís en Kupe. No queremos perderte — esta semana el Chicken Bacon te espera 🙌',
+  'Perdido':   'Hola [Nombre]! Hace mucho que no pedís. Tenemos el Chicken Bacon, nuestro nuevo crispy de pollo. Te esperamos 🍔',
+};
+let msgActual={...MSGS_DEFAULT};
+let filtro='Tibio', busca='';
+
+// ── HELPERS ──────────────────────────────────────────────────────────────────
+const fmtM  = v => '$'+(v/1000000).toFixed(1)+'M';
+const fmtARS = v => '$'+Math.round(v).toLocaleString('es-AR');
+const gc = '#e8e8e8';
+
+function labelMes(yyyy_mm) {
+  const [y,m] = yyyy_mm.split('-');
+  const nombres = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const n = nombres[parseInt(m)];
+  const anio = y==='2025' ? '' : "'26";
+  return n + anio;
+}
+
+function mesActualYYYYMM() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+}
+
+function diasEnMes(yyyy_mm) {
+  const [y,m] = yyyy_mm.split('-').map(Number);
+  return new Date(y, m, 0).getDate();
+}
+
+function diasTranscurridos(yyyy_mm) {
+  const now = new Date();
+  const [y,m] = yyyy_mm.split('-').map(Number);
+  if (now.getFullYear()===y && now.getMonth()+1===m) return now.getDate();
+  return diasEnMes(yyyy_mm);
+}
+
+// ── CARGA DE DATOS ───────────────────────────────────────────────────────────
+async function cargarTodo() {
+  try {
+    setLoadingStatus();
+    const [monData, segsData, clientesData, prodsData] = await Promise.all([
+      cargarMON(),
+      cargarSEGS(),
+      cargarCLIENTES(),
+      cargarPRODS()
+    ]);
+
+    MON       = monData;
+    SEGS      = segsData;
+    CLIENTES  = clientesData;
+    PRODS     = prodsData;
+
+    // Mes actual para tab Marzo
+    const mesActual = mesActualYYYYMM();
+    await cargarMesActual(mesActual);
+
+    actualizarStatus();
+    renderTodo();
+
+  } catch(e) {
+    console.error(e);
+    mostrarError('Error cargando datos: ' + e.message);
+  }
+}
+
+async function cargarMON() {
+  const rows = await sbRpc('mon_evolucion');
+  // fallback si no existe la función RPC: query directa
+  if (!rows || rows.error) return cargarMON_directo();
+  return procesarMON(rows);
+}
+
+async function cargarMON_directo() {
+  const params = new URLSearchParams({
+    select: 'fecha,total,estado,telefono',
+    estado: 'eq.Entregado',
+    order: 'fecha.asc'
+  });
+  const rows = await sbQuery('deliverys', params.toString());
+  
+  // Agrupar por mes en JS
+  const map = {};
+  rows.forEach(r => {
+    const mes = r.fecha.slice(0,7);
+    if (!map[mes]) map[mes] = {pedidos:0, revenue:0, tels:new Set()};
+    map[mes].pedidos++;
+    map[mes].revenue += parseFloat(r.total)||0;
+    if (r.telefono) map[mes].tels.add(r.telefono);
+  });
+  
+  const meses=[], pedidos=[], revenue=[], ticket=[], clientes=[];
+  Object.keys(map).sort().forEach(m => {
+    const d = map[m];
+    meses.push(m);
+    pedidos.push(d.pedidos);
+    revenue.push(Math.round(d.revenue));
+    ticket.push(d.pedidos ? Math.round(d.revenue/d.pedidos) : 0);
+    clientes.push(d.tels.size);
+  });
+  return {meses, pedidos, revenue, ticket, clientes};
+}
+
+function procesarMON(rows) {
+  const meses=[], pedidos=[], revenue=[], ticket=[], clientes=[];
+  rows.forEach(r => {
+    meses.push(r.mes);
+    pedidos.push(parseInt(r.pedidos)||0);
+    revenue.push(parseFloat(r.revenue)||0);
+    ticket.push(parseFloat(r.ticket)||0);
+    clientes.push(parseInt(r.clientes)||0);
+  });
+  return {meses, pedidos, revenue, ticket, clientes};
+}
+
+async function cargarSEGS() {
+  const rows = await sbQuery('clientes',
+    'select=segmento,valor_total,ticket_promedio&segmento=neq.null&order=segmento.asc'
+  );
+  const map = {};
+  rows.forEach(r => {
+    const s = r.segmento;
+    if (!map[s]) map[s] = {segmento:s, clientes:0, revenue:0, ticket_sum:0};
+    map[s].clientes++;
+    map[s].revenue += parseFloat(r.valor_total)||0;
+    map[s].ticket_sum += parseFloat(r.ticket_promedio)||0;
+  });
+  const orden = ['Activo','Tibio','Enfriando','En riesgo','Perdido'];
+  return orden.filter(k=>map[k]).map(k => ({
+    segmento: k,
+    ic: SCFG_IC[k]||'●',
+    col: (SCFG[k]||{col:'#999'}).col,
+    clientes: map[k].clientes,
+    revenue: Math.round(map[k].revenue),
+    ticket: map[k].clientes ? Math.round(map[k].ticket_sum/map[k].clientes) : 0,
+    rec: SCFG_LABEL[k]||''
+  }));
+}
+
+async function cargarCLIENTES() {
+  const rows = await sbQuery('clientes',
+    'select=nombre,telefono,frecuencia,valor_total,ticket_promedio,recencia_dias,ultima_compra,segmento,meses_activo&frecuencia=gte.3&order=frecuencia.desc&limit=500'
+  );
+  return rows.map(r => ({
+    n: r.nombre||'',
+    t: r.telefono||'',
+    f: r.frecuencia||0,
+    v: parseFloat(r.valor_total)||0,
+    tk: parseFloat(r.ticket_promedio)||0,
+    re: r.recencia_dias||0,
+    ult: r.ultima_compra ? formatFecha(r.ultima_compra) : '—',
+    s: r.segmento||'Perdido',
+    ma: r.meses_activo||0
+  }));
+}
+
+function formatFecha(f) {
+  if (!f) return '—';
+  // Si es YYYY-MM-DD lo convertimos a DD/MM/YYYY
+  if (/^\d{4}-\d{2}-\d{2}/.test(f)) {
+    const [y,m,d] = f.slice(0,10).split('-');
+    return `${d}/${m}/${y}`;
+  }
+  return f;
+}
+
+async function cargarPRODS() {
+  const rows = await sbQuery('articulos_vendidos',
+    'select=articulo,cantidad,total&order=cantidad.desc&limit=15'
+  );
+  return rows.map(r => ({
+    producto: r.articulo,
+    unidades: parseFloat(r.cantidad)||0,
+    importe: parseFloat(r.total)||0
+  }));
+}
+
+async function cargarMesActual(mesYYYYMM) {
+  const params = new URLSearchParams({
+    select: 'fecha,total,estado,telefono',
+    fecha: `gte.${mesYYYYMM}-01`,
+    order: 'fecha.asc'
+  });
+  const rows = await sbQuery('deliverys', params.toString());
+
+  // Agrupar por día
+  const byDia = {};
+  rows.filter(r=>r.estado==='Entregado').forEach(r => {
+    const dia = r.fecha.slice(8,10);
+    byDia[dia] = (byDia[dia]||0) + 1;
+  });
+
+  const entregados = rows.filter(r=>r.estado==='Entregado');
+  const rechazados = rows.filter(r=>r.estado==='Rechazado');
+
+  // Productos del mes — desde articulos_vendidos no tenemos fecha,
+  // para esto necesitaríamos tabla detalle. Por ahora usamos top del mes desde deliverys agregado.
+  // Si articulos_vendidos tiene campo fecha en el futuro, acá se filtra.
+  // De momento mostramos los mismos top productos históricos filtrados al período.
+
+  MAR_DIAS = Object.keys(byDia).sort();
+  MAR_PEDS = MAR_DIAS.map(d => byDia[d]);
+
+  // KPIs del mes
+  const totalPeds = entregados.length;
+  const totalRev  = entregados.reduce((a,r) => a+parseFloat(r.total||0), 0);
+  const ticket    = totalPeds ? Math.round(totalRev/totalPeds) : 0;
+  const dias      = diasTranscurridos(mesYYYYMM);
+  const totalDias = diasEnMes(mesYYYYMM);
+  const proyPeds  = dias>0 ? Math.round(totalPeds/dias*totalDias) : 0;
+  const proyRev   = dias>0 ? Math.round(totalRev/dias*totalDias) : 0;
+
+  // Productos del mes — top desde deliverys con group: usamos rpc o estimamos
+  // Cargamos desde articulos_vendidos directo (es el acumulado; en futuro tendrá campo mes)
+  const prodsData = await sbQuery('articulos_vendidos',
+    'select=articulo,cantidad,total&order=cantidad.desc&limit=10'
+  );
+  MAR_PRODS = prodsData.map(r => ({p:r.articulo, u:parseFloat(r.cantidad)||0, new:false}));
+
+  // Datos para render
+  window._MAR_KPI = {
+    mes: mesYYYYMM,
+    pedidos: totalPeds,
+    rechazos: rechazados.length,
+    revenue: totalRev,
+    ticket,
+    dias,
+    totalDias,
+    proyPeds,
+    proyRev
+  };
+}
+
+// ── RENDER GENERAL ───────────────────────────────────────────────────────────
+function renderTodo() {
+  renderEvo();
+  renderMesActual();
+  renderSegs();
+  renderCRM();
+  renderProds();
+  iniciarFiltrosCRM();
+  updateMsgEditor();
+  renderGestion();
+}
+
+// ── TAB EVOLUCIÓN ────────────────────────────────────────────────────────────
+function renderEvo() {
+  const {meses, pedidos, revenue, ticket, clientes} = MON;
+  const labels = meses.map(labelMes);
+  const n = meses.length;
+  const mesAct = mesActualYYYYMM();
+  const idxAct = meses.indexOf(mesAct);
+
+  // Alert dinámico
+  const pisoIdx  = pedidos.indexOf(Math.min(...pedidos));
+  const picoIdx  = pedidos.indexOf(Math.max(...pedidos));
+  const totalRev = revenue.reduce((a,b)=>a+b,0);
+  const ticketPct = ticket.length>1 ? Math.round((ticket[n-1]-ticket[0])/ticket[0]*100) : 0;
+  document.getElementById('evo-alert').innerHTML =
+    `<b>📉 ${n} meses de datos.</b> Pico: <b>${pedidos[picoIdx]} pedidos</b> (${labels[picoIdx]}). ` +
+    `Piso: <b>${pedidos[pisoIdx]}</b> (${labels[pisoIdx]}). ` +
+    `Revenue total: <b>${fmtM(totalRev)}</b>. Ticket <b>+${ticketPct}%</b> en el período.`;
+
+  // KPI cards
+  document.getElementById('kpi-revenue-total').textContent = fmtM(totalRev);
+  document.getElementById('kpi-revenue-meses').textContent = `${n} meses`;
+  document.getElementById('kpi-pico-val').textContent      = pedidos[picoIdx];
+  document.getElementById('kpi-pico-mes').textContent      = labels[picoIdx];
+  document.getElementById('kpi-piso-val').textContent      = pedidos[pisoIdx];
+  document.getElementById('kpi-piso-mes').textContent      = labels[pisoIdx];
+  if (idxAct>=0) {
+    document.getElementById('kpi-actual-lbl').textContent  = labels[idxAct]+'*';
+    document.getElementById('kpi-actual-val').textContent  = pedidos[idxAct];
+    document.getElementById('kpi-actual-dias').textContent = `${diasTranscurridos(mesAct)} días`;
+  }
+
+  // Gráfico pedidos
+  const bgP = pedidos.map((_,i) =>
+    i===idxAct ? 'rgba(0,166,90,0.75)' :
+    `rgba(224,${Math.max(30,110-i*6)},0,${Math.max(0.35,0.85-i*0.04)})`
+  );
+  if (chartP) chartP.destroy();
+  chartP = new Chart(document.getElementById('cP'), {
+    type:'bar',
+    data:{labels, datasets:[{data:pedidos, backgroundColor:bgP, borderRadius:5}]},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:gc},ticks:{font:{size:9}}},y:{grid:{color:gc},ticks:{font:{size:10}}}}}
+  });
+
+  // Gráfico revenue
+  if (chartR) chartR.destroy();
+  chartR = new Chart(document.getElementById('cR'), {
+    type:'line',
+    data:{labels, datasets:[{data:revenue, borderColor:'#d97700', backgroundColor:'rgba(217,119,0,.07)',
+      pointBackgroundColor:labels.map((_,i)=>i===idxAct?'#00a65a':'#d97700'), pointRadius:4, tension:0.35, fill:true}]},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:gc},ticks:{font:{size:9}}},y:{grid:{color:gc},ticks:{callback:v=>'$'+(v/1000000).toFixed(0)+'M',font:{size:9}}}}}
+  });
+
+  // Gráfico clientes
+  if (chartC) chartC.destroy();
+  chartC = new Chart(document.getElementById('cC'), {
+    type:'line',
+    data:{labels, datasets:[{data:clientes, borderColor:'#1a73e8', backgroundColor:'rgba(26,115,232,.06)',
+      pointBackgroundColor:labels.map((_,i)=>i===idxAct?'#00a65a':'#1a73e8'), pointRadius:4, tension:0.35, fill:true}]},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:gc},ticks:{font:{size:9}}},y:{grid:{color:gc},ticks:{font:{size:10}}}}}
+  });
+}
+
+// ── TAB MES ACTUAL ───────────────────────────────────────────────────────────
+function renderMesActual() {
+  const k = window._MAR_KPI;
+  if (!k) return;
+
+  const [y,m] = k.mes.split('-');
+  const nombresMes=['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const nomMes = nombresMes[parseInt(m)] + ' ' + y;
+
+  document.getElementById('mar-sec-titulo').textContent = `${nomMes.toUpperCase()} (1–${k.dias})`;
+  document.getElementById('mar-chart-titulo').textContent = `1–${k.dias} de ${nombresMes[parseInt(m)]}`;
+
+  document.getElementById('mar-alert').innerHTML =
+    `<b>🔥 ${nomMes}.</b> Ticket ${fmtARS(k.ticket)} · ` +
+    `${k.dias} de ${k.totalDias} días. Proyección: <b>~${k.proyPeds} pedidos · ${fmtM(k.proyRev)}</b>`;
+
+  document.getElementById('mar-pedidos').textContent   = k.pedidos;
+  document.getElementById('mar-dias-txt').textContent  = `${k.dias} días`;
+  document.getElementById('mar-revenue').textContent   = fmtM(k.revenue);
+  document.getElementById('mar-ticket').textContent    = fmtARS(k.ticket);
+  document.getElementById('mar-rechazos').textContent  = k.rechazos;
+  document.getElementById('mar-rechazos-pct').textContent = k.pedidos+k.rechazos>0
+    ? ((k.rechazos/(k.pedidos+k.rechazos))*100).toFixed(1)+'%' : '0%';
+  document.getElementById('mar-proy-ped').textContent  = '~'+k.proyPeds;
+  document.getElementById('mar-proy-rev').textContent  = '~'+fmtM(k.proyRev);
+
+  // Productos del mes
+  const mpl = document.getElementById('plist-mar');
+  mpl.innerHTML = '';
+  if (MAR_PRODS.length) {
+    const mpMax = MAR_PRODS[0].u;
+    MAR_PRODS.forEach(p => {
+      const pct = Math.round(p.u/mpMax*100);
+      const nb  = p.new ? '<span class="pnew">NUEVO</span>' : '';
+      const bc  = p.new ? '#00a65a' : '#e03a00';
+      mpl.innerHTML += `<div class="pr"><div class="pt"><div class="pn">${p.p} ${nb}</div><div class="pu" style="color:${p.new?'#00a65a':'var(--acc)'}">${p.u}</div></div><div class="bt"><div class="bf" style="width:${pct}%;background:${bc}"></div></div></div>`;
+    });
+  }
+
+  // Gráfico por día
+  if (chartMar) chartMar.destroy();
+  chartMar = new Chart(document.getElementById('cMar'), {
+    type:'bar',
+    data:{
+      labels: MAR_DIAS.map(d => String(parseInt(d))),
+      datasets:[{data:MAR_PEDS,
+        backgroundColor:MAR_PEDS.map(v=>v>=15?'rgba(0,166,90,0.75)':v>=8?'rgba(217,119,0,0.65)':'rgba(224,58,0,0.4)'),
+        borderRadius:4}]
+    },
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:gc},ticks:{font:{size:8}}},y:{grid:{color:gc},ticks:{font:{size:10}}}}}
+  });
+}
+
+// ── TAB SEGMENTOS ────────────────────────────────────────────────────────────
+function renderSegs() {
+  const totalCli = SEGS.reduce((a,s)=>a+s.clientes, 0);
+  const segListEl = document.getElementById('seglist');
+  segListEl.innerHTML = '';
+  SEGS.forEach(s => {
+    const cfg = SCFG[s.segmento]||{col:'#999',bg:'#f5f5f5'};
+    const pctCli = Math.round(s.clientes/totalCli*100);
+    const isTarget = s.segmento==='Tibio';
+    segListEl.innerHTML += `
+      <div class="seg-row" onclick="goSegCRM('${s.segmento}')" style="${isTarget?'border-color:'+cfg.col:''}">
+        <div class="seg-stripe" style="background:${cfg.col}"></div>
+        <div class="seg-top">
+          <div class="seg-ic">${s.ic}</div>
+          <div style="flex:1"><div class="seg-name" style="color:${cfg.col}">${s.segmento}${isTarget?' 🎯':''}</div><div style="font-size:10px;color:var(--mu2)">${SCFG_LABEL[s.segmento]||''}</div></div>
+          <div class="seg-count" style="color:${cfg.col}">${s.clientes}</div>
+        </div>
+        <div class="seg-bar-wrap"><div class="seg-bar" style="width:${pctCli}%;background:${cfg.col}"></div></div>
+        <div class="seg-meta"><span>${pctCli}% de la base</span><span><b>${fmtM(s.revenue)}</b> hist. · ${fmtARS(s.ticket)}/ticket</span></div>
+      </div>`;
+  });
+
+  if (chartSg) chartSg.destroy();
+  chartSg = new Chart(document.getElementById('cSg'), {
+    type:'bar',
+    data:{labels:SEGS.map(s=>s.segmento), datasets:[{data:SEGS.map(s=>s.revenue), backgroundColor:SEGS.map(s=>(SCFG[s.segmento]||{col:'#ccc'}).col+'cc'), borderRadius:5}]},
+    options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:gc},ticks:{callback:v=>'$'+(v/1000000).toFixed(0)+'M',font:{size:9}}},y:{grid:{color:gc},ticks:{font:{size:10}}}}}
+  });
+}
+
+// ── TAB PRODUCTOS ────────────────────────────────────────────────────────────
+function renderProds() {
+  const maxU   = PRODS[0]?.unidades||1;
+  const totalU = PRODS.reduce((a,b)=>a+b.unidades, 0);
+  const pColores=['#e03a00','#e05a00','#d97700','#c09000','#a07800','#806000','#604800','#8a6000','#6a5000','#aaa','#bbb','#ccc','#00a65a','#ddd','#eee'];
+  const pl = document.getElementById('plist');
+  pl.innerHTML = '';
+
+  // Alert
+  if (PRODS.length) {
+    document.getElementById('prod-alert').innerHTML =
+      `<b>${PRODS[0].producto}</b> lidera con ${Math.round(PRODS[0].unidades).toLocaleString('es-AR')} unidades. ` +
+      `Total histórico: <b>${Math.round(totalU).toLocaleString('es-AR')} productos</b> vendidos.`;
+  }
+
+  PRODS.forEach((p,i) => {
+    const pct  = Math.round(p.unidades/maxU*100);
+    const sh   = (p.unidades/totalU*100).toFixed(1);
+    const isNew = p.producto.includes('CHICKEN BACON');
+    pl.innerHTML += `<div class="pr"><div class="pt"><div class="pn">${p.producto}${isNew?' <span class="pnew">NUEVO</span>':''}</div><div><div class="pu" style="${isNew?'color:#00a65a':''}">${Math.round(p.unidades)}</div><div class="pi">${fmtM(p.importe)} · ${sh}%</div></div></div><div class="bt"><div class="bf" style="width:${pct}%;background:${isNew?'#00a65a':pColores[i]||'#ccc'}"></div></div></div>`;
+  });
+
+  if (chartPie) chartPie.destroy();
+  chartPie = new Chart(document.getElementById('cPie'), {
+    type:'doughnut',
+    data:{
+      labels:PRODS.slice(0,8).map(p=>p.producto.replace(' DOBLE','').replace(' SIMPLE','').replace('PORCION ','')),
+      datasets:[{data:PRODS.slice(0,8).map(p=>p.unidades), backgroundColor:['#e03a00','#e05a00','#d97700','#c09000','#a07800','#1a73e8','#00a65a','#7c3aed'], borderColor:'#fff', borderWidth:3}]
+    },
+    options:{responsive:true,cutout:'45%',plugins:{legend:{position:'bottom',labels:{color:'#777',font:{size:9},padding:6,boxWidth:10}}}}
+  });
+}
+
+// ── TAB CRM ──────────────────────────────────────────────────────────────────
+function iniciarFiltrosCRM() {
+  const filterDiv = document.getElementById('seg-filters');
+  filterDiv.innerHTML = '';
+  [{key:'todos',label:'Todos'},{key:'Activo',label:'🟢 Activos'},{key:'Tibio',label:'🎯 Tibios'},
+   {key:'Enfriando',label:'🟠 Enfriando'},{key:'En riesgo',label:'🔴 En riesgo'},{key:'Perdido',label:'⬛ Perdidos'}
+  ].forEach(f=>{
+    const btn=document.createElement('button');
+    btn.className='fb'+(f.key===filtro?' active':'');
+    btn.textContent=f.label;
+    btn.onclick=()=>setF(f.key,btn);
+    filterDiv.appendChild(btn);
+  });
+}
+
+function updateMsgEditor(){
+  document.getElementById('msg-ta').value = msgActual[filtro]||msgActual['todos'];
+}
+function saveMsg(){ msgActual[filtro]=document.getElementById('msg-ta').value; }
+function resetMsg(){
+  msgActual[filtro]=MSGS_DEFAULT[filtro]||MSGS_DEFAULT['todos'];
+  document.getElementById('msg-ta').value=msgActual[filtro];
+}
+function setF(seg,el){
+  filtro=seg;
+  document.querySelectorAll('.fb').forEach(b=>b.classList.remove('active'));
+  if(el) el.classList.add('active');
+  updateMsgEditor(); renderCRM();
+}
+function setS(v){ busca=v; renderCRM(); }
+function goSegCRM(seg){
+  goTab('crm',document.querySelectorAll('.tab')[3]);
+  filtro=seg;
+  document.querySelectorAll('.fb').forEach(b=>{
+    b.classList.remove('active');
+    if(b.textContent.includes(seg)) b.classList.add('active');
+  });
+  updateMsgEditor(); renderCRM();
+}
+function getMsgParaCliente(primerNombre){
+  const msg=msgActual[filtro]||msgActual['todos'];
+  return msg.replace(/\[Nombre\]/gi,primerNombre);
+}
+
+function renderCRM(){
+  let lista=[...CLIENTES];
+  if(filtro!=='todos') lista=lista.filter(c=>c.s===filtro);
+  if(busca){const q=busca.toLowerCase();lista=lista.filter(c=>c.n.toLowerCase().includes(q));}
+  lista.sort((a,b)=>{
+    if(a.s!==b.s){const o=['Tibio','Activo','Enfriando','En riesgo','Perdido'];return o.indexOf(a.s)-o.indexOf(b.s);}
+    return b.f-a.f||b.v-a.v;
+  });
+  const cont=document.getElementById('clist');
+  cont.innerHTML='';
+  lista.forEach((c,i)=>{
+    const nom=c.n.toLowerCase().replace(/\b\w/g,l=>l.toUpperCase());
+    const primerN=nom.split(' ')[0];
+    const tel=c.t.replace(/^0?54?/,'');
+    const cfg=SCFG[c.s]||{col:'#999',bg:'#f5f5f5'};
+    const rk=i===0?'gld':i<5?'ac':'';
+    const recC=c.re<=14?'#00a65a':c.re<=30?'#d97700':c.re<=60?'#c05a00':'#cc2222';
+    const recPct=Math.min(100,Math.round(c.re/90*100));
+    const recT=c.re===0?'Hoy':`${c.re}d`;
+    const wa=`https://wa.me/54${tel}?text=${encodeURIComponent(getMsgParaCliente(primerN))}`;
+    cont.innerHTML+=`
+      <div class="ci">
+        <div class="rk ${rk}">${i+1}</div>
+        <div class="cib">
+          <div class="cn">${nom}</div>
+          <div class="cm">${c.f} pedido${c.f>1?'s':''} en ${c.ma} mes${c.ma>1?'es':''} · <b>${fmtARS(c.v)}</b> · Ticket ${fmtARS(c.tk)}</div>
+          <div class="cr">
+            <span class="sp" style="background:${cfg.bg};color:${cfg.col}">${c.s}</span>
+            <span style="font-size:10px;color:${recC};font-weight:600">⏱ ${recT}</span>
+            <div class="rec-bar"><div class="rec-fill" style="width:${recPct}%;background:${recC}"></div></div>
+            <span style="font-size:9px;color:var(--mu2)">Última: ${c.ult}</span>
+          </div>
+          <div id="cbtn-${tel}">${renderBotones(tel)}</div>
+        </div>
+        <a class="bw" href="${wa}" target="_blank" onclick="marcarContactado('${tel}','${c.n}','${c.s}',${c.tk})">💬</a>
+      </div>`;
+  });
+  document.getElementById('chint').textContent=`${lista.length} cliente${lista.length!==1?'s':''} · ordenados por frecuencia · 💬 usa el mensaje del editor`;
+}
+
+// ── STATUS HEADER ────────────────────────────────────────────────────────────
+function setLoadingStatus() {
+  ['pill-fecha','pill-periodo','pill-resumen'].forEach(id=>{
+    document.getElementById(id).classList.add('loading');
+  });
+}
+
+function actualizarStatus() {
+  const {meses, pedidos} = MON;
+  if (!meses || !meses.length) return;
+
+  const primerMes = meses[0];
+  const ultMes    = meses[meses.length-1];
+  const totalPeds = pedidos.reduce((a,b)=>a+b,0);
+  const totalClis = CLIENTES.length;
+
+  // Fecha última: último día con datos
+  const mesAct = mesActualYYYYMM();
+  const diasAct = diasTranscurridos(mesAct);
+  const fechaStr = `${String(diasAct).padStart(2,'0')}/${mesAct.slice(5,7)}/${mesAct.slice(0,4)}`;
+
+  document.getElementById('pill-fecha-val').textContent    = fechaStr;
+  document.getElementById('pill-periodo-val').textContent  = `${labelMes(primerMes)} → ${labelMes(ultMes)}`;
+  document.getElementById('pill-pedidos-lbl').textContent  = `${totalPeds.toLocaleString('es-AR')} pedidos`;
+  document.getElementById('pill-clientes-val').textContent = `${totalClis.toLocaleString('es-AR')} clientes`;
+  document.getElementById('hdr-tag').textContent           = `CRM · ${meses.length} meses`;
+
+  ['pill-fecha','pill-periodo','pill-resumen'].forEach(id=>{
+    const el = document.getElementById(id);
+    el.classList.remove('loading');
+    el.className = el.className.replace('loading','') + (id==='pill-fecha'?' ok':id==='pill-periodo'?' info':' warn');
+  });
+}
+
+function mostrarError(msg) {
+  ['pg-evo','pg-mar','pg-seg','pg-prod'].forEach(id => {
+    const pg = document.getElementById(id);
+    if (pg) {
+      const err = document.createElement('div');
+      err.className = 'error-msg';
+      err.textContent = '⚠️ ' + msg;
+      pg.prepend(err);
+    }
+  });
+  document.getElementById('hdr-tag').textContent = 'CRM · error';
+}
+
+// ── NAVEGACIÓN ────────────────────────────────────────────────────────────────
+function openModal(){document.getElementById('modal-bg').classList.add('open');}
+function closeModal(){document.getElementById('modal-bg').classList.remove('open');}
+function closeModalBg(e){if(e.target===document.getElementById('modal-bg'))closeModal();}
+
+function goTab(id,el){
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('pg-'+id).classList.add('active');
+  el.classList.add('active');
+}
+
+Chart.defaults.color='#999';
+Chart.defaults.font.family='DM Sans';
+
+// ── CONTACTO TRACKING ────────────────────────────────────────────────────────
+const CK='kupe_v1';
+function cargar(){try{return JSON.parse(localStorage.getItem(CK)||'{}')}catch(e){return{}}}
+function guardar(d){localStorage.setItem(CK,JSON.stringify(d))}
+
+const ECFG={
+  'contactado':  {lb:'Contactado',   cl:'on-contactado',  co:'#1a6fb5'},
+  'respondio':   {lb:'Respondió',    cl:'on-respondio',   co:'#9a6600'},
+  'compro':      {lb:'Compró 🎉',    cl:'on-compro',      co:'#006635'},
+  'no-resp':     {lb:'No respondió', cl:'on-no-respondio',co:'#c02020'},
+};
+
+function marcarContactado(tel,nombre,seg,ticket){
+  const d=cargar();
+  if(d[tel]) return;
+  const now=new Date();
+  d[tel]={nombre,seg,ticket,estado:'contactado',
+    fecha:now.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}),
+    hora:now.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})};
+  guardar(d);
+  const el=document.getElementById('cbtn-'+tel);
+  if(el) el.innerHTML=renderBotones(tel);
+  renderGestion();
+}
+
+function setEstado(tel,estado){
+  const d=cargar();
+  if(!d[tel]) return;
+  d[tel].estado=estado;
+  guardar(d);
+  const el=document.getElementById('cbtn-'+tel);
+  if(el) el.innerHTML=renderBotones(tel);
+  renderGestion();
+}
+
+function renderBotones(tel){
+  const d=cargar();
+  const actual=d[tel]?d[tel].estado:null;
+  if(!actual) return '';
+  return Object.entries(ECFG).map(([k,v])=>
+    `<button class="cbtn ${actual===k?v.cl:''}" onclick="setEstado('${tel}','${k}')">${v.lb}</button>`
+  ).join('');
+}
+
+function renderGestion(){
+  const d=cargar();
+  const tels=Object.keys(d);
+  const cnt={contactado:0,respondio:0,compro:0,'no-resp':0};
+  tels.forEach(t=>{if(d[t].estado) cnt[d[t].estado]=(cnt[d[t].estado]||0)+1;});
+  ['c','r','v','n'].forEach((id,i)=>{
+    const keys=['contactado','respondio','compro','no-resp'];
+    const el=document.getElementById('st-'+id);
+    if(el) el.textContent=cnt[keys[i]]||0;
+  });
+  const cont=document.getElementById('gestion-list');
+  if(!cont) return;
+  if(!tels.length){
+    cont.innerHTML='<div class="cg-empty">Todavía no contactaste a nadie.<br>Usá el botón 💬 en el CRM.</div>';
+    return;
+  }
+  const orden=['compro','respondio','contactado','no-resp'];
+  tels.sort((a,b)=>orden.indexOf(d[a].estado)-orden.indexOf(d[b].estado));
+  cont.innerHTML=tels.map(tel=>{
+    const c=d[tel];
+    const cfg=ECFG[c.estado]||{lb:c.estado,cl:'',co:'#999'};
+    const nom=(c.nombre||'').toLowerCase().replace(/\b\w/g,l=>l.toUpperCase());
+    return `<div class="cg-item">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <div style="flex:1;font-size:13px;font-weight:600;text-transform:capitalize">${nom}</div>
+        <span class="cg-badge ${cfg.cl}" style="color:${cfg.co}">${cfg.lb}</span>
+      </div>
+      <div style="font-size:10px;color:#aaa">Seg: ${c.seg} · Ticket ${fmtARS(c.ticket)} · ${c.fecha} ${c.hora}</div>
+      <div style="margin-top:6px">
+        ${Object.entries(ECFG).map(([k,v])=>
+          `<button class="cbtn ${c.estado===k?v.cl:''}" onclick="setEstadoHist('${tel}','${k}')" style="font-size:9px;padding:3px 8px">${v.lb}</button>`
+        ).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setEstadoHist(tel,estado){
+  const d=cargar();
+  if(!d[tel]) return;
+  d[tel].estado=estado;
+  guardar(d);
+  renderGestion();
+  const el=document.getElementById('cbtn-'+tel);
+  if(el) el.innerHTML=renderBotones(tel);
+}
+
+function limpiarContactos(){
+  if(confirm('¿Limpiar todo el historial?')){
+    localStorage.removeItem(CK);
+    renderGestion();
+    renderCRM();
+  }
+}
+
+// ── INICIO ───────────────────────────────────────────────────────────────────
+cargarTodo();
+</script>
+
+<div id="pg-gestion" class="pg">
+  <div class="sec">RESUMEN</div>
+  <div class="cg-stats">
+    <div class="cg-stat"><div class="cg-num" id="st-c" style="color:#1a6fb5">0</div><div class="cg-lbl">Contactados</div></div>
+    <div class="cg-stat"><div class="cg-num" id="st-r" style="color:#9a6600">0</div><div class="cg-lbl">Respondieron</div></div>
+    <div class="cg-stat"><div class="cg-num" id="st-v" style="color:#006635">0</div><div class="cg-lbl">Compraron</div></div>
+    <div class="cg-stat"><div class="cg-num" id="st-n" style="color:#c02020">0</div><div class="cg-lbl">Sin resp.</div></div>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+    <div class="sec" style="margin:0">HISTORIAL</div>
+    <span style="font-size:10px;color:#bbb;cursor:pointer;text-decoration:underline" onclick="limpiarContactos()">Limpiar todo</span>
+  </div>
+  <div id="gestion-list"></div>
+</div>
+</body>
