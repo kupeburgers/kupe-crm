@@ -290,19 +290,6 @@ async function sbQuery(table, params='') {
   return r.json();
 }
 
-async function sbRpc(fn, body={}) {
-  const r = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, {
-    method: 'POST',
-    headers: {
-      'apikey': SB_KEY,
-      'Authorization': `Bearer ${SB_KEY}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(body)
-  });
-  if (!r.ok) throw new Error(`Supabase RPC error ${r.status} en ${fn}`);
-  return r.json();
-}
 
 // ── ESTADO GLOBAL ────────────────────────────────────────────────────────────
 let MON={}, SEGS=[], CLIENTES=[], PRODS=[], MAR_PRODS=[], MAR_PEDS=[], MAR_DIAS=[];
@@ -395,30 +382,20 @@ async function cargarTodo() {
 }
 
 async function cargarMON() {
-  const rows = await sbRpc('mon_evolucion');
-  // fallback si no existe la función RPC: query directa
-  if (!rows || rows.error) return cargarMON_directo();
-  return procesarMON(rows);
-}
+  const rows = await sbQuery('deliverys',
+    'select=fecha,total,telefono&estado=eq.Entregado&order=fecha.asc&limit=10000'
+  );
 
-async function cargarMON_directo() {
-  const params = new URLSearchParams({
-    select: 'fecha,total,estado,telefono',
-    estado: 'eq.Entregado',
-    order: 'fecha.asc'
-  });
-  const rows = await sbQuery('deliverys', params.toString());
-  
   // Agrupar por mes en JS
   const map = {};
   rows.forEach(r => {
-    const mes = r.fecha.slice(0,7);
+    const mes = r.fecha.slice(0,7); // 'YYYY-MM'
     if (!map[mes]) map[mes] = {pedidos:0, revenue:0, tels:new Set()};
     map[mes].pedidos++;
     map[mes].revenue += parseFloat(r.total)||0;
     if (r.telefono) map[mes].tels.add(r.telefono);
   });
-  
+
   const meses=[], pedidos=[], revenue=[], ticket=[], clientes=[];
   Object.keys(map).sort().forEach(m => {
     const d = map[m];
@@ -431,17 +408,6 @@ async function cargarMON_directo() {
   return {meses, pedidos, revenue, ticket, clientes};
 }
 
-function procesarMON(rows) {
-  const meses=[], pedidos=[], revenue=[], ticket=[], clientes=[];
-  rows.forEach(r => {
-    meses.push(r.mes);
-    pedidos.push(parseInt(r.pedidos)||0);
-    revenue.push(parseFloat(r.revenue)||0);
-    ticket.push(parseFloat(r.ticket)||0);
-    clientes.push(parseInt(r.clientes)||0);
-  });
-  return {meses, pedidos, revenue, ticket, clientes};
-}
 
 async function cargarSEGS() {
   const rows = await sbQuery('clientes',
@@ -540,7 +506,7 @@ async function cargarMesActual(mesYYYYMM) {
   const proyPeds  = dias>0 ? Math.round(totalPeds/dias*totalDias) : 0;
   const proyRev   = dias>0 ? Math.round(totalRev/dias*totalDias) : 0;
 
-  // Productos del mes — top desde deliverys con group: usamos rpc o estimamos
+  // Productos del mes — top desde articulos_vendidos (acumulado; en futuro tendrá campo mes)
   // Cargamos desde articulos_vendidos directo (es el acumulado; en futuro tendrá campo mes)
   const prodsData = await sbQuery('articulos_vendidos',
     'select=articulo,cantidad,total&order=cantidad.desc&limit=10'
