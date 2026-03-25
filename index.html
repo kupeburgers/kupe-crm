@@ -278,6 +278,7 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;padd
 const SB_URL = 'https://lqpzhzworncmcuptesjh.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxxcHpoendvcm5jbWN1cHRlc2poIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NDI2NDYsImV4cCI6MjA4OTUxODY0Nn0.sa4SrtesQLLpP898P4zKUGeYbbILxQ2PUoaOy-dXFjI';
 
+// Query simple — para tablas chicas (clientes, articulos_vendidos)
 async function sbQuery(table, params='') {
   const r = await fetch(`${SB_URL}/rest/v1/${table}?${params}`, {
     headers: {
@@ -288,6 +289,32 @@ async function sbQuery(table, params='') {
   });
   if (!r.ok) throw new Error(`Supabase error ${r.status} en ${table}`);
   return r.json();
+}
+
+// Query paginada — para deliverys (6000+ filas)
+// Supabase REST corta a 1000 por request; esto trae todo paginando
+async function sbQueryAll(table, params='') {
+  const PAGE = 1000;
+  let offset = 0;
+  let todos = [];
+  while (true) {
+    const r = await fetch(
+      `${SB_URL}/rest/v1/${table}?${params}&limit=${PAGE}&offset=${offset}`,
+      {
+        headers: {
+          'apikey': SB_KEY,
+          'Authorization': `Bearer ${SB_KEY}`,
+          'Prefer': 'count=none'
+        }
+      }
+    );
+    if (!r.ok) throw new Error(`Supabase error ${r.status} en ${table} (offset ${offset})`);
+    const batch = await r.json();
+    todos = todos.concat(batch);
+    if (batch.length < PAGE) break; // ultima pagina
+    offset += PAGE;
+  }
+  return todos;
 }
 
 
@@ -382,8 +409,9 @@ async function cargarTodo() {
 }
 
 async function cargarMON() {
-  const rows = await sbQuery('deliverys',
-    'select=fecha,total,telefono&estado=eq.Entregado&order=fecha.asc&limit=10000'
+  // sbQueryAll pagina de a 1000 — trae los 6000+ pedidos completos
+  const rows = await sbQueryAll('deliverys',
+    'select=fecha,total,telefono&estado=eq.Entregado&order=fecha.asc'
   );
 
   // Agrupar por mes en JS
