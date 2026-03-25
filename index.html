@@ -529,14 +529,14 @@ async function cargarMesActual(mesYYYYMM) {
   const proyPeds  = ultimoDia > 0 ? Math.round(totalPeds / ultimoDia * totalDias) : 0;
   const proyRev   = ultimoDia > 0 ? Math.round(totalRev  / ultimoDia * totalDias) : 0;
 
-  // FIX 3: productos del mes — articulos_vendidos no tiene fecha.
-  // Solución práctica: dejamos MAR_PRODS vacío con aviso,
-  // o usamos los históricos con marca clara. Usamos históricos con etiqueta.
-  // (Cuando articulos_vendidos tenga campo 'mes', reemplazar por query filtrada)
-  MAR_PRODS = PRODS.slice(0,10).map(p => ({
-    p: p.producto,
-    u: Math.round(p.unidades),
-    new: p.producto.toUpperCase().includes('CHICKEN BACON')
+  // FIX 3: productos del mes — consulta real filtrada por mes en articulos_vendidos
+  const prodsDelMes = await sbQuery('articulos_vendidos',
+    `select=articulo,cantidad&mes=eq.${mesYYYYMM}&order=cantidad.desc&limit=15`
+  );
+  MAR_PRODS = prodsDelMes.map(r => ({
+    p: r.articulo,
+    u: Math.round(parseFloat(r.cantidad)||0),
+    new: r.articulo.toUpperCase().includes('CHICKEN BACON')
   }));
 
   window._MAR_KPI = {
