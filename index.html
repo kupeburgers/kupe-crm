@@ -259,6 +259,7 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;padd
     <div class="msg-hint">Usá <b>[Nombre]</b> para insertar el nombre automáticamente.</div>
   </div>
   <input class="si2" type="text" placeholder="🔍 Buscar por nombre..." oninput="setS(this.value)">
+  <div id="accion-hoy"></div>
   <div id="clist"></div>
   <div class="ht" id="chint"></div>
 </div>
@@ -421,13 +422,60 @@ function renderCRM(){
   let lista=[...CLIENTES];
   if(filtro!=='todos') lista=lista.filter(c=>c.s===filtro);
   if(busca){const q=busca.toLowerCase();lista=lista.filter(c=>c.n.toLowerCase().includes(q));}
-  lista.sort((a,b)=>{
-    if(a.s!==b.s){const o=['Tibio','Activo','Enfriando','En riesgo','Perdido'];return o.indexOf(a.s)-o.indexOf(b.s);}
-    return b.f-a.f||b.v-a.v;
+  const minF = Math.min(...CLIENTES.map(c => c.f));
+  const maxF = Math.max(...CLIENTES.map(c => c.f));
+  const minTk = Math.min(...CLIENTES.map(c => c.tk));
+  const maxTk = Math.max(...CLIENTES.map(c => c.tk));
+  const minRe = Math.min(...CLIENTES.map(c => c.re));
+  const maxRe = Math.max(...CLIENTES.map(c => c.re));
+  lista.forEach(c => {
+    const f_norm = (c.f - minF) / (maxF - minF) || 0;
+    const tk_norm = (c.tk - minTk) / (maxTk - minTk) || 0;
+    const re_norm = (c.re - minRe) / (maxRe - minRe) || 0;
+    c.sc = (f_norm * 0.4) + (tk_norm * 0.3) + (re_norm * 0.3);
+  });
+  lista.sort((a, b) => b.sc - a.sc);
+  const top5cont=document.getElementById('accion-hoy');
+  top5cont.innerHTML='<div class="sec">🔥 ACCIÓN HOY</div>';
+  lista.slice(0,5).forEach((c,i)=>{
+    const nom=c.n.toLowerCase().replace(/\w/g,l=>l.toUpperCase());
+    const primerN=nom.split(' ')[0];
+    const tel=c.t.replace(/^0?54?/,'');
+    const cfg=SCFG[c.s]||{col:'#999',bg:'#f5f5f5'};
+    const recC=c.re<=14?'#00a65a':c.re<=30?'#d97700':c.re<=60?'#c05a00':'#cc2222';
+    const recPct=Math.min(100,Math.round(c.re/90*100));
+    const recT=c.re===0?'Hoy':`${c.re}d`;
+    const wa=`https://wa.me/54${tel}?text=${encodeURIComponent(getMsgParaCliente(primerN))}`;
+    top5cont.innerHTML+=`
+      <div class="ci">
+        <div class="rk gld">${i+1}</div>
+        <div class="cib">
+          <div class="cn">${nom}</div>
+          <div class="cm">${c.f} pedido${c.f>1?'s':''} en ${c.ma} mes${c.ma>1?'es':''} · <b>$${c.v.toLocaleString('es-AR')}</b> · Ticket $${c.tk.toLocaleString('es-AR')}</div>
+          <div class="cr">
+            <span class="sp" style="background:${cfg.bg};color:${cfg.col}">${c.s}</span>
+            <span style="font-size:10px;color:${recC};font-weight:600">⏱ ${recT}</span>
+            <div class="rec-bar"><div class="rec-fill" style="width:${recPct}%;background:${recC}"></div></div>
+            <span style="font-size:9px;color:var(--mu2)">Última: ${c.ult}</span>
+          </div>
+        </div>
+        <a class="bw" href="${wa}" target="_blank">💬</a>
+        <div id="cbtn-${tel}"></div>
+      </div>`;
+  });
+  lista.slice(0,5).forEach(c => {
+    const tel = c.t.replace(/^0?54?/,'');
+    const btn = document.getElementById('cbtn-' + tel);
+    if(btn) {
+      const estado = renderBotones(tel);
+      if(!estado) btn.innerHTML = `<button class="cbtn" onclick="marcarContactado('${tel}','${c.n}','${c.s}','${c.tk}')">Marcar contactado</button>`;
+      else btn.innerHTML = estado;
+    }
   });
   const cont=document.getElementById('clist');
   cont.innerHTML='';
   lista.forEach((c,i)=>{
+    if(i<5) return;
     const nom=c.n.toLowerCase().replace(/\w/g,l=>l.toUpperCase());
     const primerN=nom.split(' ')[0];
     const tel=c.t.replace(/^0?54?/,'');
@@ -451,9 +499,19 @@ function renderCRM(){
           </div>
         </div>
         <a class="bw" href="${wa}" target="_blank">💬</a>
+        <div id="cbtn-${tel}"></div>
       </div>`;
   });
-  document.getElementById('chint').textContent=`${lista.length} cliente${lista.length!==1?'s':''} · ordenados por frecuencia · 💬 usa el mensaje del editor`;
+  lista.forEach(c => {
+    const tel = c.t.replace(/^0?54?/,'');
+    const btn = document.getElementById('cbtn-' + tel);
+    if(btn) {
+      const estado = renderBotones(tel);
+      if(!estado) btn.innerHTML = `<button class="cbtn" onclick="marcarContactado('${tel}','${c.n}','${c.s}','${c.tk}')">Marcar</button>`;
+      else btn.innerHTML = estado;
+    }
+  });
+  document.getElementById('chint').textContent=`${lista.length} cliente${lista.length!==1?'s':''} · ordenados por prioridad · 💬 usa el mensaje del editor`;
 }
 renderCRM();
 
@@ -495,6 +553,7 @@ function marcarContactado(tel,nombre,seg,ticket){
     hora:now.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})};
   guardar(d);
   document.getElementById('cbtn-'+tel).innerHTML=renderBotones(tel);
+  renderCRM();
   renderGestion();
 }
 
@@ -504,6 +563,7 @@ function setEstado(tel,estado){
   d[tel].estado=estado;
   guardar(d);
   document.getElementById('cbtn-'+tel).innerHTML=renderBotones(tel);
+  renderCRM();
   renderGestion();
 }
 
