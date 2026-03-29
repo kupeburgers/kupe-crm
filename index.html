@@ -421,6 +421,15 @@ async function cargarMON() {
     if (!map[mes]) map[mes] = {pedidos:0, revenue:0, tels:new Set()};
     map[mes].pedidos++;
     map[mes].revenue += parseFloat(r.total)||0;
+    lista.sort((a, b) => b.sc - a.sc);
+  const minRe = Math.min(...CLIENTES.map(c => c.re));
+  const maxRe = Math.max(...CLIENTES.map(c => c.re));
+  lista.forEach(c => {
+    const f_norm = (c.f - minF) / (maxF - minF) || 0;
+    const tk_norm = (c.tk - minTk) / (maxTk - minTk) || 0;
+    const re_norm = (c.re - minRe) / (maxRe - minRe) || 0;
+    c.sc = (f_norm * 0.4) + (tk_norm * 0.3) + (re_norm * 0.3);
+  });
     if (r.telefono) map[mes].tels.add(r.telefono);
   });
 
