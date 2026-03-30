@@ -546,7 +546,7 @@ const ECFG={
 
 function marcarContactado(tel,nombre,seg,ticket){
   const d=cargar();
-  if(d[tel]) return;
+  if(d[tel] && d[tel].estado) return;
   const now=new Date();
   d[tel]={nombre,seg,ticket,estado:'contactado',
     fecha:now.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}),
