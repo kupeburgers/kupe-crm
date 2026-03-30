@@ -534,6 +534,7 @@ new Chart(document.getElementById('cPie'),{
 
 // ── CONTACTO TRACKING ──
 const CK='kupe_v1';
+let memCache={};
 let dbReady=false;
 const initDB=()=>{return new Promise((resolve)=>{
   if(dbReady){resolve();return;}
@@ -542,8 +543,10 @@ const initDB=()=>{return new Promise((resolve)=>{
   req.onsuccess=()=>{dbReady=true;resolve();};
   req.onerror=()=>{resolve();};
 })};
-async function cargar(){
-  await initDB();
+function cargar(){return memCache;}
+async function cargarAsync(){
+  const cached=cargar();
+  if(Object.keys(cached).length>0)return cached;
   return new Promise((resolve)=>{
     const req=indexedDB.open('kupeCRM',1);
     req.onsuccess=()=>{
@@ -551,25 +554,26 @@ async function cargar(){
       const tx=db.transaction('datos','readonly');
       const store=tx.objectStore('datos');
       const get=store.get('contactos');
-      get.onsuccess=()=>resolve(get.result||{});
+      get.onsuccess=()=>{memCache=get.result||{};resolve(memCache);};
       get.onerror=()=>resolve({});
     };
     req.onerror=()=>resolve({});
   });
 }
-async function guardar(d){
-  await initDB();
-  return new Promise((resolve)=>{
-    const req=indexedDB.open('kupeCRM',1);
-    req.onsuccess=()=>{
-      const db=req.result;
-      const tx=db.transaction('datos','readwrite');
-      const store=tx.objectStore('datos');
-      store.put(d,'contactos');
-      tx.oncomplete=()=>resolve();
-    };
-    req.onerror=()=>resolve();
-  });
+function guardar(d){
+  memCache=d;
+  setTimeout(async()=>{
+    await initDB();
+    return new Promise((resolve)=>{
+      const req=indexedDB.open('kupeCRM',1);
+      req.onsuccess=()=>{
+        const db=req.result;
+        const tx=db.transaction('datos','readwrite');
+        const store=tx.objectStore('datos');
+        store.put(d,'contactos');
+      };
+    });
+  },0);
 }
 
 const ECFG={
@@ -579,33 +583,31 @@ const ECFG={
   'no-resp':     {lb:'No respondió', cl:'on-no-respondio',co:'#c02020'},
 };
 
-async function marcarContactado(tel,nombre,seg,ticket){
-  const d=await cargar();
+function marcarContactado(tel,nombre,seg,ticket){
+  const d=cargar();
   if(d[tel] && d[tel].estado) return;
   const now=new Date();
   d[tel]={nombre,seg,ticket,estado:'contactado',
     fecha:now.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}),
     hora:now.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})};
-  await guardar(d);
-  const btn=document.getElementById('cbtn-'+tel);
-  if(btn) btn.innerHTML=await renderBotones(tel);
+  guardar(d);
+  document.getElementById('cbtn-'+tel).innerHTML=renderBotones(tel);
   renderCRM();
   renderGestion();
 }
 
-async function setEstado(tel,estado){
-  const d=await cargar();
+function setEstado(tel,estado){
+  const d=cargar();
   if(!d[tel]) return;
   d[tel].estado=estado;
-  await guardar(d);
-  const btn=document.getElementById('cbtn-'+tel);
-  if(btn) btn.innerHTML=await renderBotones(tel);
+  guardar(d);
+  document.getElementById('cbtn-'+tel).innerHTML=renderBotones(tel);
   renderCRM();
   renderGestion();
 }
 
-async function renderBotones(tel){
-  const d=await cargar();
+function renderBotones(tel){
+  const d=cargar();
   const actual=d[tel]?d[tel].estado:null;
   if(!actual) return '';
   return Object.entries(ECFG).map(([k,v])=>
@@ -613,8 +615,8 @@ async function renderBotones(tel){
   ).join('');
 }
 
-async function renderGestion(){
-  const d=await cargar();
+function renderGestion(){
+  const d=cargar();
   const tels=Object.keys(d);
   const cnt={contactado:0,respondio:0,compro:0,'no-resp':0};
   tels.forEach(t=>{if(d[t].estado) cnt[d[t].estado]=(cnt[d[t].estado]||0)+1;});
@@ -650,24 +652,24 @@ async function renderGestion(){
   }).join('');
 }
 
-async function setEstadoHist(tel,estado){
-  const d=await cargar();
+function setEstadoHist(tel,estado){
+  const d=cargar();
   if(!d[tel]) return;
   d[tel].estado=estado;
-  await guardar(d);
+  guardar(d);
   renderGestion();
   const el=document.getElementById('cbtn-'+tel);
-  if(el) el.innerHTML=await renderBotones(tel);
+  if(el) el.innerHTML=renderBotones(tel);
 }
 
-async function limpiarContactos(){
+function limpiarContactos(){
   if(confirm('¿Limpiar todo el historial?')){
-    await guardar({});
+    guardar({});
     renderGestion();
     renderCRM();
   }
 }
-
+cargarAsync().then(()=>{renderGestion();});
 renderGestion();
 
 </script>
