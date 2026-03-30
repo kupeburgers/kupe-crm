@@ -534,8 +534,43 @@ new Chart(document.getElementById('cPie'),{
 
 // ── CONTACTO TRACKING ──
 const CK='kupe_v1';
-function cargar(){try{return JSON.parse(localStorage.getItem(CK)||'{}')}catch(e){return{}}}
-function guardar(d){localStorage.setItem(CK,JSON.stringify(d))}
+let dbReady=false;
+const initDB=()=>{return new Promise((resolve)=>{
+  if(dbReady){resolve();return;}
+  const req=indexedDB.open('kupeCRM',1);
+  req.onupgradeneeded=(e)=>{const db=e.target.result;if(!db.objectStoreNames.contains('datos'))db.createObjectStore('datos');};
+  req.onsuccess=()=>{dbReady=true;resolve();};
+  req.onerror=()=>{resolve();};
+})};
+async function cargar(){
+  await initDB();
+  return new Promise((resolve)=>{
+    const req=indexedDB.open('kupeCRM',1);
+    req.onsuccess=()=>{
+      const db=req.result;
+      const tx=db.transaction('datos','readonly');
+      const store=tx.objectStore('datos');
+      const get=store.get('contactos');
+      get.onsuccess=()=>resolve(get.result||{});
+      get.onerror=()=>resolve({});
+    };
+    req.onerror=()=>resolve({});
+  });
+}
+async function guardar(d){
+  await initDB();
+  return new Promise((resolve)=>{
+    const req=indexedDB.open('kupeCRM',1);
+    req.onsuccess=()=>{
+      const db=req.result;
+      const tx=db.transaction('datos','readwrite');
+      const store=tx.objectStore('datos');
+      store.put(d,'contactos');
+      tx.oncomplete=()=>resolve();
+    };
+    req.onerror=()=>resolve();
+  });
+}
 
 const ECFG={
   'contactado':  {lb:'Contactado',   cl:'on-contactado',  co:'#1a6fb5'},
@@ -544,31 +579,33 @@ const ECFG={
   'no-resp':     {lb:'No respondió', cl:'on-no-respondio',co:'#c02020'},
 };
 
-function marcarContactado(tel,nombre,seg,ticket){
-  const d=cargar();
+async function marcarContactado(tel,nombre,seg,ticket){
+  const d=await cargar();
   if(d[tel] && d[tel].estado) return;
   const now=new Date();
   d[tel]={nombre,seg,ticket,estado:'contactado',
     fecha:now.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}),
     hora:now.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})};
-  guardar(d);
-  document.getElementById('cbtn-'+tel).innerHTML=renderBotones(tel);
+  await guardar(d);
+  const btn=document.getElementById('cbtn-'+tel);
+  if(btn) btn.innerHTML=await renderBotones(tel);
   renderCRM();
   renderGestion();
 }
 
-function setEstado(tel,estado){
-  const d=cargar();
+async function setEstado(tel,estado){
+  const d=await cargar();
   if(!d[tel]) return;
   d[tel].estado=estado;
-  guardar(d);
-  document.getElementById('cbtn-'+tel).innerHTML=renderBotones(tel);
+  await guardar(d);
+  const btn=document.getElementById('cbtn-'+tel);
+  if(btn) btn.innerHTML=await renderBotones(tel);
   renderCRM();
   renderGestion();
 }
 
-function renderBotones(tel){
-  const d=cargar();
+async function renderBotones(tel){
+  const d=await cargar();
   const actual=d[tel]?d[tel].estado:null;
   if(!actual) return '';
   return Object.entries(ECFG).map(([k,v])=>
@@ -576,8 +613,8 @@ function renderBotones(tel){
   ).join('');
 }
 
-function renderGestion(){
-  const d=cargar();
+async function renderGestion(){
+  const d=await cargar();
   const tels=Object.keys(d);
   const cnt={contactado:0,respondio:0,compro:0,'no-resp':0};
   tels.forEach(t=>{if(d[t].estado) cnt[d[t].estado]=(cnt[d[t].estado]||0)+1;});
@@ -613,19 +650,19 @@ function renderGestion(){
   }).join('');
 }
 
-function setEstadoHist(tel,estado){
-  const d=cargar();
+async function setEstadoHist(tel,estado){
+  const d=await cargar();
   if(!d[tel]) return;
   d[tel].estado=estado;
-  guardar(d);
+  await guardar(d);
   renderGestion();
   const el=document.getElementById('cbtn-'+tel);
-  if(el) el.innerHTML=renderBotones(tel);
+  if(el) el.innerHTML=await renderBotones(tel);
 }
 
-function limpiarContactos(){
+async function limpiarContactos(){
   if(confirm('¿Limpiar todo el historial?')){
-    localStorage.removeItem(CK);
+    await guardar({});
     renderGestion();
     renderCRM();
   }
