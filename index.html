@@ -628,17 +628,18 @@ function updateChartMarPeds() {
 
   if (window.chartMar) window.chartMar.destroy();
 
-  window.chartMar = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: crmData.MAR_DIAS,
-      datasets: [{
-        data: crmData.MAR_PEDS.map(p => p.pedidos),
-        backgroundColor: '#e03a00'
-      }]
-    }
-  });
-}
+  /*
+window.chartMar = new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: crmData.MAR_DIAS,
+    datasets: [{
+      data: crmData.MAR_PEDS.map(p => p.pedidos),
+      backgroundColor: '#e03a00'
+    }]
+  }
+});
+*/
 document.addEventListener('DOMContentLoaded', async function() {
 
   await fetchCRMData();
