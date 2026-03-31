@@ -314,7 +314,8 @@ Chart.defaults.font.family='DM Sans';
 const gc='#e8e8e8';
 new Chart(document.getElementById('cP'),{
   type:'bar',
-  data:{labels:MON.meses,datasets:[{data:MON.pedidos,
+  data:{labels: crmData.MON.meses,
+data: crmData.MON.pedidos,
     backgroundColor:MON.pedidos.map((_,i)=>i===14?'rgba(0,166,90,0.75)':`rgba(224,${Math.max(30,110-i*6)},0,${Math.max(0.35,0.85-i*0.04)})`),
     borderRadius:5}]},
   options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:gc},ticks:{font:{size:9}}},y:{grid:{color:gc},ticks:{font:{size:10}}}}}
