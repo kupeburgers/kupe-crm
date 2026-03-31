@@ -608,24 +608,7 @@ function limpiarContactos(){
   }
 }
 renderGestion();
-</script>
-<div id="pg-gestion" class="pg">
-  <div class="sec">RESUMEN</div>
-  <div class="cg-stats">
-    <div class="cg-stat"><div class="cg-num" id="st-c" style="color:#1a6fb5">0</div><div class="cg-lbl">Contactados</div></div>
-    <div class="cg-stat"><div class="cg-num" id="st-r" style="color:#9a6600">0</div><div class="cg-lbl">Respondieron</div></div>
-    <div class="cg-stat"><div class="cg-num" id="st-v" style="color:#006635">0</div><div class="cg-lbl">Compraron</div></div>
-    <div class="cg-stat"><div class="cg-num" id="st-n" style="color:#c02020">0</div><div class="cg-lbl">Sin resp.</div></div>
-  </div>
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-    <div class="sec" style="margin:0">HISTORIAL</div>
-    <span style="font-size:10px;color:#bbb;cursor:pointer;text-decoration:underline" onclick="limpiarContactos()">Limpiar todo</span>
-  </div>
-  <div id="gestion-list"></div>
-</div>
-</body>
-</html>
-function updateTableMarProds() {
+  function updateTableMarProds() {
   if (!crmData || !crmData.MAR_PRODS) return;
 
   const cont = document.getElementById('plist-mar');
@@ -666,3 +649,21 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
 
 });
+
+</script>
+<div id="pg-gestion" class="pg">
+  <div class="sec">RESUMEN</div>
+  <div class="cg-stats">
+    <div class="cg-stat"><div class="cg-num" id="st-c" style="color:#1a6fb5">0</div><div class="cg-lbl">Contactados</div></div>
+    <div class="cg-stat"><div class="cg-num" id="st-r" style="color:#9a6600">0</div><div class="cg-lbl">Respondieron</div></div>
+    <div class="cg-stat"><div class="cg-num" id="st-v" style="color:#006635">0</div><div class="cg-lbl">Compraron</div></div>
+    <div class="cg-stat"><div class="cg-num" id="st-n" style="color:#c02020">0</div><div class="cg-lbl">Sin resp.</div></div>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+    <div class="sec" style="margin:0">HISTORIAL</div>
+    <span style="font-size:10px;color:#bbb;cursor:pointer;text-decoration:underline" onclick="limpiarContactos()">Limpiar todo</span>
+  </div>
+  <div id="gestion-list"></div>
+</div>
+</body>
+</html>
