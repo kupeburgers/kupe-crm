@@ -287,6 +287,15 @@ function goTab(id,el){
 Chart.defaults.color='#999';
 Chart.defaults.font.family='DM Sans';
 const gc='#e8e8e8';
+  
+// Datos cargados dinámicamente (deben existir antes de inicializar gráficos/render)
+MON={"meses": ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic", "Ene'26", "Feb'26", "Mar'26*"], "pedidos": [643, 545, 597, 564, 587, 552, 557, 521, 419, 369, 351, 348, 299, 175, 144], "revenue": [16873313, 14958487, 17802552, 15761326, 18153320, 18199520, 18399720, 18117907, 14255775, 12201025, 12012900, 12941340, 11035685, 6626670, 6367130], "ticket": [26241, 27446, 29820, 27945, 30925, 32970, 33033, 34775, 34023, 33065, 34224, 37187, 36908, 37866, 44216], "clientes": [489, 442, 444, 423, 422, 390, 388, 359, 317, 260, 275, 286, 234, 150, 125]};
+SEGS=[{"segmento": "Activo", "ic": "🟢", "col": "#00a65a", "clientes": 118, "revenue": 36133942, "ticket": 39530, "rec": "0–14 días"}, {"segmento": "Tibio", "ic": "🎯", "col": "#d97700", "clientes": 69, "revenue": 13979312, "ticket": 34279, "rec": "15–30 días"}, {"segmento": "Enfriando", "ic": "🟠", "col": "#c05a00", "clientes": 128, "revenue": 24016885, "ticket": 34977, "rec": "31–60 días"}, {"segmento": "En riesgo", "ic": "🔴", "col": "#cc2222", "clientes": 180, "revenue": 26964769, "ticket": 37813, "rec": "61–90 días"}, {"segmento": "Perdido", "ic": "⬛", "col": "#999", "clientes": 1530, "revenue": 111863942, "ticket": 34589, "rec": "90+ días"}];
+CLIENTES=[{n:'',t:'0',f:1,v:0,tk:1,re:1,ult:'',s:'Tibio',ma:1}];
+PRODS=[{producto:'BASE',unidades:1,importe:0}];
+MAR_PRODS=[{p:'BASE',u:1,new:false}];
+MAR_PEDS=[1];
+MAR_DIAS=['01'];
 new Chart(document.getElementById('cP'),{
   type:'bar',
   data:{labels:MON.meses,datasets:[{data:MON.pedidos,
@@ -594,6 +603,8 @@ MAR_PEDS=[6,1,6,3,12,16,20,8,4,4,2,9,18,15,7,7,6];
 MAR_DIAS=['01','02','03','04','05','06','07','08','09','10','11','12','13','14','15','16','17'];
 
 
+function initCharts(){}  
+  
 // Ejecutar después de que DOM esté listo
 document.addEventListener("DOMContentLoaded", () => {
   initCharts();
