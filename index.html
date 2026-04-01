@@ -343,9 +343,24 @@ new Chart(document.getElementById('cR'),{
 });
 new Chart(document.getElementById('cC'),{
   type:'line',
-  data:{labels:MON.meses,datasets:[{data:MON.clientes,borderColor:'#1a73e8',backgroundColor:'rgba(26,115,232,.06)',
-    pointBackgroundColor:MON.meses.map((_,i)=>i===14?'#00a65a':'#1a73e8'),pointRadius:4,tension:0.35,fill:true}]},
-  options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:gc},ticks:{font:{size:9}}},y:{grid:{color:gc},ticks:{font:{size:10}}}}}
+  data:{
+    labels: crmData ? crmData.MON.meses : MON.meses,
+    datasets:[{
+      data: crmData ? crmData.MON.clientes_unicos : MON.clientes,
+      borderColor:'#1a73e8',
+      backgroundColor:'rgba(26,115,232,0.1)',
+      tension:0.3,
+      fill:true
+    }]
+  },
+  options:{
+    responsive:true,
+    plugins:{legend:{display:false}},
+    scales:{
+      x:{grid:{color:gc}},
+      y:{grid:{color:gc}}
+    }
+  }
 });
 new Chart(document.getElementById('cMar'),{
   type:'bar',
