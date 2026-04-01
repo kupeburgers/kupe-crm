@@ -679,8 +679,23 @@ document.addEventListener('DOMContentLoaded', async function() {
   if (crmData) {
     updateTableMarProds();
     updateChartMarPeds();
+    updateHeaderStats();
   }
 });
+  function updateHeaderStats() {
+  if (!crmData || !crmData.MON) return;
+
+  const pills = document.querySelectorAll('.status-pill .status-val');
+  if (pills.length < 3) return;
+
+  const ultimoMes = crmData.mes_actual || '';
+  const totalPedidos = crmData.MON.pedidos.reduce((a,b) => a + b, 0);
+  const totalClientes = crmData.MON.clientes_unicos.reduce((a,b) => a + b, 0);
+
+  pills[0].textContent = ultimoMes;
+  pills[1].textContent = `${crmData.MON.meses[0]} → ${crmData.MON.meses[crmData.MON.meses.length - 1]}`;
+  pills[2].textContent = `${totalPedidos} pedidos ${totalClientes} clientes`;
+}
 </script>
 <div id="pg-gestion" class="pg">
   <div class="sec">RESUMEN</div>
