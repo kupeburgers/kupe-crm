@@ -126,7 +126,6 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;padd
 </style>
 </head>
 <body>
-
 <div class="hdr">
   <div class="hdr-top">
     <div class="logo">KUPE<em>.</em></div>
@@ -150,7 +149,6 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;padd
     </div>
   </div>
 </div>
-
 <div class="modal-bg" id="modal-bg" onclick="closeModalBg(event)">
   <div class="modal">
     <button class="modal-close" onclick="closeModal()">✕</button>
@@ -172,14 +170,13 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;padd
       <div class="file-rows">1,807 registros sin compras registradas</div>
     </div>
     <div class="modal-hint">
-      ⚠️ <b>Para actualizar siempre subí 2 archivos:</b><br><br>
-      1. <b>Reporte de Deliverys</b> — exportalo desde el ERP con el período nuevo<br><br>
-      2. <b>Pedidos Pendientes (Detalle)</b> — el mismo período<br><br><br>
+      ⚠️ <b>Para actualizar siempre subí 2 archivos:</b><br>
+      1. <b>Reporte de Deliverys</b> — exportalo desde el ERP con el período nuevo<br>
+      2. <b>Pedidos Pendientes (Detalle)</b> — el mismo período<br><br>
       Última actualización: <b>19/03/2026</b> con datos hasta el 17/03/2026.
     </div>
   </div>
 </div>
-
 <div class="tabs">
   <div class="tab active" onclick="goTab('evo',this)"><span class="ti">📈</span>Evolución</div>
   <div class="tab" onclick="goTab('mar',this)"><span class="ti">🔥</span>Marzo</div>
@@ -188,7 +185,6 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;padd
   <div class="tab" onclick="goTab('gestion',this)"><span class="ti">✅</span>Gestión</div>
   <div class="tab" onclick="goTab('prod',this)"><span class="ti">🍔</span>Productos</div>
 </div>
-
 <div id="pg-evo" class="pg active">
   <div class="ale"><b>📉 Dos velocidades:</b> Ene–Jul 2025 estable ~570 pedidos/mes. Desde agosto caída hasta el piso de Feb 2026 (175). Marzo empieza a remontar — 144 en 17 días, proyección ~263. Ticket <b>+68%</b> en 15 meses. El problema siempre fue volumen, no precio.</div>
   <div class="sec">PEDIDOS / MES</div>
@@ -204,7 +200,6 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;padd
   <div class="sec">CLIENTES ÚNICOS / MES</div>
   <div class="cb"><div class="ct">Retención mes a mes</div><canvas id="cC" height="155"></canvas></div>
 </div>
-
 <div id="pg-mar" class="pg">
   <div class="ale-g"><b>🔥 Marzo arranca bien.</b> Ticket $44.2K — máximo histórico (+16.8% vs feb). Chicken Bacon entró directo al #7 en su primer mes parcial. Proyección mes completo: <b>~263 pedidos · ~$11.6M</b>.</div>
   <div class="sec">MARZO (1–17)</div>
@@ -229,14 +224,12 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;padd
   <div class="sec">PEDIDOS POR DÍA</div>
   <div class="cb"><div class="ct">1–17 marzo</div><canvas id="cMar" height="165"></canvas></div>
 </div>
-
 <div id="pg-seg" class="pg">
   <div class="ale"><b>Segmentación por días reales.</b> Ciclo esperado: 2–3 veces por mes. Más de 14 días sin comprar ya es señal. Tocá un segmento para ir al CRM.</div>
   <div class="sec">ESTADO DE LA BASE</div>
   <div class="seg-list" id="seglist"></div>
   <div class="cb"><div class="ct">Revenue histórico acumulado por segmento</div><canvas id="cSg" height="195"></canvas></div>
 </div>
-
 <div id="pg-crm" class="pg">
   <div class="sec">SEGMENTO</div>
   <div class="fr" id="seg-filters"></div>
@@ -253,104 +246,63 @@ body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;padd
   <div id="clist"></div>
   <div class="ht" id="chint"></div>
 </div>
-
 <div id="pg-prod" class="pg">
   <div class="ale"><b>CRISPY DOBLE</b> lidera con 2,048 uds. <b>Chicken Bacon</b> debuta con 19 uds en 17 días — top 10 en su primer mes parcial.</div>
   <div class="sec">TOP 15 · ENE 2025 → MAR 2026</div>
   <div id="plist"></div>
   <div class="cb"><div class="ct">Participación top 8</div><canvas id="cPie" height="220"></canvas></div>
 </div>
-
-<div id="pg-gestion" class="pg">
-  <div class="sec">RESUMEN</div>
-  <div class="cg-stats">
-    <div class="cg-stat"><div class="cg-num" id="st-c" style="color:#1a6fb5">0</div><div class="cg-lbl">Contactados</div></div>
-    <div class="cg-stat"><div class="cg-num" id="st-r" style="color:#9a6600">0</div><div class="cg-lbl">Respondieron</div></div>
-    <div class="cg-stat"><div class="cg-num" id="st-v" style="color:#006635">0</div><div class="cg-lbl">Compraron</div></div>
-    <div class="cg-stat"><div class="cg-num" id="st-n" style="color:#c02020">0</div><div class="cg-lbl">Sin resp.</div></div>
-  </div>
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-    <div class="sec" style="margin:0">HISTORIAL</div>
-    <span style="font-size:10px;color:#bbb;cursor:pointer;text-decoration:underline" onclick="limpiarContactos()">Limpiar todo</span>
-  </div>
-  <div id="gestion-list"></div>
-</div>
-
 <script>
+let MON;
+let SEGS;
+let CLIENTES;
+let PRODS;
+let MAR_PRODS;
+let MAR_PEDS;
+let MAR_DIAS;
 
-// ===== VARIABLES GLOBALES =====
-let MON, SEGS, CLIENTES, PRODS, MAR_PRODS, MAR_PEDS, MAR_DIAS;
+async function initData() {
+  MON={"meses": ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic", "Ene'26", "Feb'26", "Mar'26*"], "pedidos": [643, 545, 597, 564, 587, 552, 557, 521, 419, 369, 351, 348, 299, 175, 144], "revenue": [16873313, 14958487, 17802552, 15761326, 18153320, 18199520, 18399720, 18117907, 14255775, 12201025, 12012900, 12941340, 11035685, 6626670, 6367130], "ticket": [26241, 27446, 29820, 27945, 30925, 32970, 33033, 34775, 34023, 33065, 34224, 37187, 36908, 37866, 44216], "clientes": [489, 442, 444, 423, 422, 390, 388, 359, 317, 260, 275, 286, 234, 150, 125]};
+  SEGS=[{"segmento": "Activo", "ic": "🟢", "col": "#00a65a", "clientes": 118, "revenue": 36133942, "ticket": 39530, "rec": "0–14 días"}, {"segmento": "Tibio", "ic": "🎯", "col": "#d97700", "clientes": 69, "revenue": 13979312, "ticket": 34279, "rec": "15–30 días"}, {"segmento": "Enfriando", "ic": "🟠", "col": "#c05a00", "clientes": 128, "revenue": 24016885, "ticket": 34977, "rec": "31–60 días"}, {"segmento": "En riesgo", "ic": "🔴", "col": "#cc2222", "clientes": 180, "revenue": 26964769, "ticket": 37813, "rec": "61–90 días"}, {"segmento": "Perdido", "ic": "⬛", "col": "#999", "clientes": 1530, "revenue": 111863942, "ticket": 34589, "rec": "90+ días"}];
+  CLIENTES=[{"n": "Luka gasparri", "t": "1166950091", "f": 43, "v": 919700, "tk": 21388, "re": 19, "ult": "26/02/2026", "s": "Tibio", "ma": 13}, {"n": "DIEGO", "t": "1162519898", "f": 39, "v": 1041290, "tk": 26699, "re": 16, "ult": "01/03/2026", "s": "Tibio", "ma": 15}, {"n": "MAT═AS RIVERO", "t": "1160444489", "f": 27, "v": 799280, "tk": 29602, "re": 16, "ult": "01/03/2026", "s": "Tibio", "ma": 13}, {"n": "CAROL", "t": "1126503148", "f": 20, "v": 441810, "tk": 22090, "re": 29, "ult": "16/02/2026", "s": "Tibio", "ma": 10}, {"n": "Lucas Vera", "t": "1141669265", "f": 19, "v": 769350, "tk": 40492, "re": 29, "ult": "16/02/2026", "s": "Tibio", "ma": 11}, {"n": "Pamela Diaz", "t": "1141735912", "f": 19, "v": 698800, "tk": 36778, "re": 17, "ult": "28/02/2026", "s": "Tibio", "ma": 9}, {"n": "SOFIA PENAYO", "t": "1133601580", "f": 14, "v": 362940, "tk": 25924, "re": 29, "ult": "16/02/2026", "s": "Tibio", "ma": 9}, {"n": "Matφas", "t": "1166407658", "f": 13, "v": 264716, "tk": 20362, "re": 27, "ult": "18/02/2026", "s": "Tibio", "ma": 8}, {"n": "ANTONIO", "t": "1161297564", "f": 12, "v": 232200, "tk": 19350, "re": 17, "ult": "28/02/2026", "s": "Tibio", "ma": 8}, {"n": "Thomas Cuello", "t": "1148703900", "f": 11, "v": 615500, "tk": 55954, "re": 21, "ult": "24/02/2026", "s": "Tibio", "ma": 9}, {"n": "NICOLAS", "t": "1138819391", "f": 11, "v": 426470, "tk": 38770, "re": 25, "ult": "20/02/2026", "s": "Tibio", "ma": 9}, {"n": "Tomas Robledo", "t": "1158438600", "f": 11, "v": 346686, "tk": 31516, "re": 26, "ult": "19/02/2026", "s": "Tibio", "ma": 9}, {"n": "Milagros Sauro", "t": "1124760099", "f": 10, "v": 406310, "tk": 40631, "re": 16, "ult": "01/03/2026", "s": "Tibio", "ma": 7}, {"n": "Gabriel roman", "t": "1125627042", "f": 10, "v": 308900, "tk": 30890, "re": 20, "ult": "25/02/2026", "s": "Tibio", "ma": 6}, {"n": "LEANDRO KUPINSKI", "t": "1126964385", "f": 9, "v": 390380, "tk": 43375, "re": 28, "ult": "17/02/2026", "s": "Tibio", "ma": 6}, {"n": "Ramiro Gonzalez", "t": "1144089385", "f": 9, "v": 270750, "tk": 30083, "re": 16, "ult": "01/03/2026", "s": "Tibio", "ma": 8}, {"n": "Matias Amen", "t": "1130698037", "f": 8, "v": 247580, "tk": 30947, "re": 25, "ult": "20/02/2026", "s": "Tibio", "ma": 6}, {"n": "Diego giacosa", "t": "1130282500", "f": 8, "v": 193320, "tk": 24165, "re": 25, "ult": "20/02/2026", "s": "Tibio", "ma": 7}, {"n": "SEBASTIAN", "t": "1151611513", "f": 7, "v": 256910, "tk": 36701, "re": 30, "ult": "15/02/2026", "s": "Tibio", "ma": 6}, {"n": "MACARENA CORREA", "t": "1138089725", "f": 7, "v": 241480, "tk": 34497, "re": 25, "ult": "20/02/2026", "s": "Tibio", "ma": 6}, {"n": "Facundo Fernßndez Cobas", "t": "1130069623", "f": 6, "v": 360554, "tk": 60092, "re": 25, "ult": "20/02/2026", "s": "Tibio", "ma": 5}, {"n": "Nico Denis", "t": "1157549744", "f": 6, "v": 281250, "tk": 46875, "re": 20, "ult": "25/02/2026", "s": "Tibio", "ma": 5}, {"n": "YESICA LEIVA", "t": "1144947064", "f": 6, "v": 171916, "tk": 28652, "re": 21, "ult": "24/02/2026", "s": "Tibio", "ma": 5}, {"n": "Lara Rosales", "t": "1168733152", "f": 6, "v": 168200, "tk": 28033, "re": 25, "ult": "20/02/2026", "s": "Tibio", "ma": 6}, {"n": "Gabriel", "t": "1166864735", "f": 6, "v": 148300, "tk": 24716, "re": 16, "ult": "01/03/2026", "s": "Tibio", "ma": 6}, {"n": "Agustφn", "t": "1132485686", "f": 6, "v": 135190, "tk": 22531, "re": 25, "ult": "20/02/2026", "s": "Tibio", "ma": 5}, {"n": "Camila Riedel", "t": "1166852908", "f": 6, "v": 132310, "tk": 22051, "re": 28, "ult": "17/02/2026", "s": "Tibio", "ma": 6}, {"n": "Agustφn martino", "t": "1144346615", "f": 6, "v": 132200, "tk": 22033, "re": 25, "ult": "20/02/2026", "s": "Tibio", "ma": 6}, {"n": "Facundo simo", "t": "1159208991", "f": 5, "v": 177200, "tk": 35440, "re": 20, "ult": "25/02/2026", "s": "Tibio", "ma": 4}, {"n": "Matφas Linares", "t": "1167336901", "f": 5, "v": 161700, "tk": 32340, "re": 25, "ult": "20/02/2026", "s": "Tibio", "ma": 4}, {"n": "Belen", "t": "1165201113", "f": 5, "v": 141080, "tk": 28216, "re": 18, "ult": "27/02/2026", "s": "Tibio", "ma": 4}, {"n": "Leann", "t": "1127025129", "f": 5, "v": 100520, "tk": 20104, "re": 24, "ult": "21/02/2026", "s": "Tibio", "ma": 4}, {"n": "Franco Burgue±o", "t": "1165771757", "f": 4, "v": 141700, "tk": 35425, "re": 21, "ult": "24/02/2026", "s": "Tibio", "ma": 4}, {"n": "Diego Vilaseca", "t": "1144394135", "f": 4, "v": 107500, "tk": 26875, "re": 17, "ult": "28/02/2026", "s": "Tibio", "ma": 3}, {"n": "Matias", "t": "1135588626", "f": 4, "v": 104300, "tk": 26075, "re": 29, "ult": "16/02/2026", "s": "Tibio", "ma": 4}, {"n": "Fernando Santobuono", "t": "1161632030", "f": 4, "v": 98200, "tk": 24550, "re": 26, "ult": "19/02/2026", "s": "Tibio", "ma": 3}, {"n": "Lucas Insaurralde", "t": "1171215461", "f": 4, "v": 90200, "tk": 22550, "re": 19, "ult": "26/02/2026", "s": "Tibio", "ma": 3}, {"n": "Martin Quilapi", "t": "1169624396", "f": 4, "v": 90060, "tk": 22515, "re": 17, "ult": "28/02/2026", "s": "Tibio", "ma": 3}, {"n": "VIVIANA", "t": "1155728891", "f": 3, "v": 194400, "tk": 64800, "re": 18, "ult": "27/02/2026", "s": "Tibio", "ma": 3}, {"n": "Facundo Navetta", "t": "1165834061", "f": 3, "v": 126400, "tk": 42133, "re": 25, "ult": "20/02/2026", "s": "Tibio", "ma": 3}, {"n": "Catalina Ferrisi", "t": "1123235091", "f": 66, "v": 1691280, "tk": 25625, "re": 6, "ult": "11/03/2026", "s": "Activo", "ma": 15}, {"n": "FACUNDO", "t": "1167563076", "f": 41, "v": 2279851, "tk": 55606, "re": 14, "ult": "03/03/2026", "s": "Activo", "ma": 15}, {"n": "Jonathan Rios", "t": "1166262691", "f": 41, "v": 1017660, "tk": 24820, "re": 4, "ult": "13/03/2026", "s": "Activo", "ma": 10}, {"n": "MATIAS DEBA", "t": "1139430221", "f": 34, "v": 846540, "tk": 24898, "re": 11, "ult": "06/03/2026", "s": "Activo", "ma": 12}, {"n": "Valentin Rios", "t": "1164105697", "f": 30, "v": 622680, "tk": 20756, "re": 10, "ult": "07/03/2026", "s": "Activo", "ma": 12}, {"n": "Nazareno Farina", "t": "1133176815", "f": 29, "v": 1053380, "tk": 36323, "re": 1, "ult": "16/03/2026", "s": "Activo", "ma": 12}, {"n": "Facundo sabga", "t": "1533958753", "f": 29, "v": 854730, "tk": 29473, "re": 1, "ult": "16/03/2026", "s": "Activo", "ma": 13}, {"n": "LUCAS CUELLO", "t": "1165120986", "f": 28, "v": 1003201, "tk": 35828, "re": 4, "ult": "13/03/2026", "s": "Activo", "ma": 14}, {"n": "FACUNDO SILVESTRO", "t": "1161833780", "f": 26, "v": 976470, "tk": 37556, "re": 3, "ult": "14/03/2026", "s": "Activo", "ma": 14}, {"n": "Ariel Sebastian Souto", "t": "1164455308", "f": 25, "v": 1157335, "tk": 46293, "re": 11, "ult": "06/03/2026", "s": "Activo", "ma": 12}, {"n": "Victoria", "t": "1168856682", "f": 25, "v": 705353, "tk": 28214, "re": 3, "ult": "14/03/2026", "s": "Activo", "ma": 12}, {"n": "tobias fernandez", "t": "1171331024", "f": 23, "v": 359850, "tk": 15645, "re": 1, "ult": "16/03/2026", "s": "Activo", "ma": 8}, {"n": "Juan pablo", "t": "1153784929", "f": 22, "v": 832320, "tk": 37832, "re": 14, "ult": "03/03/2026", "s": "Activo", "ma": 13}, {"n": "Uziel", "t": "1155255146", "f": 22, "v": 796618, "tk": 36209, "re": 4, "ult": "13/03/2026", "s": "Activo", "ma": 9}, {"n": "mateo sanabria", "t": "1162082976", "f": 20, "v": 713140, "tk": 35657, "re": 3, "ult": "14/03/2026", "s": "Activo", "ma": 13}, {"n": "MALU", "t": "1154759170", "f": 20, "v": 620610, "tk": 31030, "re": 9, "ult": "08/03/2026", "s": "Activo", "ma": 13}, {"n": "ANA SANTAMARIA", "t": "1136309962", "f": 18, "v": 742540, "tk": 41252, "re": 2, "ult": "15/03/2026", "s": "Activo", "ma": 11}, {"n": "Manuel Coria", "t": "1123706716", "f": 18, "v": 646400, "tk": 35911, "re": 11, "ult": "06/03/2026", "s": "Activo", "ma": 12}, {"n": "Pablo barberis", "t": "1130238284", "f": 17, "v": 566650, "tk": 33332, "re": 3, "ult": "14/03/2026", "s": "Activo", "ma": 12}, {"n": "Agustin scilingo", "t": "1166112003", "f": 17, "v": 558320, "tk": 32842, "re": 9, "ult": "08/03/2026", "s": "Activo", "ma": 11}, {"n": "Barbi", "t": "1128422848", "f": 17, "v": 439247, "tk": 25838, "re": 4, "ult": "13/03/2026", "s": "Activo", "ma": 9}, {"n": "Belen", "t": "1159645625", "f": 17, "v": 415180, "tk": 24422, "re": 11, "ult": "06/03/2026", "s": "Activo", "ma": 12}, {"n": "Jorge Carlos Garces", "t": "1149946170", "f": 16, "v": 743440, "tk": 46465, "re": 10, "ult": "07/03/2026", "s": "Activo", "ma": 12}, {"n": "Sol Nu±ez", "t": "1140434075", "f": 16, "v": 497850, "tk": 31115, "re": 2, "ult": "15/03/2026", "s": "Activo", "ma": 8}, {"n": "Noelia", "t": "1160345894", "f": 15, "v": 371950, "tk": 24796, "re": 5, "ult": "12/03/2026", "s": "Activo", "ma": 11}, {"n": "LuciA", "t": "1124934135", "f": 15, "v": 336100, "tk": 22406, "re": 10, "ult": "07/03/2026", "s": "Activo", "ma": 9}, {"n": "Lucas", "t": "1153848879", "f": 14, "v": 527600, "tk": 37685, "re": 2, "ult": "15/03/2026", "s": "Activo", "ma": 10}, {"n": "Yami", "t": "1155082101", "f": 13, "v": 379700, "tk": 29207, "re": 0, "ult": "17/03/2026", "s": "Activo", "ma": 9}, {"n": "AGUSTIN SOLARI", "t": "1167850904", "f": 12, "v": 518940, "tk": 43245, "re": 2, "ult": "15/03/2026", "s": "Activo", "ma": 10}, {"n": "Mariana", "t": "1157720637", "f": 11, "v": 320880, "tk": 29170, "re": 12, "ult": "05/03/2026", "s": "Activo", "ma": 8}, {"n": "Gabriel Adrian Bustamante", "t": "1158927408", "f": 11, "v": 238810, "tk": 21710, "re": 8, "ult": "09/03/2026", "s": "Activo", "ma": 9}, {"n": "Cintia Gomez", "t": "1151212832", "f": 10, "v": 489830, "tk": 48983, "re": 10, "ult": "07/03/2026", "s": "Activo", "ma": 9}, {"n": "Jaqri", "t": "1165562811", "f": 10, "v": 376840, "tk": 37684, "re": 3, "ult": "14/03/2026", "s": "Activo", "ma": 7}, {"n": "Luciano zajac", "t": "1122373915", "f": 10, "v": 270680, "tk": 27068, "re": 0, "ult": "17/03/2026", "s": "Activo", "ma": 5}, {"n": "SANTIAGO BAENA", "t": "1169957076", "f": 10, "v": 243930, "tk": 24393, "re": 14, "ult": "03/03/2026", "s": "Activo", "ma": 7}, {"n": "LAUTARO ESCUDERO", "t": "1134698414", "f": 9, "v": 538030, "tk": 59781, "re": 4, "ult": "13/03/2026", "s": "Activo", "ma": 7}, {"n": "FRANCISCO", "t": "1169568586", "f": 9, "v": 517800, "tk": 57533, "re": 3, "ult": "14/03/2026", "s": "Activo", "ma": 7}, {"n": "Rocio aguirre", "t": "1169653715", "f": 9, "v": 379300, "tk": 42144, "re": 12, "ult": "05/03/2026", "s": "Activo", "ma": 5}, {"n": "German", "t": "1138541674", "f": 9, "v": 348390, "tk": 38710, "re": 0, "ult": "17/03/2026", "s": "Activo", "ma": 8}, {"n": "YLLA RAFAEL", "t": "1140499909", "f": 9, "v": 333977, "tk": 37108, "re": 7, "ult": "10/03/2026", "s": "Activo", "ma": 7}, {"n": "Laura Macarena Britiz", "t": "1144477842", "f": 46, "v": 962851, "tk": 20931, "re": 31, "ult": "14/02/2026", "s": "Enfriando", "ma": 12}, {"n": "Nicolas", "t": "1155914223", "f": 44, "v": 1090820, "tk": 24791, "re": 46, "ult": "30/01/2026", "s": "Enfriando", "ma": 13}, {"n": "LUCAS MORENO", "t": "1155969505", "f": 34, "v": 640530, "tk": 18839, "re": 59, "ult": "17/01/2026", "s": "Enfriando", "ma": 12}, {"n": "Lucas Marotta", "t": "1166548568", "f": 25, "v": 917740, "tk": 36709, "re": 46, "ult": "30/01/2026", "s": "Enfriando", "ma": 12}, {"n": "Juan manuel crudo", "t": "1133885349", "f": 23, "v": 745670, "tk": 32420, "re": 32, "ult": "13/02/2026", "s": "Enfriando", "ma": 13}, {"n": "Alejo vaccaro", "t": "1176092771", "f": 22, "v": 473080, "tk": 21503, "re": 32, "ult": "13/02/2026", "s": "Enfriando", "ma": 11}, {"n": "Lupe castera", "t": "1158000307", "f": 21, "v": 644280, "tk": 30680, "re": 35, "ult": "10/02/2026", "s": "Enfriando", "ma": 9}, {"n": "Nicolas cardozo", "t": "1160009908", "f": 20, "v": 570780, "tk": 28539, "re": 44, "ult": "01/02/2026", "s": "Enfriando", "ma": 14}, {"n": "MAR═A DE LOS ANGELES", "t": "1569166349", "f": 18, "v": 391880, "tk": 21771, "re": 50, "ult": "26/01/2026", "s": "Enfriando", "ma": 12}, {"n": "MAR═ANELLA", "t": "1127517828", "f": 16, "v": 518488, "tk": 32405, "re": 51, "ult": "25/01/2026", "s": "Enfriando", "ma": 10}, {"n": "Belen garrido", "t": "1133380989", "f": 16, "v": 323978, "tk": 20248, "re": 44, "ult": "01/02/2026", "s": "Enfriando", "ma": 7}, {"n": "Tomßs Rodriguez", "t": "1158011177", "f": 15, "v": 642400, "tk": 42826, "re": 32, "ult": "13/02/2026", "s": "Enfriando", "ma": 10}, {"n": "Marita", "t": "1161721050", "f": 15, "v": 367740, "tk": 24516, "re": 59, "ult": "17/01/2026", "s": "Enfriando", "ma": 10}, {"n": "Yamila Miori", "t": "1131801578", "f": 15, "v": 286790, "tk": 19119, "re": 32, "ult": "13/02/2026", "s": "Enfriando", "ma": 11}, {"n": "MARTU", "t": "1123113054", "f": 13, "v": 438080, "tk": 33698, "re": 40, "ult": "05/02/2026", "s": "Enfriando", "ma": 10}, {"n": "Alan De Battisti", "t": "1144799028", "f": 13, "v": 392540, "tk": 30195, "re": 54, "ult": "22/01/2026", "s": "Enfriando", "ma": 5}, {"n": "RUB╔N FERNANDEZ", "t": "1134549454", "f": 13, "v": 243260, "tk": 18712, "re": 38, "ult": "07/02/2026", "s": "Enfriando", "ma": 8}, {"n": "Fernando Javier Lemos", "t": "1137773433", "f": 11, "v": 483360, "tk": 43941, "re": 35, "ult": "10/02/2026", "s": "Enfriando", "ma": 8}, {"n": "Marcos Zabala", "t": "1144364047", "f": 11, "v": 398380, "tk": 36216, "re": 54, "ult": "22/01/2026", "s": "Enfriando", "ma": 9}, {"n": "GABRIELA ZINGONI", "t": "1158888667", "f": 11, "v": 388040, "tk": 35276, "re": 32, "ult": "13/02/2026", "s": "Enfriando", "ma": 6}, {"n": "Christian fernandez", "t": "1168672704", "f": 11, "v": 298470, "tk": 27133, "re": 31, "ult": "14/02/2026", "s": "Enfriando", "ma": 7}, {"n": "NAIARA BARRERA", "t": "1125620103", "f": 11, "v": 286978, "tk": 26088, "re": 36, "ult": "09/02/2026", "s": "Enfriando", "ma": 8}, {"n": "Delfina Perez", "t": "1126416789", "f": 10, "v": 387849, "tk": 38784, "re": 55, "ult": "21/01/2026", "s": "Enfriando", "ma": 6}, {"n": "priscila A", "t": "1155166698", "f": 10, "v": 345505, "tk": 34550, "re": 52, "ult": "24/01/2026", "s": "Enfriando", "ma": 7}, {"n": "agustin cari±o", "t": "1133735821", "f": 10, "v": 317240, "tk": 31724, "re": 52, "ult": "24/01/2026", "s": "Enfriando", "ma": 7}, {"n": "Luana Mu±oz", "t": "1123073320", "f": 10, "v": 208415, "tk": 20841, "re": 35, "ult": "10/02/2026", "s": "Enfriando", "ma": 7}, {"n": "MARTIN SOSA", "t": "1169632347", "f": 8, "v": 260280, "tk": 32535, "re": 36, "ult": "09/02/2026", "s": "Enfriando", "ma": 6}, {"n": "Thiago Fontoura", "t": "1167310880", "f": 8, "v": 228560, "tk": 28570, "re": 51, "ult": "25/01/2026", "s": "Enfriando", "ma": 6}, {"n": "RODRIGO", "t": "1163543542", "f": 8, "v": 211250, "tk": 26406, "re": 52, "ult": "24/01/2026", "s": "Enfriando", "ma": 6}, {"n": "Julißn", "t": "1166066581", "f": 8, "v": 165710, "tk": 20713, "re": 33, "ult": "12/02/2026", "s": "Enfriando", "ma": 6}, {"n": "Martina Sosa", "t": "1154789453", "f": 7, "v": 372840, "tk": 53262, "re": 54, "ult": "22/01/2026", "s": "Enfriando", "ma": 4}, {"n": "valentina vander wond", "t": "1134321654", "f": 7, "v": 284040, "tk": 40577, "re": 45, "ult": "31/01/2026", "s": "Enfriando", "ma": 6}, {"n": "Matias riera", "t": "1165801403", "f": 7, "v": 243100, "tk": 34728, "re": 47, "ult": "29/01/2026", "s": "Enfriando", "ma": 4}, {"n": "Milagros", "t": "1167585294", "f": 7, "v": 197700, "tk": 28242, "re": 51, "ult": "25/01/2026", "s": "Enfriando", "ma": 5}, {"n": "Leonela", "t": "1166081952", "f": 7, "v": 186600, "tk": 26657, "re": 32, "ult": "13/02/2026", "s": "Enfriando", "ma": 6}, {"n": "PABLO MOKOREL", "t": "1169816902", "f": 7, "v": 183420, "tk": 26202, "re": 33, "ult": "12/02/2026", "s": "Enfriando", "ma": 6}, {"n": "camila", "t": "1160416702", "f": 7, "v": 182380, "tk": 26054, "re": 52, "ult": "24/01/2026", "s": "Enfriando", "ma": 6}, {"n": "Claudio", "t": "1168036624", "f": 7, "v": 136910, "tk": 19558, "re": 32, "ult": "13/02/2026", "s": "Enfriando", "ma": 7}, {"n": "Francisco Marinelli", "t": "1122748486", "f": 6, "v": 317825, "tk": 52970, "re": 38, "ult": "07/02/2026", "s": "Enfriando", "ma": 5}, {"n": "LUCAS", "t": "1125521994", "f": 6, "v": 293540, "tk": 48923, "re": 55, "ult": "21/01/2026", "s": "Enfriando", "ma": 6}, {"n": "LUCAS OVIEDO", "t": "1530910316", "f": 57, "v": 1628630, "tk": 28572, "re": 74, "ult": "02/01/2026", "s": "En riesgo", "ma": 13}, {"n": "MEL", "t": "1126003105", "f": 37, "v": 651415, "tk": 17605, "re": 69, "ult": "07/01/2026", "s": "En riesgo", "ma": 13}, {"n": "Oriana", "t": "1144160267", "f": 32, "v": 765290, "tk": 23915, "re": 63, "ult": "13/01/2026", "s": "En riesgo", "ma": 13}, {"n": "FELIPE RIVAROLA", "t": "1126872202", "f": 19, "v": 692610, "tk": 36453, "re": 61, "ult": "15/01/2026", "s": "En riesgo", "ma": 11}, {"n": "Alan acosta", "t": "1150360998", "f": 17, "v": 486113, "tk": 28594, "re": 82, "ult": "25/12/2025", "s": "En riesgo", "ma": 7}, {"n": "Alexis Romero Luque", "t": "1136669260", "f": 16, "v": 440370, "tk": 27523, "re": 63, "ult": "13/01/2026", "s": "En riesgo", "ma": 10}, {"n": "Agostina Peritore", "t": "1131045880", "f": 15, "v": 394950, "tk": 26330, "re": 81, "ult": "26/12/2025", "s": "En riesgo", "ma": 10}, {"n": "Giuliana morelli", "t": "1131674930", "f": 15, "v": 319838, "tk": 21322, "re": 85, "ult": "22/12/2025", "s": "En riesgo", "ma": 8}, {"n": "Pablo Ramirez", "t": "1156583708", "f": 14, "v": 563040, "tk": 40217, "re": 75, "ult": "01/01/2026", "s": "En riesgo", "ma": 10}, {"n": "Gonzalo Ignacio avila", "t": "1524510012", "f": 14, "v": 435680, "tk": 31120, "re": 72, "ult": "04/01/2026", "s": "En riesgo", "ma": 7}, {"n": "Paola", "t": "1125925968", "f": 13, "v": 281540, "tk": 21656, "re": 73, "ult": "03/01/2026", "s": "En riesgo", "ma": 10}, {"n": "Carolina jose", "t": "1137729733", "f": 12, "v": 561352, "tk": 46779, "re": 71, "ult": "05/01/2026", "s": "En riesgo", "ma": 9}, {"n": "Geronimo alu", "t": "1162918800", "f": 11, "v": 485210, "tk": 44110, "re": 90, "ult": "17/12/2025", "s": "En riesgo", "ma": 8}, {"n": "Manuel Fuente", "t": "1134041912", "f": 11, "v": 464080, "tk": 42189, "re": 86, "ult": "21/12/2025", "s": "En riesgo", "ma": 9}, {"n": "Eli Colombi", "t": "1164350891", "f": 11, "v": 412320, "tk": 37483, "re": 85, "ult": "22/12/2025", "s": "En riesgo", "ma": 6}, {"n": "ROMAN ABUD", "t": "1158957440", "f": 11, "v": 326735, "tk": 29703, "re": 77, "ult": "30/12/2025", "s": "En riesgo", "ma": 6}, {"n": "Leiva Agustina", "t": "1122414224", "f": 11, "v": 274300, "tk": 24936, "re": 80, "ult": "27/12/2025", "s": "En riesgo", "ma": 8}, {"n": "Lola Peralta", "t": "1124740793", "f": 10, "v": 449150, "tk": 44915, "re": 67, "ult": "09/01/2026", "s": "En riesgo", "ma": 9}, {"n": "Lautaro", "t": "1165830853", "f": 10, "v": 294900, "tk": 29490, "re": 89, "ult": "18/12/2025", "s": "En riesgo", "ma": 9}, {"n": "Sofia", "t": "1138752945", "f": 10, "v": 279810, "tk": 27981, "re": 89, "ult": "18/12/2025", "s": "En riesgo", "ma": 5}, {"n": "CINTIA", "t": "1134337375", "f": 10, "v": 246080, "tk": 24608, "re": 74, "ult": "02/01/2026", "s": "En riesgo", "ma": 7}, {"n": "Carla trasande", "t": "1550368419", "f": 9, "v": 566870, "tk": 62985, "re": 71, "ult": "05/01/2026", "s": "En riesgo", "ma": 8}, {"n": "Santiago gibert", "t": "1152598191", "f": 9, "v": 554120, "tk": 61568, "re": 69, "ult": "07/01/2026", "s": "En riesgo", "ma": 7}, {"n": "Federico Gentile", "t": "1134801610", "f": 9, "v": 244485, "tk": 27165, "re": 88, "ult": "19/12/2025", "s": "En riesgo", "ma": 8}, {"n": "Tomßs", "t": "1137256075", "f": 9, "v": 230900, "tk": 25655, "re": 77, "ult": "30/12/2025", "s": "En riesgo", "ma": 7}, {"n": "Facundo chamorro", "t": "1150375410", "f": 9, "v": 181100, "tk": 20122, "re": 67, "ult": "09/01/2026", "s": "En riesgo", "ma": 6}, {"n": "Marcelo", "t": "1166144856", "f": 8, "v": 272840, "tk": 34105, "re": 89, "ult": "18/12/2025", "s": "En riesgo", "ma": 6}, {"n": "ELIZABETH ALVAREZ", "t": "1153343415", "f": 8, "v": 234110, "tk": 29263, "re": 62, "ult": "14/01/2026", "s": "En riesgo", "ma": 8}, {"n": "Rocφo Douer", "t": "1169694926", "f": 8, "v": 228300, "tk": 28537, "re": 68, "ult": "08/01/2026", "s": "En riesgo", "ma": 6}, {"n": "Andrea casadio", "t": "1557551182", "f": 8, "v": 219620, "tk": 27452, "re": 89, "ult": "18/12/2025", "s": "En riesgo", "ma": 6}, {"n": "MELANIE", "t": "1133832196", "f": 8, "v": 194070, "tk": 24258, "re": 74, "ult": "02/01/2026", "s": "En riesgo", "ma": 6}, {"n": "brian garcia", "t": "1168573443", "f": 8, "v": 131550, "tk": 16443, "re": 88, "ult": "19/12/2025", "s": "En riesgo", "ma": 4}, {"n": "Gonzalo", "t": "1167250787", "f": 7, "v": 366900, "tk": 52414, "re": 65, "ult": "11/01/2026", "s": "En riesgo", "ma": 5}, {"n": "Manuela", "t": "2324540063", "f": 7, "v": 230320, "tk": 32902, "re": 82, "ult": "25/12/2025", "s": "En riesgo", "ma": 7}, {"n": "Lautaro Perez", "t": "1136454232", "f": 7, "v": 195430, "tk": 27918, "re": 75, "ult": "01/01/2026", "s": "En riesgo", "ma": 5}, {"n": "LUCIANA FERNANDEZ", "t": "1148895740", "f": 7, "v": 191000, "tk": 27285, "re": 88, "ult": "19/12/2025", "s": "En riesgo", "ma": 6}, {"n": "FRANCO COLL", "t": "1151164690", "f": 7, "v": 169900, "tk": 24271, "re": 79, "ult": "28/12/2025", "s": "En riesgo", "ma": 5}, {"n": "Sofia Carabelli", "t": "1121724956", "f": 6, "v": 309300, "tk": 51550, "re": 81, "ult": "26/12/2025", "s": "En riesgo", "ma": 5}, {"n": "Ezequiel Albornoz", "t": "1164994599", "f": 6, "v": 238280, "tk": 39713, "re": 82, "ult": "25/12/2025", "s": "En riesgo", "ma": 5}, {"n": "JOHANA", "t": "1162455751", "f": 6, "v": 198920, "tk": 33153, "re": 66, "ult": "10/01/2026", "s": "En riesgo", "ma": 6}, {"n": "Ale", "t": "1138253191", "f": 54, "v": 424392, "tk": 7859, "re": 114, "ult": "23/11/2025", "s": "Perdido", "ma": 11}, {"n": "Fabricio", "t": "1123150915", "f": 30, "v": 706320, "tk": 23544, "re": 138, "ult": "30/10/2025", "s": "Perdido", "ma": 9}, {"n": "Jere", "t": "1136426867", "f": 27, "v": 144530, "tk": 5352, "re": 200, "ult": "29/08/2025", "s": "Perdido", "ma": 6}, {"n": "JEREMIAS RIZZOLLO", "t": "1162437661", "f": 20, "v": 465632, "tk": 23281, "re": 104, "ult": "03/12/2025", "s": "Perdido", "ma": 10}, {"n": "Moni", "t": "1157107633", "f": 20, "v": 116515, "tk": 5825, "re": 268, "ult": "22/06/2025", "s": "Perdido", "ma": 5}, {"n": "Camila", "t": "1124794032", "f": 17, "v": 509300, "tk": 29958, "re": 157, "ult": "11/10/2025", "s": "Perdido", "ma": 8}, {"n": "Esteban", "t": "1160059274", "f": 15, "v": 310768, "tk": 20717, "re": 319, "ult": "02/05/2025", "s": "Perdido", "ma": 5}, {"n": "Alejo Fernandez", "t": "1173638830", "f": 15, "v": 266910, "tk": 17794, "re": 105, "ult": "02/12/2025", "s": "Perdido", "ma": 11}, {"n": "VALENRIN CESILIANO", "t": "1162025733", "f": 15, "v": 256440, "tk": 17096, "re": 93, "ult": "14/12/2025", "s": "Perdido", "ma": 9}, {"n": "MANUEL RENZI", "t": "1157227121", "f": 15, "v": 229400, "tk": 15293, "re": 99, "ult": "08/12/2025", "s": "Perdido", "ma": 8}, {"n": "Guillermo Portillo", "t": "1173641949", "f": 14, "v": 451690, "tk": 32263, "re": 113, "ult": "24/11/2025", "s": "Perdido", "ma": 9}, {"n": "Barbara herrera", "t": "1140371308", "f": 14, "v": 380890, "tk": 27206, "re": 235, "ult": "25/07/2025", "s": "Perdido", "ma": 5}, {"n": "Guido", "t": "1132354136", "f": 14, "v": 378790, "tk": 27056, "re": 243, "ult": "17/07/2025", "s": "Perdido", "ma": 7}, {"n": "Ian", "t": "1169342018", "f": 14, "v": 268618, "tk": 19187, "re": 128, "ult": "09/11/2025", "s": "Perdido", "ma": 8}, {"n": "Nicolßs", "t": "1134040104", "f": 13, "v": 348300, "tk": 26792, "re": 144, "ult": "24/10/2025", "s": "Perdido", "ma": 4}, {"n": "Eliana doval", "t": "1169759494", "f": 13, "v": 307620, "tk": 23663, "re": 118, "ult": "19/11/2025", "s": "Perdido", "ma": 8}, {"n": "Loana", "t": "1167634438", "f": 13, "v": 277890, "tk": 21376, "re": 167, "ult": "01/10/2025", "s": "Perdido", "ma": 9}, {"n": "natalio grispo", "t": "1171174685", "f": 13, "v": 250610, "tk": 19277, "re": 184, "ult": "14/09/2025", "s": "Perdido", "ma": 6}, {"n": "Eli", "t": "1124580830", "f": 13, "v": 120780, "tk": 9290, "re": 195, "ult": "03/09/2025", "s": "Perdido", "ma": 5}, {"n": "Julian Duran", "t": "1150539395", "f": 12, "v": 343470, "tk": 28622, "re": 163, "ult": "05/10/2025", "s": "Perdido", "ma": 7}, {"n": "MARTIN TERZAGHI", "t": "1164683756", "f": 12, "v": 321712, "tk": 26809, "re": 95, "ult": "12/12/2025", "s": "Perdido", "ma": 10}, {"n": "Jonathan e marino", "t": "1164536707", "f": 12, "v": 233970, "tk": 19497, "re": 201, "ult": "28/08/2025", "s": "Perdido", "ma": 6}, {"n": "Alexis navarro", "t": "1162287246", "f": 12, "v": 194140, "tk": 16178, "re": 184, "ult": "14/09/2025", "s": "Perdido", "ma": 8}, {"n": "MAT═AS PIRAGINE", "t": "1130136316", "f": 11, "v": 453910, "tk": 41264, "re": 266, "ult": "24/06/2025", "s": "Perdido", "ma": 5}, {"n": "Scarso pablo", "t": "1133590542", "f": 11, "v": 433243, "tk": 39385, "re": 147, "ult": "21/10/2025", "s": "Perdido", "ma": 7}, {"n": "Santiago Escobedo", "t": "1157209457", "f": 11, "v": 404140, "tk": 36740, "re": 180, "ult": "18/09/2025", "s": "Perdido", "ma": 6}, {"n": "NORBERTO FLORES", "t": "1168445556", "f": 11, "v": 383900, "tk": 34900, "re": 200, "ult": "29/08/2025", "s": "Perdido", "ma": 6}, {"n": "nicolas barrionuevo", "t": "1141769064", "f": 11, "v": 379670, "tk": 34515, "re": 110, "ult": "27/11/2025", "s": "Perdido", "ma": 8}, {"n": "ALAN BIFFANI", "t": "1168604730", "f": 11, "v": 375680, "tk": 34152, "re": 206, "ult": "23/08/2025", "s": "Perdido", "ma": 6}, {"n": "Luciana Romano", "t": "1140608853", "f": 11, "v": 232840, "tk": 21167, "re": 94, "ult": "13/12/2025", "s": "Perdido", "ma": 9}, {"n": "Maximiliano tripodi", "t": "1163571843", "f": 11, "v": 136290, "tk": 12390, "re": 128, "ult": "09/11/2025", "s": "Perdido", "ma": 9}, {"n": "RODOLFO DARIO SANCHEZ", "t": "1151060525", "f": 10, "v": 477400, "tk": 47740, "re": 123, "ult": "14/11/2025", "s": "Perdido", "ma": 5}, {"n": "FRANCISCO", "t": "1130177886", "f": 10, "v": 461420, "tk": 46142, "re": 123, "ult": "14/11/2025", "s": "Perdido", "ma": 7}, {"n": "Gonzalo vazquez", "t": "1138955913", "f": 10, "v": 453460, "tk": 45346, "re": 113, "ult": "24/11/2025", "s": "Perdido", "ma": 6}, {"n": "Claudia Slobinsky", "t": "1160553831", "f": 10, "v": 354670, "tk": 35467, "re": 135, "ult": "02/11/2025", "s": "Perdido", "ma": 7}, {"n": "santino", "t": "1134139902", "f": 10, "v": 278585, "tk": 27858, "re": 102, "ult": "05/12/2025", "s": "Perdido", "ma": 9}, {"n": "BRYAN CONTRERAS", "t": "1131352880", "f": 10, "v": 253000, "tk": 25300, "re": 155, "ult": "13/10/2025", "s": "Perdido", "ma": 5}, {"n": "Santiago caceres", "t": "1124694962", "f": 10, "v": 224560, "tk": 22456, "re": 114, "ult": "23/11/2025", "s": "Perdido", "ma": 8}, {"n": "Ariel buckmeier", "t": "1121844192", "f": 10, "v": 190158, "tk": 19015, "re": 292, "ult": "29/05/2025", "s": "Perdido", "ma": 4}, {"n": "Alejo Castro", "t": "1122926238", "f": 10, "v": 178280, "tk": 17828, "re": 191, "ult": "07/09/2025", "s": "Perdido", "ma": 5}];
+  PRODS=[{"producto": "CRISPY DOBLE", "unidades": 2048, "importe": 36669474.0}, {"producto": "CHEESE BACON DOBLE", "unidades": 1129, "importe": 19879620.0}, {"producto": "CHEESE BURGER DOBLE", "unidades": 1073, "importe": 17965065.0}, {"producto": "DELUXE DOBLE", "unidades": 977, "importe": 17039220.0}, {"producto": "CRISPY SIMPLE", "unidades": 794, "importe": 11917658.0}, {"producto": "CUARTO DOBLE", "unidades": 725, "importe": 12160934.0}, {"producto": "CHEESE BURGER SIMPLE", "unidades": 529, "importe": 7242045.0}, {"producto": "ARGENTA SIMPLE", "unidades": 506, "importe": 6963056.0}, {"producto": "CHEESE BACON SIMPLE", "unidades": 484, "importe": 6980180.0}, {"producto": "PORCION PAPAS EXTRAS SOLAS", "unidades": 470, "importe": 2144015.0}, {"producto": "CRISPY 90", "unidades": 468, "importe": 6351010.0}, {"producto": "DELUXE SIMPLE", "unidades": 456, "importe": 6823220.0}, {"producto": "CUARTO SIMPLE", "unidades": 425, "importe": 5765903.0}, {"producto": "FANTASTY K DOBLE", "unidades": 406, "importe": 5511190.0}, {"producto": "ARGENTA DOBLE", "unidades": 384, "importe": 6569470.0}];
+  MAR_PRODS=[{"p": "CHEESE 90", "u": 42, "new": false}, {"p": "CRISPY DOBLE", "u": 36, "new": false}, {"p": "CHEESE BURGER DOBLE", "u": 34, "new": false}, {"p": "DELUXE DOBLE", "u": 29, "new": false}, {"p": "CHEESE BACON DOBLE", "u": 26, "new": false}, {"p": "CUARTO DOBLE", "u": 22, "new": false}, {"p": "CHICKEN BACON", "u": 19, "new": true}, {"p": "CRISPY SIMPLE", "u": 17, "new": false}, {"p": "ARGENTA SIMPLE", "u": 15, "new": false}, {"p": "PROVONETA DOBLE", "u": 15, "new": false}];
+  MAR_PEDS=[6,1,6,3,12,16,20,8,4,4,2,9,18,15,7,7,6];
+  MAR_DIAS=['01','02','03','04','05','06','07','08','09','10','11','12','13','14','15','16','17'];
 
-// ===== DYNAMIC DATA LOADING FROM SUPABASE EDGE FUNCTION =====
-async function loadCRMData() {
-  try {
-    const response = await fetch('https://lqpzhzworncmcuptesjh.supabase.co/functions/v1/crm-data');
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const crmData = await response.json();
-
-    MON = crmData.MON || [];
-    SEGS = crmData.SEGS || [];
-    CLIENTES = crmData.CLIENTES || [];
-    PRODS = crmData.PRODS || [];
-    MAR_PRODS = crmData.MAR_PRODS || [];
-    MAR_PEDS = crmData.MAR_PEDS || [];
-    MAR_DIAS = crmData.MAR_DIAS || [];
-
-    console.log('✅ CRM data loaded:', {MON: MON.length, CLIENTES: CLIENTES.length, PRODS: PRODS.length});
-
-    // AHORA que los datos están cargados, inicializamos TODO
-    initCharts();
-    renderCRM();
-    renderGestion();
-    updateMsgEditor();
-
-  } catch (error) {
-    console.error('❌ Error loading CRM data:', error);
-    alert('No se pudieron cargar los datos. Verifica la conexión con Supabase.');
+  const SCFG={
+    'Activo':   {col:'#00a65a',bg:'#edfbf4'},
+    'Tibio':    {col:'#d97700',bg:'#fff8ec'},
+    'Enfriando':{col:'#c05a00',bg:'#fff3e8'},
+    'En riesgo':{col:'#cc2222',bg:'#fdecea'},
+    'Perdido':  {col:'#999',   bg:'#f5f5f5'},
+  };
+  const SCFG_LABEL={
+    'Activo':'0–14 días','Tibio':'15–30 días · TARGET WhatsApp',
+    'Enfriando':'31–60 días','En riesgo':'61–90 días','Perdido':'90+ días',
+  };
+  const MSGS_DEFAULT={
+    'todos':    'Hola [Nombre]! Tenemos algo nuevo en Kupe: el Chicken Bacon, nuestro crispy de pollo. Ya disponible en BCN 🍔',
+    'Activo':   'Hola [Nombre]! Ya que sos de los nuestros... ¿probaste el Chicken Bacon? Nuestro nuevo crispy de pollo está en el menú 🍔🔥',
+    'Tibio':    'Hola [Nombre]! Hace unos días que no pedís. Esta semana tenemos el Chicken Bacon, nuestro nuevo crispy de pollo. ¿Pedimos? 🍔',
+    'Enfriando':'Hola [Nombre]! Hace más de un mes que no sabemos de vos. El Chicken Bacon nuevo es una buena excusa para volver 🍔',
+    'En riesgo':'Hola [Nombre]! Hace casi 3 meses que no pedís en Kupe. No queremos perderte — esta semana el Chicken Bacon te espera 🙌',
+    'Perdido':  'Hola [Nombre]! Hace mucho que no pedís. Tenemos el Chicken Bacon, nuestro nuevo crispy de pollo. Te esperamos 🍔',
+  };
+  let msgActual={...MSGS_DEFAULT};
+  let filtro='Tibio', busca='';
+  function openModal(){document.getElementById('modal-bg').classList.add('open');}
+  function closeModal(){document.getElementById('modal-bg').classList.remove('open');}
+  function closeModalBg(e){if(e.target===document.getElementById('modal-bg'))closeModal();}
+  function goTab(id,el){
+    document.querySelectorAll('.pg').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.getElementById('pg-'+id).classList.add('active');
+    el.classList.add('active');
   }
-}
-
-// ===== CONFIGURACIÓN =====
-const SCFG={
-  'Activo':   {col:'#00a65a',bg:'#edfbf4'},
-  'Tibio':    {col:'#d97700',bg:'#fff8ec'},
-  'Enfriando':{col:'#c05a00',bg:'#fff3e8'},
-  'En riesgo':{col:'#cc2222',bg:'#fdecea'},
-  'Perdido':  {col:'#999',   bg:'#f5f5f5'},
-};
-const SCFG_LABEL={
-  'Activo':'0–14 días','Tibio':'15–30 días · TARGET WhatsApp',
-  'Enfriando':'31–60 días','En riesgo':'61–90 días','Perdido':'90+ días',
-};
-const MSGS_DEFAULT={
-  'todos':    'Hola [Nombre]! Tenemos algo nuevo en Kupe: el Chicken Bacon, nuestro crispy de pollo. Ya disponible en BCN 🍔',
-  'Activo':   'Hola [Nombre]! Ya que sos de los nuestros... ¿probaste el Chicken Bacon? Nuestro nuevo crispy de pollo está en el menú 🍔🔥',
-  'Tibio':    'Hola [Nombre]! Hace unos días que no pedís. Esta semana tenemos el Chicken Bacon, nuestro nuevo crispy de pollo. ¿Pedimos? 🍔',
-  'Enfriando':'Hola [Nombre]! Hace más de un mes que no sabemos de vos. El Chicken Bacon nuevo es una buena excusa para volver 🍔',
-  'En riesgo':'Hola [Nombre]! Hace casi 3 meses que no pedís en Kupe. No queremos perderte — esta semana el Chicken Bacon te espera 🙌',
-  'Perdido':  'Hola [Nombre]! Hace mucho que no pedís. Tenemos el Chicken Bacon, nuestro nuevo crispy de pollo. Te esperamos 🍔',
-};
-
-let msgActual={...MSGS_DEFAULT};
-let filtro='Tibio', busca='';
-
-// ===== UI HELPERS =====
-function openModal(){document.getElementById('modal-bg').classList.add('open');}
-function closeModal(){document.getElementById('modal-bg').classList.remove('open');}
-function closeModalBg(e){if(e.target===document.getElementById('modal-bg'))closeModal();}
-function goTab(id,el){
-  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('pg-'+id).classList.add('active');
-  el.classList.add('active');
-}
-
-// ===== CHARTS INITIALIZATION =====
-function initCharts(){
   Chart.defaults.color='#999';
   Chart.defaults.font.family='DM Sans';
   const gc='#e8e8e8';
-
   new Chart(document.getElementById('cP'),{
     type:'bar',
     data:{labels:MON.meses,datasets:[{data:MON.pedidos,
@@ -358,21 +310,18 @@ function initCharts(){
       borderRadius:5}]},
     options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:gc},ticks:{font:{size:9}}},y:{grid:{color:gc},ticks:{font:{size:10}}}}}
   });
-
   new Chart(document.getElementById('cR'),{
     type:'line',
     data:{labels:MON.meses,datasets:[{data:MON.revenue,borderColor:'#d97700',backgroundColor:'rgba(217,119,0,.07)',
       pointBackgroundColor:MON.meses.map((_,i)=>i===14?'#00a65a':'#d97700'),pointRadius:4,tension:0.35,fill:true}]},
     options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:gc},ticks:{font:{size:9}}},y:{grid:{color:gc},ticks:{callback:v=>'$'+(v/1000000).toFixed(0)+'M',font:{size:9}}}}}
   });
-
   new Chart(document.getElementById('cC'),{
     type:'line',
     data:{labels:MON.meses,datasets:[{data:MON.clientes,borderColor:'#1a73e8',backgroundColor:'rgba(26,115,232,.06)',
       pointBackgroundColor:MON.meses.map((_,i)=>i===14?'#00a65a':'#1a73e8'),pointRadius:4,tension:0.35,fill:true}]},
     options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:gc},ticks:{font:{size:9}}},y:{grid:{color:gc},ticks:{font:{size:10}}}}}
   });
-
   new Chart(document.getElementById('cMar'),{
     type:'bar',
     data:{labels:MAR_DIAS.map(d=>'Mar '+d),datasets:[{data:MAR_PEDS,
@@ -380,7 +329,6 @@ function initCharts(){
       borderRadius:4}]},
     options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:gc},ticks:{font:{size:8}}},y:{grid:{color:gc},ticks:{font:{size:10}}}}}
   });
-
   const mpMax=MAR_PRODS[0].u;
   const mpl=document.getElementById('plist-mar');
   MAR_PRODS.forEach(p=>{
@@ -389,7 +337,6 @@ function initCharts(){
     const bc=p.new?'#00a65a':'#e03a00';
     mpl.innerHTML+=`<div class="pr"><div class="pt"><div class="pn">${p.p} ${nb}</div><div class="pu" style="color:${p.new?'#00a65a':'var(--acc)'}">${p.u}</div></div><div class="bt"><div class="bf" style="width:${pct}%;background:${bc}"></div></div></div>`;
   });
-
   const totalCli=SEGS.reduce((a,s)=>a+s.clientes,0);
   const segListEl=document.getElementById('seglist');
   SEGS.forEach(s=>{
@@ -408,13 +355,11 @@ function initCharts(){
         <div class="seg-meta"><span>${pctCli}% de la base</span><span><b>$${(s.revenue/1000000).toFixed(1)}M</b> hist. · $${Math.round(s.ticket).toLocaleString('es-AR')}/ticket</span></div>
       </div>`;
   });
-
   new Chart(document.getElementById('cSg'),{
     type:'bar',
     data:{labels:SEGS.map(s=>s.segmento),datasets:[{data:SEGS.map(s=>s.revenue),backgroundColor:SEGS.map(s=>(SCFG[s.segmento]||{col:'#ccc'}).col+'cc'),borderRadius:5}]},
     options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:gc},ticks:{callback:v=>'$'+(v/1000000).toFixed(0)+'M',font:{size:9}}},y:{grid:{color:gc},ticks:{font:{size:10}}}}}
   });
-
   const filterDiv=document.getElementById('seg-filters');
   [{key:'todos',label:'Todos'},{key:'Activo',label:'🟢 Activos'},{key:'Tibio',label:'🎯 Tibios'},
    {key:'Enfriando',label:'🟠 Enfriando'},{key:'En riesgo',label:'🔴 En riesgo'},{key:'Perdido',label:'⬛ Perdidos'}
@@ -425,7 +370,128 @@ function initCharts(){
     btn.onclick=()=>setF(f.key,btn);
     filterDiv.appendChild(btn);
   });
-
+  function updateMsgEditor(){
+    document.getElementById('msg-ta').value=msgActual[filtro]||msgActual['todos'];
+  }
+  function saveMsg(){msgActual[filtro]=document.getElementById('msg-ta').value;}
+  function resetMsg(){
+    msgActual[filtro]=MSGS_DEFAULT[filtro]||MSGS_DEFAULT['todos'];
+    document.getElementById('msg-ta').value=msgActual[filtro];
+  }
+  function setF(seg,el){
+    filtro=seg;
+    document.querySelectorAll('.fb').forEach(b=>b.classList.remove('active'));
+    if(el)el.classList.add('active');
+    updateMsgEditor();renderCRM();
+  }
+  function setS(v){busca=v;renderCRM();}
+  function goSegCRM(seg){
+    goTab('crm',document.querySelectorAll('.tab')[3]);
+    filtro=seg;
+    document.querySelectorAll('.fb').forEach(b=>{b.classList.remove('active');if(b.textContent.includes(seg))b.classList.add('active');});
+    updateMsgEditor();renderCRM();
+  }
+  function getMsgParaCliente(primerNombre){
+    const msg=msgActual[filtro]||msgActual['todos'];
+    return msg.replace(/\[Nombre\]/gi,primerNombre);
+  }
+  updateMsgEditor();
+  function renderCRM(){
+    let lista=[...CLIENTES];
+    if(filtro!=='todos') lista=lista.filter(c=>c.s===filtro);
+    if(busca){const q=busca.toLowerCase();lista=lista.filter(c=>c.n.toLowerCase().includes(q));}
+    const minF = Math.min(...CLIENTES.map(c => c.f));
+    const maxF = Math.max(...CLIENTES.map(c => c.f));
+    const minTk = Math.min(...CLIENTES.map(c => c.tk));
+    const maxTk = Math.max(...CLIENTES.map(c => c.tk));
+    const minRe = Math.min(...CLIENTES.map(c => c.re));
+    const maxRe = Math.max(...CLIENTES.map(c => c.re));
+    lista.forEach(c => {
+      const f_norm = (c.f - minF) / (maxF - minF) || 0;
+      const tk_norm = (c.tk - minTk) / (maxTk - minTk) || 0;
+      const re_norm = (c.re - minRe) / (maxRe - minRe) || 0;
+      c.sc = (f_norm * 0.4) + (tk_norm * 0.3) + (re_norm * 0.3);
+    });
+    lista.sort((a, b) => b.sc - a.sc);
+    const top5cont=document.getElementById('accion-hoy');
+    top5cont.innerHTML='<div class="sec">🔥 ACCIÓN HOY</div>';
+    lista.slice(0,5).forEach((c,i)=>{
+      const nom=c.n.toLowerCase().replace(/\w/g,l=>l.toUpperCase());
+      const primerN=nom.split(' ')[0];
+      const tel=c.t.replace(/^0?54?/,'');
+      const cfg=SCFG[c.s]||{col:'#999',bg:'#f5f5f5'};
+      const recC=c.re<=14?'#00a65a':c.re<=30?'#d97700':c.re<=60?'#c05a00':'#cc2222';
+      const recPct=Math.min(100,Math.round(c.re/90*100));
+      const recT=c.re===0?'Hoy':`${c.re}d`;
+      const wa=`https://wa.me/54${tel}?text=${encodeURIComponent(getMsgParaCliente(primerN))}`;
+      top5cont.innerHTML+=`
+        <div class="ci">
+          <div class="rk gld">${i+1}</div>
+          <div class="cib">
+            <div class="cn">${nom}</div>
+            <div class="cm">${c.f} pedido${c.f>1?'s':''} en ${c.ma} mes${c.ma>1?'es':''} · <b>$${c.v.toLocaleString('es-AR')}</b> · Ticket $${c.tk.toLocaleString('es-AR')}</div>
+            <div class="cr">
+              <span class="sp" style="background:${cfg.bg};color:${cfg.col}">${c.s}</span>
+              <span style="font-size:10px;color:${recC};font-weight:600">⏱ ${recT}</span>
+              <div class="rec-bar"><div class="rec-fill" style="width:${recPct}%;background:${recC}"></div></div>
+              <span style="font-size:9px;color:var(--mu2)">Última: ${c.ult}</span>
+            </div>
+          </div>
+          <a class="bw" href="${wa}" target="_blank">💬</a>
+          <div id="cbtn-${tel}"></div>
+        </div>`;
+    });
+    lista.slice(0,5).forEach(c => {
+      const tel = c.t.replace(/^0?54?/,'');
+      const btn = document.getElementById('cbtn-' + tel);
+      if(btn) {
+        const estado = renderBotones(tel);
+        if(!estado) btn.innerHTML = `<button class="cbtn" onclick="marcarContactado('${tel}','${c.n}','${c.s}','${c.tk}')">Marcar contactado</button>`;
+        else btn.innerHTML = estado;
+      }
+    });
+    const cont=document.getElementById('clist');
+    cont.innerHTML='';
+    lista.forEach((c,i)=>{
+      if(i<5) return;
+      const nom=c.n.toLowerCase().replace(/\w/g,l=>l.toUpperCase());
+      const primerN=nom.split(' ')[0];
+      const tel=c.t.replace(/^0?54?/,'');
+      const cfg=SCFG[c.s]||{col:'#999',bg:'#f5f5f5'};
+      const rk=i===0?'gld':i<5?'ac':'';
+      const recC=c.re<=14?'#00a65a':c.re<=30?'#d97700':c.re<=60?'#c05a00':'#cc2222';
+      const recPct=Math.min(100,Math.round(c.re/90*100));
+      const recT=c.re===0?'Hoy':`${c.re}d`;
+      const wa=`https://wa.me/54${tel}?text=${encodeURIComponent(getMsgParaCliente(primerN))}`;
+      cont.innerHTML+=`
+        <div class="ci">
+          <div class="rk ${rk}">${i+1}</div>
+          <div class="cib">
+            <div class="cn">${nom}</div>
+            <div class="cm">${c.f} pedido${c.f>1?'s':''} en ${c.ma} mes${c.ma>1?'es':''} · <b>$${c.v.toLocaleString('es-AR')}</b> · Ticket $${c.tk.toLocaleString('es-AR')}</div>
+            <div class="cr">
+              <span class="sp" style="background:${cfg.bg};color:${cfg.col}">${c.s}</span>
+              <span style="font-size:10px;color:${recC};font-weight:600">⏱ ${recT}</span>
+              <div class="rec-bar"><div class="rec-fill" style="width:${recPct}%;background:${recC}"></div></div>
+              <span style="font-size:9px;color:var(--mu2)">Última: ${c.ult}</span>
+            </div>
+          </div>
+          <a class="bw" href="${wa}" target="_blank">💬</a>
+          <div id="cbtn-${tel}"></div>
+        </div>`;
+    });
+    lista.forEach(c => {
+      const tel = c.t.replace(/^0?54?/,'');
+      const btn = document.getElementById('cbtn-' + tel);
+      if(btn) {
+        const estado = renderBotones(tel);
+        if(!estado) btn.innerHTML = `<button class="cbtn" onclick="marcarContactado('${tel}','${c.n}','${c.s}','${c.tk}')">Marcar</button>`;
+        else btn.innerHTML = estado;
+      }
+    });
+    document.getElementById('chint').textContent=`${lista.length} cliente${lista.length!==1?'s':''} · ordenados por prioridad · 💬 usa el mensaje del editor`;
+  }
+  renderCRM();
   const maxU=PRODS[0].unidades,totalU=PRODS.reduce((a,b)=>a+b.unidades,0);
   const pColores=['#e03a00','#e05a00','#d97700','#c09000','#a07800','#806000','#604800','#8a6000','#6a5000','#aaa','#bbb','#ccc','#00a65a','#ddd','#eee'];
   const pl=document.getElementById('plist');
@@ -435,253 +501,124 @@ function initCharts(){
     const isNew=p.producto.includes('CHICKEN BACON');
     pl.innerHTML+=`<div class="pr"><div class="pt"><div class="pn">${p.producto}${isNew?' <span class="pnew">NUEVO</span>':''}</div><div><div class="pu" style="${isNew?'color:#00a65a':''}">${p.unidades}</div><div class="pi">$${(p.importe/1000000).toFixed(1)}M · ${sh}%</div></div></div><div class="bt"><div class="bf" style="width:${pct}%;background:${isNew?'#00a65a':pColores[i]||'#ccc'}"></div></div></div>`;
   });
-
   new Chart(document.getElementById('cPie'),{
     type:'doughnut',
     data:{labels:PRODS.slice(0,8).map(p=>p.producto.replace(' DOBLE','').replace(' SIMPLE','').replace('PORCION ','')),
       datasets:[{data:PRODS.slice(0,8).map(p=>p.unidades),backgroundColor:['#e03a00','#e05a00','#d97700','#c09000','#a07800','#1a73e8','#00a65a','#7c3aed'],borderColor:'#fff',borderWidth:3}]},
     options:{responsive:true,cutout:'45%',plugins:{legend:{position:'bottom',labels:{color:'#777',font:{size:9},padding:6,boxWidth:10}}}}
   });
-}
-
-// ===== MESSAGE EDITOR =====
-function updateMsgEditor(){
-  document.getElementById('msg-ta').value=msgActual[filtro]||msgActual['todos'];
-}
-function saveMsg(){msgActual[filtro]=document.getElementById('msg-ta').value;}
-function resetMsg(){
-  msgActual[filtro]=MSGS_DEFAULT[filtro]||MSGS_DEFAULT['todos'];
-  document.getElementById('msg-ta').value=msgActual[filtro];
-}
-
-// ===== FILTERS & SEARCH =====
-function setF(seg,el){
-  filtro=seg;
-  document.querySelectorAll('.fb').forEach(b=>b.classList.remove('active'));
-  if(el)el.classList.add('active');
-  updateMsgEditor();renderCRM();
-}
-function setS(v){busca=v;renderCRM();}
-function goSegCRM(seg){
-  goTab('crm',document.querySelectorAll('.tab')[3]);
-  filtro=seg;
-  document.querySelectorAll('.fb').forEach(b=>{b.classList.remove('active');if(b.textContent.includes(seg))b.classList.add('active');});
-  updateMsgEditor();renderCRM();
-}
-function getMsgParaCliente(primerNombre){
-  const msg=msgActual[filtro]||msgActual['todos'];
-  return msg.replace(/\[Nombre\]/gi,primerNombre);
-}
-
-// ===== CRM RENDERING =====
-function renderCRM(){
-  let lista=[...CLIENTES];
-  if(filtro!=='todos') lista=lista.filter(c=>c.s===filtro);
-  if(busca){const q=busca.toLowerCase();lista=lista.filter(c=>c.n.toLowerCase().includes(q));}
-
-  const minF = Math.min(...CLIENTES.map(c => c.f));
-  const maxF = Math.max(...CLIENTES.map(c => c.f));
-  const minTk = Math.min(...CLIENTES.map(c => c.tk));
-  const maxTk = Math.max(...CLIENTES.map(c => c.tk));
-  const minRe = Math.min(...CLIENTES.map(c => c.re));
-  const maxRe = Math.max(...CLIENTES.map(c => c.re));
-
-  lista.forEach(c => {
-    const f_norm = (c.f - minF) / (maxF - minF) || 0;
-    const tk_norm = (c.tk - minTk) / (maxTk - minTk) || 0;
-    const re_norm = (c.re - minRe) / (maxRe - minRe) || 0;
-    c.sc = (f_norm * 0.4) + (tk_norm * 0.3) + (re_norm * 0.3);
-  });
-  lista.sort((a, b) => b.sc - a.sc);
-
-  const top5cont=document.getElementById('accion-hoy');
-  top5cont.innerHTML='<div class="sec">🔥 ACCIÓN HOY</div>';
-  lista.slice(0,5).forEach((c,i)=>{
-    const nom=c.n.toLowerCase().replace(/\w/g,l=>l.toUpperCase());
-    const primerN=nom.split(' ')[0];
-    const tel=c.t.replace(/^0?54?/,'');
-    const cfg=SCFG[c.s]||{col:'#999',bg:'#f5f5f5'};
-    const recC=c.re<=14?'#00a65a':c.re<=30?'#d97700':c.re<=60?'#c05a00':'#cc2222';
-    const recPct=Math.min(100,Math.round(c.re/90*100));
-    const recT=c.re===0?'Hoy':`${c.re}d`;
-    const wa=`https://wa.me/54${tel}?text=${encodeURIComponent(getMsgParaCliente(primerN))}`;
-    top5cont.innerHTML+=`
-      <div class="ci">
-        <div class="rk gld">${i+1}</div>
-        <div class="cib">
-          <div class="cn">${nom}</div>
-          <div class="cm">${c.f} pedido${c.f>1?'s':''} en ${c.ma} mes${c.ma>1?'es':''} · <b>$${c.v.toLocaleString('es-AR')}</b> · Ticket $${c.tk.toLocaleString('es-AR')}</div>
-          <div class="cr">
-            <span class="sp" style="background:${cfg.bg};color:${cfg.col}">${c.s}</span>
-            <span style="font-size:10px;color:${recC};font-weight:600">⏱ ${recT}</span>
-            <div class="rec-bar"><div class="rec-fill" style="width:${recPct}%;background:${recC}"></div></div>
-            <span style="font-size:9px;color:var(--mu2)">Última: ${c.ult}</span>
-          </div>
-        </div>
-        <a class="bw" href="${wa}" target="_blank">💬</a>
-        <div id="cbtn-${tel}"></div>
-      </div>`;
-  });
-  lista.slice(0,5).forEach(c => {
-    const tel = c.t.replace(/^0?54?/,'');
-    const btn = document.getElementById('cbtn-' + tel);
-    if(btn) {
-      const estado = renderBotones(tel);
-      if(!estado) btn.innerHTML = `<button class="cbtn" onclick="marcarContactado('${tel}','${c.n}','${c.s}','${c.tk}')">Marcar contactado</button>`;
-      else btn.innerHTML = estado;
-    }
-  });
-
-  const cont=document.getElementById('clist');
-  cont.innerHTML='';
-  lista.forEach((c,i)=>{
-    if(i<5) return;
-    const nom=c.n.toLowerCase().replace(/\w/g,l=>l.toUpperCase());
-    const primerN=nom.split(' ')[0];
-    const tel=c.t.replace(/^0?54?/,'');
-    const cfg=SCFG[c.s]||{col:'#999',bg:'#f5f5f5'};
-    const rk=i===0?'gld':i<5?'ac':'';
-    const recC=c.re<=14?'#00a65a':c.re<=30?'#d97700':c.re<=60?'#c05a00':'#cc2222';
-    const recPct=Math.min(100,Math.round(c.re/90*100));
-    const recT=c.re===0?'Hoy':`${c.re}d`;
-    const wa=`https://wa.me/54${tel}?text=${encodeURIComponent(getMsgParaCliente(primerN))}`;
-    cont.innerHTML+=`
-      <div class="ci">
-        <div class="rk ${rk}">${i+1}</div>
-        <div class="cib">
-          <div class="cn">${nom}</div>
-          <div class="cm">${c.f} pedido${c.f>1?'s':''} en ${c.ma} mes${c.ma>1?'es':''} · <b>$${c.v.toLocaleString('es-AR')}</b> · Ticket $${c.tk.toLocaleString('es-AR')}</div>
-          <div class="cr">
-            <span class="sp" style="background:${cfg.bg};color:${cfg.col}">${c.s}</span>
-            <span style="font-size:10px;color:${recC};font-weight:600">⏱ ${recT}</span>
-            <div class="rec-bar"><div class="rec-fill" style="width:${recPct}%;background:${recC}"></div></div>
-            <span style="font-size:9px;color:var(--mu2)">Última: ${c.ult}</span>
-          </div>
-        </div>
-        <a class="bw" href="${wa}" target="_blank">💬</a>
-        <div id="cbtn-${tel}"></div>
-      </div>`;
-  });
-  lista.forEach(c => {
-    const tel = c.t.replace(/^0?54?/,'');
-    const btn = document.getElementById('cbtn-' + tel);
-    if(btn) {
-      const estado = renderBotones(tel);
-      if(!estado) btn.innerHTML = `<button class="cbtn" onclick="marcarContactado('${tel}','${c.n}','${c.s}','${c.tk}')">Marcar</button>`;
-      else btn.innerHTML = estado;
-    }
-  });
-
-  document.getElementById('chint').textContent=`${lista.length} cliente${lista.length!==1?'s':''} · ordenados por prioridad · 💬 usa el mensaje del editor`;
-}
-
-// ===== CONTACT TRACKING =====
-const CK='kupe_v1';
-function cargar(){try{return JSON.parse(localStorage.getItem(CK)||'{}')}catch(e){return{}}}
-function guardar(d){localStorage.setItem(CK,JSON.stringify(d))}
-
-const ECFG={
-  'contactado':  {lb:'Contactado',   cl:'on-contactado',  co:'#1a6fb5'},
-  'respondio':   {lb:'Respondió',    cl:'on-respondio',   co:'#9a6600'},
-  'compro':      {lb:'Compró 🎉',    cl:'on-compro',      co:'#006635'},
-  'no-resp':     {lb:'No respondió', cl:'on-no-respondio',co:'#c02020'},
-};
-
-function marcarContactado(tel,nombre,seg,ticket){
-  const d=cargar();
-  if(d[tel] && d[tel].estado) return;
-  const now=new Date();
-  d[tel]={nombre,seg,ticket,estado:'contactado',
-    fecha:now.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}),
-    hora:now.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})};
-  guardar(d);
-  document.getElementById('cbtn-'+tel).innerHTML=renderBotones(tel);
-  renderCRM();
-  renderGestion();
-}
-
-function setEstado(tel,estado){
-  const d=cargar();
-  if(!d[tel]) return;
-  d[tel].estado=estado;
-  guardar(d);
-  document.getElementById('cbtn-'+tel).innerHTML=renderBotones(tel);
-  renderCRM();
-  renderGestion();
-}
-
-function renderBotones(tel){
-  const d=cargar();
-  const actual=d[tel]?d[tel].estado:null;
-  if(!actual) return '';
-  return Object.entries(ECFG).map(([k,v])=>
-    `<button class="cbtn ${actual===k?v.cl:''}" onclick="setEstado('${tel}','${k}')">${v.lb}</button>`
-  ).join('');
-}
-
-function renderGestion(){
-  const d=cargar();
-  const tels=Object.keys(d);
-  const cnt={contactado:0,respondio:0,compro:0,'no-resp':0};
-  tels.forEach(t=>{if(d[t].estado) cnt[d[t].estado]=(cnt[d[t].estado]||0)+1;});
-  ['c','r','v','n'].forEach((id,i)=>{
-    const keys=['contactado','respondio','compro','no-resp'];
-    const el=document.getElementById('st-'+id);
-    if(el) el.textContent=cnt[keys[i]]||0;
-  });
-
-  const cont=document.getElementById('gestion-list');
-  if(!cont) return;
-  if(!tels.length){
-    cont.innerHTML='<div class="cg-empty">Todavía no contactaste a nadie.<br>Usá el botón 💬 en el CRM.</div>';
-    return;
-  }
-
-  const orden=['compro','respondio','contactado','no-resp'];
-  tels.sort((a,b)=>orden.indexOf(d[a].estado)-orden.indexOf(d[b].estado));
-  cont.innerHTML=tels.map(tel=>{
-    const c=d[tel];
-    const cfg=ECFG[c.estado]||{lb:c.estado,cl:'',co:'#999'};
-    const nom=(c.nombre||'').toLowerCase().replace(/\w/g,l=>l.toUpperCase());
-    return `<div class="cg-item">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-        <div style="flex:1;font-size:13px;font-weight:600;text-transform:capitalize">${nom}</div>
-        <span class="cg-badge ${cfg.cl}" style="color:${cfg.co}">${cfg.lb}</span>
-      </div>
-      <div style="font-size:10px;color:#aaa">Seg: ${c.seg} · Ticket $${Number(c.ticket).toLocaleString('es-AR')} · ${c.fecha} ${c.hora}</div>
-      <div style="margin-top:6px">
-        ${Object.entries(ECFG).map(([k,v])=>
-          `<button class="cbtn ${c.estado===k?v.cl:''}" onclick="setEstadoHist('${tel}','${k}')" style="font-size:9px;padding:3px 8px">${v.lb}</button>`
-        ).join('')}
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function setEstadoHist(tel,estado){
-  const d=cargar();
-  if(!d[tel]) return;
-  d[tel].estado=estado;
-  guardar(d);
-  renderGestion();
-  const el=document.getElementById('cbtn-'+tel);
-  if(el) el.innerHTML=renderBotones(tel);
-}
-
-function limpiarContactos(){
-  if(confirm('¿Limpiar todo el historial?')){
-    localStorage.removeItem(CK);
-    renderGestion();
+  // ── CONTACTO TRACKING ──
+  const CK='kupe_v1';
+  function cargar(){try{return JSON.parse(localStorage.getItem(CK)||'{}')}catch(e){return{}}}
+  function guardar(d){localStorage.setItem(CK,JSON.stringify(d))}
+  const ECFG={
+    'contactado':  {lb:'Contactado',   cl:'on-contactado',  co:'#1a6fb5'},
+    'respondio':   {lb:'Respondió',    cl:'on-respondio',   co:'#9a6600'},
+    'compro':      {lb:'Compró 🎉',    cl:'on-compro',      co:'#006635'},
+    'no-resp':     {lb:'No respondió', cl:'on-no-respondio',co:'#c02020'},
+  };
+  function marcarContactado(tel,nombre,seg,ticket){
+    const d=cargar();
+    if(d[tel] && d[tel].estado) return;
+    const now=new Date();
+    d[tel]={nombre,seg,ticket,estado:'contactado',
+      fecha:now.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}),
+      hora:now.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})};
+    guardar(d);
+    document.getElementById('cbtn-'+tel).innerHTML=renderBotones(tel);
     renderCRM();
+    renderGestion();
   }
+  function setEstado(tel,estado){
+    const d=cargar();
+    if(!d[tel]) return;
+    d[tel].estado=estado;
+    guardar(d);
+    document.getElementById('cbtn-'+tel).innerHTML=renderBotones(tel);
+    renderCRM();
+    renderGestion();
+  }
+  function renderBotones(tel){
+    const d=cargar();
+    const actual=d[tel]?d[tel].estado:null;
+    if(!actual) return '';
+    return Object.entries(ECFG).map(([k,v])=>
+      `<button class="cbtn ${actual===k?v.cl:''}" onclick="setEstado('${tel}','${k}')">${v.lb}</button>`
+    ).join('');
+  }
+  function renderGestion(){
+    const d=cargar();
+    const tels=Object.keys(d);
+    const cnt={contactado:0,respondio:0,compro:0,'no-resp':0};
+    tels.forEach(t=>{if(d[t].estado) cnt[d[t].estado]=(cnt[d[t].estado]||0)+1;});
+    ['c','r','v','n'].forEach((id,i)=>{
+      const keys=['contactado','respondio','compro','no-resp'];
+      const el=document.getElementById('st-'+id);
+      if(el) el.textContent=cnt[keys[i]]||0;
+    });
+    const cont=document.getElementById('gestion-list');
+    if(!cont) return;
+    if(!tels.length){
+      cont.innerHTML='<div class="cg-empty">Todavía no contactaste a nadie.<br>Usá el botón 💬 en el CRM.</div>';
+      return;
+    }
+    const orden=['compro','respondio','contactado','no-resp'];
+    tels.sort((a,b)=>orden.indexOf(d[a].estado)-orden.indexOf(d[b].estado));
+    cont.innerHTML=tels.map(tel=>{
+      const c=d[tel];
+      const cfg=ECFG[c.estado]||{lb:c.estado,cl:'',co:'#999'};
+      const nom=(c.nombre||'').toLowerCase().replace(/\w/g,l=>l.toUpperCase());
+      return `<div class="cg-item">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <div style="flex:1;font-size:13px;font-weight:600;text-transform:capitalize">${nom}</div>
+          <span class="cg-badge ${cfg.cl}" style="color:${cfg.co}">${cfg.lb}</span>
+        </div>
+        <div style="font-size:10px;color:#aaa">Seg: ${c.seg} · Ticket $${Number(c.ticket).toLocaleString('es-AR')} · ${c.fecha} ${c.hora}</div>
+        <div style="margin-top:6px">
+          ${Object.entries(ECFG).map(([k,v])=>
+            `<button class="cbtn ${c.estado===k?v.cl:''}" onclick="setEstadoHist('${tel}','${k}')" style="font-size:9px;padding:3px 8px">${v.lb}</button>`
+          ).join('')}
+        </div>
+      </div>`;
+    }).join('');
+  }
+  function setEstadoHist(tel,estado){
+    const d=cargar();
+    if(!d[tel]) return;
+    d[tel].estado=estado;
+    guardar(d);
+    renderGestion();
+    const el=document.getElementById('cbtn-'+tel);
+    if(el) el.innerHTML=renderBotones(tel);
+  }
+  function limpiarContactos(){
+    if(confirm('¿Limpiar todo el historial?')){
+      localStorage.removeItem(CK);
+      renderGestion();
+      renderCRM();
+    }
+  }
+  renderGestion();
 }
 
-// ===== INICIALIZACIÓN AL CARGAR LA PÁGINA =====
-document.addEventListener('DOMContentLoaded', () => {
-  loadCRMData();
+document.addEventListener("DOMContentLoaded", () => {
+  initData();
 });
 
 </script>
-
+<div id="pg-gestion" class="pg">
+  <div class="sec">RESUMEN</div>
+  <div class="cg-stats">
+    <div class="cg-stat"><div class="cg-num" id="st-c" style="color:#1a6fb5">0</div><div class="cg-lbl">Contactados</div></div>
+    <div class="cg-stat"><div class="cg-num" id="st-r" style="color:#9a6600">0</div><div class="cg-lbl">Respondieron</div></div>
+    <div class="cg-stat"><div class="cg-num" id="st-v" style="color:#006635">0</div><div class="cg-lbl">Compraron</div></div>
+    <div class="cg-stat"><div class="cg-num" id="st-n" style="color:#c02020">0</div><div class="cg-lbl">Sin resp.</div></div>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+    <div class="sec" style="margin:0">HISTORIAL</div>
+    <span style="font-size:10px;color:#bbb;cursor:pointer;text-decoration:underline" onclick="limpiarContactos()">Limpiar todo</span>
+  </div>
+  <div id="gestion-list"></div>
+</div>
 </body>
 </html>
