@@ -318,8 +318,8 @@ new Chart(document.getElementById('cP'),{
     labels: crmData ? crmData.MON.meses : MON.meses,
     datasets:[{
       data: crmData ? crmData.MON.pedidos : MON.pedidos,
-      backgroundColor: (crmData ? crmData.MON.pedidos : MON.pedidos).map((_,i)=>
-        i===((crmData ? crmData.MON.pedidos : MON.pedidos).length-1)
+      backgroundColor: (crmData ? crmData.MON.pedidos : MON.pedidos).map((_,i,arr)=>
+        i===arr.length-1
           ? 'rgba(0,166,90,0.75)'
           : `rgba(224,${Math.max(30,110-i*6)},0,${Math.max(0.35,0.85-i*0.04)})`
       ),
