@@ -279,20 +279,14 @@ async function loadCRMData() {
 }
 
 function initializeUI() {
-  renderCharts();
-  updateTableMarProds();
-  updateChartMarPeds();
-  updateTableProds();
-  renderSegments();
-  initFilterButtons();
-  updateMsgEditor();
-  renderCRM();
-  renderGestion();
+  // Aquí NO llamamos a funciones inexistentes
+  // El código de Chart.js ya está ejecutándose en initCharts()
+  // Las demás funciones se ejecutan cuando se necesitan
+  initCharts();
+  if (typeof renderCRM === 'function') renderCRM();
+  if (typeof renderGestion === 'function') renderGestion();
+  if (typeof updateMsgEditor === 'function') updateMsgEditor();
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-  loadCRMData();
-});
 
 const SCFG={
   'Activo':   {col:'#00a65a',bg:'#edfbf4'},
@@ -324,6 +318,8 @@ function goTab(id,el){
   document.getElementById('pg-'+id).classList.add('active');
   el.classList.add('active');
 }
+
+function initCharts(){
 Chart.defaults.color='#999';
 Chart.defaults.font.family='DM Sans';
 const gc='#e8e8e8';
@@ -394,6 +390,8 @@ const filterDiv=document.getElementById('seg-filters');
   btn.onclick=()=>setF(f.key,btn);
   filterDiv.appendChild(btn);
 });
+}
+
 function updateMsgEditor(){
   document.getElementById('msg-ta').value=msgActual[filtro]||msgActual['todos'];
 }
@@ -640,3 +638,7 @@ renderGestion();
 </div>
 </body>
 </html>
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadCRMData();
+});
