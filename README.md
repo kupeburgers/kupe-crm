@@ -126,7 +126,7 @@ Se agregó script SQL en `sql/refresh_dashboard_snapshot_from_crudo.sql`.
 ### Pasos diarios
 
 1. Subir los archivos crudos del ERP a tus tablas (`deliverys`, `articulos_vendidos`, `clientes`).
-2. Ejecutar una sola vez el script `sql/refresh_dashboard_snapshot_from_crudo.sql` (crea funciones y objetos idempotentes).
+2. Ejecutar una sola vez el script `sql/refresh_dashboard_snapshot_from_crudo.sql` (crea funciones/objetos idempotentes y agrega columnas mínimas faltantes para que la carga cruda no rompa).
 3. En adelante, cada día correr:
 
 ```sql
