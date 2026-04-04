@@ -186,19 +186,26 @@ begin
 
   with ent_src as (
     select
-      coalesce(fecha_raw, fecha_txt) as fecha_txt,
-      coalesce(total_raw, total_txt) as total_txt
+with ent_src as (
+  select
+    fecha_txt,
+    total_txt
+  from (
+    select
+      nullif(trim(coalesce(src.j->>'Fecha', src.j->>'fecha_raw', src.j->>'fecha', '')), '') as fecha_txt,
+      nullif(trim(coalesce(src.j->>'Total', src.j->>'total_raw', src.j->>'total', '')), '') as total_txt
     from (
-      select
-        e.fecha_raw,
-        e.total_raw,
-        null::text as fecha_txt,
-        null::text as total_txt
+      select to_jsonb(e) as j
       from public.stg_entregas_raw e
-      union all
-      select
-        null,
-        null,
+    ) src
+    union all
+    select
+      en.fecha::text,
+      en.total::text
+    from public.entregas en
+    where not exists (select 1 from public.stg_entregas_raw)
+  ) z
+)
         en.fecha::text,
         en.total::text
       from public.entregas en
@@ -220,27 +227,32 @@ begin
   with
   ent_src as (
     select
-      coalesce(fecha_raw, fecha_txt) as fecha_txt,
-      nullif(trim(coalesce(telefono_txt,'')), '') as telefono_txt,
-      coalesce(total_raw, total_txt) as total_txt,
-      coalesce(estado_txt,'') as estado_txt
+ent_src as (
+  select
+    fecha_txt,
+    nullif(trim(coalesce(telefono_txt,'')), '') as telefono_txt,
+    total_txt,
+    coalesce(estado_txt,'') as estado_txt
+  from (
+    select
+      nullif(trim(coalesce(src.j->>'Fecha', src.j->>'fecha_raw', src.j->>'fecha', '')), '') as fecha_txt,
+      nullif(trim(coalesce(src.j->>'Telefono', src.j->>'telefono', src.j->>'teléfono', '')), '') as telefono_txt,
+      nullif(trim(coalesce(src.j->>'Total', src.j->>'total_raw', src.j->>'total', '')), '') as total_txt,
+      nullif(trim(coalesce(src.j->>'Estado', src.j->>'estado', '')), '') as estado_txt
     from (
-      select
-        e.fecha_raw,
-        e.telefono as telefono_txt,
-        e.total_raw,
-        e.estado as estado_txt,
-        null::text as fecha_txt,
-        null::text as total_txt
+      select to_jsonb(e) as j
       from public.stg_entregas_raw e
-      union all
-      select
-        null,
-        coalesce(en.telefono::text,''),
-        null,
-        coalesce(en.estado::text,''),
-        en.fecha::text,
-        en.total::text
+    ) src
+    union all
+    select
+      en.fecha::text,
+      coalesce(en.telefono::text,''),
+      en.total::text,
+      coalesce(en.estado::text,'')
+    from public.entregas en
+    where not exists (select 1 from public.stg_entregas_raw)
+  ) z
+),
       from public.entregas en
       where not exists (select 1 from public.stg_entregas_raw)
     ) z
