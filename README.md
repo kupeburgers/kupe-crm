@@ -1,4 +1,3 @@
- (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
 diff --git a/README.md b/README.md
 index 2524ffd6a34095c97bc34ccd21802282e8541b72..a68c25939a3c5b562c7ce9b221ea903cc925fdac 100644
 --- a/README.md
@@ -181,9 +180,3 @@ index 2524ffd6a34095c97bc34ccd21802282e8541b72..a68c25939a3c5b562c7ce9b221ea903c
 +from cron.job
 +order by jobid desc;
 +```
- 
-EOF
-)
-
-- Si el snapshot existe y las keys están bien, el dashboard carga datos desde Supabase.
-- Si falta algo, vuelve automáticamente al dataset embebido en `index.html`.
