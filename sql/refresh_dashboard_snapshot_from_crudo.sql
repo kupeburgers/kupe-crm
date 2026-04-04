@@ -184,30 +184,23 @@ declare
 begin
   perform public.ensure_dashboard_source_schema();
 
-
-with ent_src as (
-  select
-    fecha_txt,
-    total_txt
-  from (
+  with ent_src as (
     select
-      nullif(trim(coalesce(src.j->>'Fecha', src.j->>'fecha_raw', src.j->>'fecha', '')), '') as fecha_txt,
-      nullif(trim(coalesce(src.j->>'Total', src.j->>'total_raw', src.j->>'total', '')), '') as total_txt
+      fecha_txt,
+      total_txt
     from (
-      select to_jsonb(e) as j
-      from public.stg_entregas_raw e
-    ) src
-    union all
-    select
-      en.fecha::text,
-      en.total::text
-    from public.entregas en
-    where not exists (select 1 from public.stg_entregas_raw)
-  ) z
-)
-    
+      select
+        nullif(trim(coalesce(src.j->>'Fecha', src.j->>'fecha_raw', src.j->>'fecha', '')), '') as fecha_txt,
+        nullif(trim(coalesce(src.j->>'Total', src.j->>'total_raw', src.j->>'total', '')), '') as total_txt
+      from (
+        select to_jsonb(e) as j
+        from public.stg_entregas_raw e
+      ) src
+      union all
+      select
+        en.fecha::text,
         en.total::text
-    
+      from public.entregas en
       where not exists (select 1 from public.stg_entregas_raw)
     ) z
   )
@@ -226,30 +219,26 @@ with ent_src as (
   with
   ent_src as (
     select
-    fecha_txt,
-    nullif(trim(coalesce(telefono_txt,'')), '') as telefono_txt,
-    total_txt,
-    coalesce(estado_txt,'') as estado_txt
-  from (
-    select
-      nullif(trim(coalesce(src.j->>'Fecha', src.j->>'fecha_raw', src.j->>'fecha', '')), '') as fecha_txt,
-      nullif(trim(coalesce(src.j->>'Telefono', src.j->>'telefono', src.j->>'teléfono', '')), '') as telefono_txt,
-      nullif(trim(coalesce(src.j->>'Total', src.j->>'total_raw', src.j->>'total', '')), '') as total_txt,
-      nullif(trim(coalesce(src.j->>'Estado', src.j->>'estado', '')), '') as estado_txt
+      fecha_txt,
+      nullif(trim(coalesce(telefono_txt,'')), '') as telefono_txt,
+      total_txt,
+      coalesce(estado_txt,'') as estado_txt
     from (
-      select to_jsonb(e) as j
-      from public.stg_entregas_raw e
-    ) src
-    union all
-    select
-      en.fecha::text,
-      coalesce(en.telefono::text,''),
-      en.total::text,
-      coalesce(en.estado::text,'')
-    from public.entregas en
-    where not exists (select 1 from public.stg_entregas_raw)
-  ) z
-),
+      select
+        nullif(trim(coalesce(src.j->>'Fecha', src.j->>'fecha_raw', src.j->>'fecha', '')), '') as fecha_txt,
+        nullif(trim(coalesce(src.j->>'Telefono', src.j->>'telefono', src.j->>'teléfono', '')), '') as telefono_txt,
+        nullif(trim(coalesce(src.j->>'Total', src.j->>'total_raw', src.j->>'total', '')), '') as total_txt,
+        nullif(trim(coalesce(src.j->>'Estado', src.j->>'estado', '')), '') as estado_txt
+      from (
+        select to_jsonb(e) as j
+        from public.stg_entregas_raw e
+      ) src
+      union all
+      select
+        en.fecha::text,
+        coalesce(en.telefono::text,''),
+        en.total::text,
+        coalesce(en.estado::text,'')
       from public.entregas en
       where not exists (select 1 from public.stg_entregas_raw)
     ) z
