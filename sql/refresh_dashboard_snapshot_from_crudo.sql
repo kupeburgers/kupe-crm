@@ -19,26 +19,109 @@ using (true);
 
 create or replace function public.parse_num_ar(v text)
 returns numeric
-language sql
+language plpgsql
 immutable
 as $$
-  select case
-    when v is null or btrim(v) = '' then null
-    else replace(replace(replace(btrim(v), '$',''), '.', ''), ',', '.')::numeric
-  end
+declare
+  s text;
+  has_comma boolean;
+  has_dot boolean;
+  dec_sep text;
+begin
+  if v is null or btrim(v) = '' then
+    return null;
+  end if;
+
+  s := btrim(v);
+  s := regexp_replace(s, '[[:space:]\$€£]', '', 'g');
+  s := regexp_replace(s, '[^0-9,.\-]', '', 'g');
+
+  if s = '' then
+    return null;
+  end if;
+
+  has_comma := position(',' in s) > 0;
+  has_dot := position('.' in s) > 0;
+
+  if has_comma and has_dot then
+    -- Si trae ambos, el último separador suele ser el decimal.
+    if strpos(reverse(s), ',') < strpos(reverse(s), '.') then
+      dec_sep := ',';
+    else
+      dec_sep := '.';
+    end if;
+  elsif has_comma then
+    dec_sep := ',';
+  elsif has_dot then
+    dec_sep := '.';
+  else
+    dec_sep := null;
+  end if;
+
+  if dec_sep = ',' then
+    s := replace(s, '.', '');
+    s := replace(s, ',', '.');
+  elsif dec_sep = '.' then
+    s := replace(s, ',', '');
+  else
+    s := replace(replace(s, '.', ''), ',', '');
+  end if;
+
+  if s !~ '^-?[0-9]+(\.[0-9]+)?$' then
+    return null;
+  end if;
+
+  return s::numeric;
+end;
 $$;
 
 create or replace function public.parse_date_mixed(v text)
 returns date
-language sql
+language plpgsql
 immutable
 as $$
-  select case
-    when v is null or btrim(v) = '' then null
-    when btrim(v) ~ '^[0-9]{5}$' then (date '1899-12-30' + btrim(v)::int)
-    when btrim(v) ~ '^[0-9]{2}/[0-9]{2}/[0-9]{4}$' then to_date(btrim(v), 'DD/MM/YYYY')
-    else null
-  end
+declare
+  s text;
+  d date;
+begin
+  if v is null or btrim(v) = '' then
+    return null;
+  end if;
+
+  s := btrim(v);
+
+  -- Excel serial date (admite 5-6 dígitos).
+  if s ~ '^[0-9]{5,6}$' then
+    return date '1899-12-30' + s::int;
+  end if;
+
+  if s ~ '^[0-9]{2}/[0-9]{2}/[0-9]{4}$' then
+    d := to_date(s, 'DD/MM/YYYY');
+    if to_char(d, 'DD/MM/YYYY') = s then
+      return d;
+    end if;
+    return null;
+  end if;
+
+  if s ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' then
+    d := to_date(s, 'YYYY-MM-DD');
+    if to_char(d, 'YYYY-MM-DD') = s then
+      return d;
+    end if;
+    return null;
+  end if;
+
+  -- Timestamp ISO: tomamos solo fecha.
+  if s ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}[ T]' then
+    s := substr(s, 1, 10);
+    d := to_date(s, 'YYYY-MM-DD');
+    if to_char(d, 'YYYY-MM-DD') = s then
+      return d;
+    end if;
+  end if;
+
+  return null;
+end;
 $$;
 
 
@@ -96,8 +179,44 @@ language plpgsql
 as $$
 declare
   v_new_id bigint;
+  v_bad_dates int;
+  v_bad_totals int;
 begin
   perform public.ensure_dashboard_source_schema();
+
+  with ent_src as (
+    select
+      coalesce(fecha_raw, fecha_txt) as fecha_txt,
+      coalesce(total_raw, total_txt) as total_txt
+    from (
+      select
+        e.fecha_raw,
+        e.total_raw,
+        null::text as fecha_txt,
+        null::text as total_txt
+      from public.stg_entregas_raw e
+      union all
+      select
+        null,
+        null,
+        en.fecha::text,
+        en.total::text
+      from public.entregas en
+      where not exists (select 1 from public.stg_entregas_raw)
+    ) z
+  )
+  select
+    count(*) filter (where nullif(trim(fecha_txt),'') is not null and public.parse_date_mixed(fecha_txt) is null),
+    count(*) filter (where nullif(trim(total_txt),'') is not null and public.parse_num_ar(total_txt) is null)
+  into v_bad_dates, v_bad_totals
+  from ent_src;
+
+  if v_bad_dates > 0 or v_bad_totals > 0 then
+    raise exception
+      'refresh_dashboard_snapshot_from_crudo cancelado: % fechas inválidas y % importes inválidos en origen',
+      v_bad_dates, v_bad_totals;
+  end if;
+
   with
   ent_src as (
     select
