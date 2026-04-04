@@ -184,8 +184,7 @@ declare
 begin
   perform public.ensure_dashboard_source_schema();
 
-  with ent_src as (
-    select
+
 with ent_src as (
   select
     fecha_txt,
@@ -206,9 +205,9 @@ with ent_src as (
     where not exists (select 1 from public.stg_entregas_raw)
   ) z
 )
-        en.fecha::text,
+    
         en.total::text
-      from public.entregas en
+    
       where not exists (select 1 from public.stg_entregas_raw)
     ) z
   )
@@ -227,8 +226,6 @@ with ent_src as (
   with
   ent_src as (
     select
-ent_src as (
-  select
     fecha_txt,
     nullif(trim(coalesce(telefono_txt,'')), '') as telefono_txt,
     total_txt,
