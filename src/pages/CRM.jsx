@@ -310,10 +310,29 @@ function TabHoy({ overrides, setOverrides }) {
                 {/* NAME */}
                 <div className="card-nombre">{c.nombre || <span style={{ color: '#ccc' }}>Sin nombre</span>}</div>
 
+                {/* PERFIL DE PRODUCTO */}
+                {c.producto_favorito && (
+                  <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 6, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: 12, color: '#374151', background: '#f3f4f6', borderRadius: 6, padding: '2px 8px', fontWeight: 600 }}>
+                      🍔 {c.producto_favorito.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())}
+                    </span>
+                    {c.pan_favorito && (
+                      <span style={{ fontSize: 12, color: '#6b7280', background: '#f9fafb', borderRadius: 6, padding: '2px 8px' }}>
+                        🍞 {c.pan_favorito}
+                      </span>
+                    )}
+                    {c.hora_habitual != null && (
+                      <span style={{ fontSize: 12, color: '#6b7280', background: '#f9fafb', borderRadius: 6, padding: '2px 8px' }}>
+                        🕐 pide ~{c.hora_habitual}hs
+                      </span>
+                    )}
+                  </div>
+                )}
+
                 {/* SECONDARY INFO */}
                 <div className="card-info">
                   <span>📞 {c.telefono}</span>
-                  <span>{c.frecuencia} ped.</span>
+                  <span>{c.total_pedidos_historial ?? c.frecuencia} ped.</span>
                   <span>{fmt(c.ticket_promedio)} tk</span>
                   <span>{fmt(c.valor_total)} total</span>
                 </div>
@@ -638,8 +657,26 @@ function TabClientes({ segs }) {
               <button style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: '#aaa' }} onClick={() => setFichaIdx(null)}>✕</button>
             </div>
           </div>
+          {/* PERFIL DE PRODUCTO */}
+          {fichaCliente.producto_favorito && (
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+              <span style={{ fontSize: 13, background: '#fef3c7', color: '#92400e', borderRadius: 8, padding: '4px 12px', fontWeight: 600 }}>
+                🍔 {fichaCliente.producto_favorito.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())}
+              </span>
+              {fichaCliente.pan_favorito && (
+                <span style={{ fontSize: 13, background: '#f3f4f6', color: '#6b7280', borderRadius: 8, padding: '4px 12px' }}>
+                  🍞 {fichaCliente.pan_favorito}
+                </span>
+              )}
+              {fichaCliente.hora_habitual != null && (
+                <span style={{ fontSize: 13, background: '#eff6ff', color: '#1d4ed8', borderRadius: 8, padding: '4px 12px' }}>
+                  🕐 Pide a las ~{fichaCliente.hora_habitual}hs
+                </span>
+              )}
+            </div>
+          )}
           <div className="ficha-grid">
-            <div className="ficha-stat"><strong>{fichaCliente.frecuencia}</strong>Pedidos</div>
+            <div className="ficha-stat"><strong>{fichaCliente.total_pedidos_historial ?? fichaCliente.frecuencia}</strong>Pedidos hist.</div>
             <div className="ficha-stat"><strong>{fmt(fichaCliente.valor_total)}</strong>Revenue total</div>
             <div className="ficha-stat"><strong>{fmt(fichaCliente.ticket_promedio)}</strong>Ticket prom.</div>
             <div className="ficha-stat"><strong>{fichaCliente.recencia_dias}d</strong>Recencia</div>
