@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useSnapshot, useClientes, useTop20, useGestionesHoy, iniciarContacto, cerrarGestion } from '../hooks/useSnapshot'
+import { useSnapshot, useClientes, useTop20, useGestionesHoy, useGestionesRecientes, useEnRiesgoUrgente, iniciarContacto, cerrarGestion } from '../hooks/useSnapshot'
 import { getPlantillas, savePlantillas, buildMessage, PLANTILLAS_DEFAULT } from '../config/templates'
 
 const fmt = n => n >= 1_000_000 ? `$${(n/1_000_000).toFixed(1)}M` : n >= 1_000 ? `$${(n/1_000).toFixed(0)}K` : `$${Math.round(n)}`
@@ -46,14 +46,23 @@ function TabHoy() {
   const [filtro, setFiltro]       = useState('sin_contactar')
   const [modalInfo, setModalInfo] = useState(null) // null | { cliente, texto }
 
+  const recientes     = useGestionesRecientes(2)   // teléfonos contactados ayer (cooldown)
+  const enRiesgo      = useEnRiesgoUrgente(70)       // En riesgo con score > 70
+
   const loading = loadingCli || gestionesDB === null
 
   // Estado efectivo = DB (persistido) sobreescrito por acciones de esta sesión
-  // Sin useEffect: se fusiona en cada render, sin race condition
-  const getEstado  = tel => overrides[tel]?.estado  ?? gestionesDB?.[tel]?.estado  ?? null
-  const getGestionId = tel => overrides[tel]?.id    ?? gestionesDB?.[tel]?.id      ?? null
+  const getEstado    = tel => overrides[tel]?.estado ?? gestionesDB?.[tel]?.estado ?? null
+  const getGestionId = tel => overrides[tel]?.id     ?? gestionesDB?.[tel]?.id     ?? null
 
-  // Bonus de urgencia por recencia (solo afecta al sort interno de pendientes)
+  // Estado con cooldown: si fue contactado ayer y hoy no tiene gestión → 'contactado_ayer'
+  const getEstadoEfectivo = tel => {
+    const est = getEstado(tel)
+    if (est === null && recientes.has(String(tel))) return 'contactado_ayer'
+    return est
+  }
+
+  // Bonus de urgencia por recencia (solo afecta sort interno de pendientes frescos)
   function urgencyBonus(dias) {
     if (dias >= 50) return 15
     if (dias >= 35) return 8
@@ -61,13 +70,14 @@ function TabHoy() {
     return 0
   }
 
-  // Orden: pendientes primero → contactados → cerrados
-  // Dentro de pendientes: score + bonus_recencia (combina calidad + urgencia)
+  // Prioridad extendida: contactado_ayer va después de cerrados
+  const PRIORIDAD_EXT = { ...PRIORIDAD_ESTADO, contactado_ayer: 3 }
+
+  // Orden: frescos → contactados hoy → cerrados → contactados ayer
   const clientesOrdenados = [...clientes].sort((a, b) => {
-    const pa = PRIORIDAD_ESTADO[getEstado(a.telefono)] ?? 0
-    const pb = PRIORIDAD_ESTADO[getEstado(b.telefono)] ?? 0
+    const pa = PRIORIDAD_EXT[getEstadoEfectivo(a.telefono)] ?? 0
+    const pb = PRIORIDAD_EXT[getEstadoEfectivo(b.telefono)] ?? 0
     if (pa !== pb) return pa - pb
-    // Para pendientes (estado null), combinar score + urgencia por días
     if (pa === 0) {
       const sa = Number(a.score_comercial || 0) + urgencyBonus(a.recencia_dias)
       const sb = Number(b.score_comercial || 0) + urgencyBonus(b.recencia_dias)
@@ -76,10 +86,16 @@ function TabHoy() {
     return Number(b.score_comercial) - Number(a.score_comercial)
   })
 
-  // Conteos para la barra de filtros
+  // Resumen del día (desde estado actual)
+  const totalContactados = clientes.filter(c => getEstado(c.telefono) !== null).length
+  const totalCompraron   = clientes.filter(c => getEstado(c.telefono) === 'compro').length
+  const totalRespondieron= clientes.filter(c => getEstado(c.telefono) === 'respondio').length
+  const tasaConversion   = totalContactados > 0 ? Math.round((totalCompraron / totalContactados) * 100) : 0
+
+  // Conteos para la barra de filtros (usa estado real de hoy, sin cooldown)
   const conteos = {
     todos:         clientes.length,
-    sin_contactar: clientes.filter(c => getEstado(c.telefono) === null).length,
+    sin_contactar: clientes.filter(c => getEstadoEfectivo(c.telefono) === null || getEstadoEfectivo(c.telefono) === 'contactado_ayer').length,
     pendiente:     clientes.filter(c => getEstado(c.telefono) === 'pendiente').length,
     compro:        clientes.filter(c => getEstado(c.telefono) === 'compro').length,
     respondio:     clientes.filter(c => getEstado(c.telefono) === 'respondio').length,
@@ -176,6 +192,49 @@ function TabHoy() {
         </span>
       </div>
 
+      {/* RESUMEN DEL DÍA */}
+      {totalContactados > 0 && (
+        <div className="resumen-dia">
+          <span className="resumen-stat"><strong>{totalContactados}</strong> contactados</span>
+          <span className="resumen-stat"><strong>{totalCompraron}</strong> compraron</span>
+          {totalRespondieron > 0 && (
+            <span className="resumen-stat"><strong>{totalRespondieron}</strong> respondieron</span>
+          )}
+          <span className="resumen-conversion" style={{ color: tasaConversion >= 30 ? '#16a34a' : tasaConversion >= 15 ? '#d97700' : '#6b7280' }}>
+            {tasaConversion}% conversión
+          </span>
+        </div>
+      )}
+
+      {/* ALERTA EN RIESGO URGENTE */}
+      {enRiesgo.length > 0 && (
+        <div className="alerta-riesgo">
+          <div className="alerta-riesgo-title">
+            ⚠️ {enRiesgo.length} clientes En riesgo con score alto — última oportunidad antes de perderlos
+          </div>
+          <div className="alerta-riesgo-list">
+            {enRiesgo.slice(0, 4).map(c => (
+              <div key={c.telefono} className="alerta-riesgo-item">
+                <span>{c.nombre || c.telefono}</span>
+                <span style={{ color: '#9ca3af' }}>{c.recencia_dias}d · score {c.score_comercial}</span>
+                <button
+                  className="btn-accion"
+                  style={{ background: '#ea580c', fontSize: 11, padding: '4px 10px' }}
+                  onClick={() => handleAbrirModal(c)}
+                >
+                  Contactar
+                </button>
+              </div>
+            ))}
+            {enRiesgo.length > 4 && (
+              <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 4 }}>
+                + {enRiesgo.length - 4} más en la lista "Todos los clientes"
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* BARRA DE FILTROS CON CONTEOS */}
       <div className="seg-filter-row" style={{ marginBottom: 16 }}>
         {FILTROS.map(f => (
@@ -200,6 +259,8 @@ function TabHoy() {
             const estado = getEstado(c.telefono)
             const res    = RESULTADO_LABEL[estado]
 
+            const estadoEfectivo = getEstadoEfectivo(c.telefono)
+
             // Card border / background class
             const cerrado   = res != null
             const urgenciaCard = c.recencia_dias >= 50 ? 'urgencia-alta'
@@ -209,7 +270,9 @@ function TabHoy() {
               ? `cliente-card estado-${estado}`
               : estado === 'pendiente'
                 ? 'cliente-card estado-pendiente'
-                : `cliente-card ${urgenciaCard}`   // sin_contactar: color por días
+                : estadoEfectivo === 'contactado_ayer'
+                  ? 'cliente-card estado-no_compro'   // visual apagado
+                  : `cliente-card ${urgenciaCard}`
 
             // Days urgency class (badge dentro de la card)
             const diasClass = c.recencia_dias > 60 ? 'urgente' : c.recencia_dias > 30 ? 'medio' : 'ok'
@@ -240,10 +303,22 @@ function TabHoy() {
                 </div>
 
                 {/* ACTIONS */}
-                {estado === null && (
+                {estado === null && estadoEfectivo !== 'contactado_ayer' && (
                   <button className="btn-contactar" onClick={() => handleAbrirModal(c)}>
                     💬 Contactar por WhatsApp
                   </button>
+                )}
+
+                {estadoEfectivo === 'contactado_ayer' && (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                    <span className="badge-ayer">📅 Contactado ayer</span>
+                    <button
+                      style={{ fontSize: 11, padding: '4px 10px', background: 'none', border: '1px solid #d1d5db', borderRadius: 6, color: '#6b7280', cursor: 'pointer' }}
+                      onClick={() => handleAbrirModal(c)}
+                    >
+                      Intentar igual
+                    </button>
+                  </div>
                 )}
 
                 {estado === 'cargando' && (

@@ -90,6 +90,41 @@ export function useSnapshot() {
   return { data, loading, error }
 }
 
+// Teléfonos contactados (con resultado cerrado) en los últimos N días ANTES de hoy
+// Usado para el cooldown: si ya lo llamaste ayer, baja en prioridad
+export function useGestionesRecientes(dias = 2) {
+  const [recientes, setRecientes] = useState(new Set())
+  useEffect(() => {
+    const desde = new Date()
+    desde.setDate(desde.getDate() - (dias - 1))
+    const desdeStr = desde.toISOString().split('T')[0]
+    const hoy = new Date().toISOString().split('T')[0]
+    fetch(
+      `${SUPABASE_URL}/rest/v1/gestion_comercial?select=telefono&fecha_contacto=gte.${desdeStr}&fecha_contacto=lt.${hoy}&resultado=not.is.null`,
+      { headers: HEADERS }
+    )
+      .then(r => r.json())
+      .then(rows => setRecientes(new Set((rows || []).map(r => String(r.telefono)))))
+      .catch(() => setRecientes(new Set()))
+  }, [])
+  return recientes
+}
+
+// Clientes "En riesgo" con score alto: última oportunidad antes de perderlos
+export function useEnRiesgoUrgente(scoreMin = 70) {
+  const [alertas, setAlertas] = useState([])
+  useEffect(() => {
+    fetch(
+      `${SUPABASE_URL}/rest/v1/clientes?select=nombre,telefono,recencia_dias,score_comercial&segmento=eq.${encodeURIComponent('En riesgo')}&score_comercial=gt.${scoreMin}&order=score_comercial.desc&limit=8`,
+      { headers: HEADERS }
+    )
+      .then(r => r.json())
+      .then(rows => setAlertas(rows || []))
+      .catch(() => setAlertas([]))
+  }, [])
+  return alertas
+}
+
 // CRM: clientes directos de la tabla con paginación
 export function useClientes(segmento, page = 0, pageSize = 50) {
   const [clientes, setClientes] = useState([])
