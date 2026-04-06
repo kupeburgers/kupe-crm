@@ -464,7 +464,9 @@ function TabClientes({ segs }) {
               <span className="seg-badge">Score {s.score_prom}</span>
               <span className="seg-badge">r30 {s.recompra_30d}%</span>
             </div>
-            {s.intervalo_prom > 0 && <div className="seg-mov">c/ {s.intervalo_prom}d</div>}
+            {s.intervalo_prom > 0 && (
+              <div className="seg-mov">🔁 compran cada {s.intervalo_prom} días</div>
+            )}
           </div>
         ))}
       </div>
