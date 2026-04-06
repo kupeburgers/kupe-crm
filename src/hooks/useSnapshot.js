@@ -3,21 +3,21 @@ import { SUPABASE_URL, SUPABASE_ANON } from '../config'
 
 const HEADERS = { apikey: SUPABASE_ANON, Authorization: `Bearer ${SUPABASE_ANON}` }
 
-// Gestiones de hoy desde DB → mapa { telefono: { id, estado } }
+// Gestiones de hoy desde DB → mapa { telefono: { id, estado, hora } }
 export function useGestionesHoy() {
   const [gestiones, setGestiones] = useState(null) // null = cargando
 
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0]
     fetch(
-      `${SUPABASE_URL}/rest/v1/gestion_comercial?select=id,telefono,resultado&fecha_contacto=eq.${today}&order=id.asc`,
+      `${SUPABASE_URL}/rest/v1/gestion_comercial?select=id,telefono,resultado,created_at&fecha_contacto=eq.${today}&order=id.asc`,
       { headers: HEADERS }
     )
       .then(r => r.json())
       .then(rows => {
         const map = {}
         ;(rows || []).forEach(r => {
-          map[r.telefono] = { id: r.id, estado: r.resultado ?? 'pendiente' }
+          map[r.telefono] = { id: r.id, estado: r.resultado ?? 'pendiente', hora: r.created_at }
         })
         setGestiones(map)
       })
@@ -25,6 +25,15 @@ export function useGestionesHoy() {
   }, [])
 
   return gestiones // null mientras carga, objeto cuando listo
+}
+
+// Elimina una gestión → el cliente vuelve a aparecer como no contactado
+export async function resetGestion(id) {
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/gestion_comercial?id=eq.${id}`,
+    { method: 'DELETE', headers: HEADERS }
+  )
+  if (!res.ok) throw new Error('reset falló')
 }
 
 // Top 20 a contactar hoy: Tibio/Enfriando/En riesgo, recencia > 7d, score DESC

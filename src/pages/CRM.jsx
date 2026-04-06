@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useSnapshot, useClientes, useTop20, useGestionesHoy, useGestionesRecientes, useEnRiesgoUrgente, iniciarContacto, cerrarGestion } from '../hooks/useSnapshot'
+import { useSnapshot, useClientes, useTop20, useGestionesHoy, useGestionesRecientes, useEnRiesgoUrgente, iniciarContacto, cerrarGestion, resetGestion } from '../hooks/useSnapshot'
 import { getPlantillas, savePlantillas, buildMessage, PLANTILLAS_DEFAULT } from '../config/templates'
 
 const fmt = n => n >= 1_000_000 ? `$${(n/1_000_000).toFixed(1)}M` : n >= 1_000 ? `$${(n/1_000).toFixed(0)}K` : `$${Math.round(n)}`
@@ -55,6 +55,11 @@ function TabHoy() {
   // Estado efectivo = DB (persistido) sobreescrito por acciones de esta sesión
   const getEstado    = tel => overrides[tel]?.estado ?? gestionesDB?.[tel]?.estado ?? null
   const getGestionId = tel => overrides[tel]?.id     ?? gestionesDB?.[tel]?.id     ?? null
+  const getHora      = tel => {
+    const raw = overrides[tel]?.hora ?? gestionesDB?.[tel]?.hora ?? null
+    if (!raw) return null
+    return new Date(raw).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
+  }
 
   // Estado con cooldown: si fue contactado ayer y hoy no tiene gestión → 'contactado_ayer'
   const getEstadoEfectivo = tel => {
@@ -124,6 +129,17 @@ function TabHoy() {
       // Si falla la RPC no abrimos WhatsApp ni actualizamos estado
     }
     setModalInfo(null)
+  }
+
+  async function handleReset(telefono) {
+    const id = getGestionId(telefono)
+    if (!id) return
+    setCambiando(s => { const n = new Set(s); n.delete(telefono); return n })
+    try {
+      await resetGestion(id)
+      // Forzar estado null: el cliente vuelve a la lista como no contactado
+      setOverrides(o => ({ ...o, [telefono]: { id: null, estado: null, hora: null } }))
+    } catch { /* silencioso — no cambia nada si falla */ }
   }
 
   async function handleResultado(telefono, resultado) {
@@ -340,23 +356,37 @@ function TabHoy() {
                 )}
 
                 {res && !cambiando.has(c.telefono) && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div className={`result-badge ${estado}`} style={{ flex: 1 }}>
-                      {res.icon} {res.texto}
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div className={`result-badge ${estado}`} style={{ flex: 1 }}>
+                        {res.icon} {res.texto}
+                      </div>
+                      <button
+                        onClick={() => setCambiando(s => new Set([...s, c.telefono]))}
+                        style={{ fontSize: 11, padding: '4px 9px', background: 'none', border: '1px solid #d1d5db', borderRadius: 6, color: '#6b7280', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                      >
+                        ✏️ Cambiar
+                      </button>
                     </div>
-                    <button
-                      onClick={() => setCambiando(s => new Set([...s, c.telefono]))}
-                      style={{ fontSize: 11, padding: '4px 9px', background: 'none', border: '1px solid #d1d5db', borderRadius: 6, color: '#6b7280', cursor: 'pointer', whiteSpace: 'nowrap' }}
-                    >
-                      ✏️ Cambiar
-                    </button>
+                    {getHora(c.telefono) && (
+                      <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 5 }}>
+                        🕐 Contactado a las {getHora(c.telefono)}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* estado pendiente (contactado sin resultado) también muestra hora */}
+                {estado === 'pendiente' && getHora(c.telefono) && (
+                  <div style={{ fontSize: 11, color: '#9ca3af', marginTop: -8, marginBottom: 4 }}>
+                    🕐 Contactado a las {getHora(c.telefono)}
                   </div>
                 )}
 
                 {res && cambiando.has(c.telefono) && (
                   <div>
                     <div style={{ fontSize: 11, color: '#9ca3af', marginBottom: 6 }}>
-                      Estaba: {res.icon} {res.texto} — elegí el nuevo resultado:
+                      Estaba: {res.icon} {res.texto} — ¿qué pasó en realidad?
                     </div>
                     <div className="btn-resultado-grid">
                       {Object.entries(RESULTADO_LABEL).map(([key, val]) => (
@@ -369,12 +399,20 @@ function TabHoy() {
                         </button>
                       ))}
                     </div>
-                    <button
-                      onClick={() => setCambiando(s => { const n = new Set(s); n.delete(c.telefono); return n })}
-                      style={{ marginTop: 6, fontSize: 11, padding: '4px 0', background: 'none', border: 'none', color: '#9ca3af', cursor: 'pointer' }}
-                    >
-                      Cancelar
-                    </button>
+                    <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                      <button
+                        onClick={() => handleReset(c.telefono)}
+                        style={{ flex: 1, fontSize: 12, padding: '7px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 7, color: '#dc2626', cursor: 'pointer', fontWeight: 600 }}
+                      >
+                        ↩️ No lo contacté — quitar
+                      </button>
+                      <button
+                        onClick={() => setCambiando(s => { const n = new Set(s); n.delete(c.telefono); return n })}
+                        style={{ fontSize: 12, padding: '7px 12px', background: 'none', border: '1px solid #e5e7eb', borderRadius: 7, color: '#9ca3af', cursor: 'pointer' }}
+                      >
+                        Cancelar
+                      </button>
+                    </div>
                   </div>
                 )}
 
@@ -460,6 +498,67 @@ function TabPlantillas() {
           {savedMsg || '💾 Guardar plantillas'}
         </button>
       </div>
+    </div>
+  )
+}
+
+// ── Tab Acciones ───────────────────────────────────────────────────────────────
+function TabAcciones() {
+  const { clientes } = useTop20()
+  const gestionesDB  = useGestionesHoy()
+
+  if (!gestionesDB) return <div className="loading">Cargando acciones...</div>
+
+  const acciones = Object.entries(gestionesDB)
+    .map(([tel, g]) => {
+      const cli = clientes.find(c => String(c.telefono) === String(tel))
+      return { telefono: tel, ...g, nombre: cli?.nombre || tel, segmento: cli?.segmento }
+    })
+    .sort((a, b) => new Date(b.hora || 0) - new Date(a.hora || 0))
+
+  if (acciones.length === 0) return (
+    <div style={{ padding: '48px 0', textAlign: 'center', color: '#9ca3af', fontSize: 14 }}>
+      Todavía no contactaste a nadie hoy
+    </div>
+  )
+
+  const compraron   = acciones.filter(a => a.estado === 'compro').length
+  const respondieron= acciones.filter(a => a.estado === 'respondio').length
+  const sinResp     = acciones.filter(a => a.estado === 'no_respondio').length
+  const pendientes  = acciones.filter(a => a.estado === 'pendiente').length
+
+  return (
+    <div className="section">
+      {/* Mini resumen */}
+      <div className="resumen-dia" style={{ marginBottom: 16 }}>
+        <span className="resumen-stat"><strong>{acciones.length}</strong> contactados</span>
+        {compraron > 0   && <span className="resumen-stat"><strong>{compraron}</strong> compraron</span>}
+        {respondieron > 0 && <span className="resumen-stat"><strong>{respondieron}</strong> respondieron</span>}
+        {sinResp > 0     && <span className="resumen-stat"><strong>{sinResp}</strong> sin respuesta</span>}
+        {pendientes > 0  && <span className="resumen-stat"><strong>{pendientes}</strong> sin resultado</span>}
+      </div>
+
+      {/* Lista */}
+      {acciones.map(a => {
+        const res  = RESULTADO_LABEL[a.estado]
+        const hora = a.hora ? new Date(a.hora).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }) : null
+        return (
+          <div key={a.telefono} className="accion-row">
+            <div className="accion-info">
+              <span className="accion-nombre">{a.nombre || a.telefono}</span>
+              {a.segmento && (
+                <span className="seg-tag" style={{ background: SEG_COLORS[a.segmento] || '#666', fontSize: 10, padding: '1px 7px' }}>
+                  {a.segmento}
+                </span>
+              )}
+            </div>
+            {hora && <span className="accion-hora">🕐 {hora}</span>}
+            <div className={`result-badge ${a.estado}`} style={{ minWidth: 110, justifyContent: 'center' }}>
+              {res ? `${res.icon} ${res.texto}` : '⏳ Sin resultado'}
+            </div>
+          </div>
+        )
+      })}
     </div>
   )
 }
@@ -622,7 +721,8 @@ export default function CRM() {
       <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
         {[
           { key: 'hoy',        label: '📋 Hoy'              },
-          { key: 'crm',        label: '👥 Todos los clientes'},
+          { key: 'acciones',   label: '✅ Acciones'          },
+          { key: 'crm',        label: '👥 Clientes'          },
           { key: 'plantillas', label: '✏️ Plantillas'        },
         ].map(t => (
           <button key={t.key}
@@ -636,6 +736,7 @@ export default function CRM() {
       </div>
 
       {vista === 'hoy'        && <TabHoy />}
+      {vista === 'acciones'   && <TabAcciones />}
       {vista === 'crm'        && <TabClientes segs={segs} />}
       {vista === 'plantillas' && <TabPlantillas />}
     </div>

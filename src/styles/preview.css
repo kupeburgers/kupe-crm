@@ -289,6 +289,19 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 }
 .alerta-riesgo-item span:first-child { font-weight: 600; flex: 1; }
 
+/* ── TAB ACCIONES ────────────────────────────────────── */
+.accion-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 0;
+  border-bottom: 1px solid #f3f4f6;
+  flex-wrap: wrap;
+}
+.accion-info { display: flex; align-items: center; gap: 7px; flex: 1; min-width: 0; }
+.accion-nombre { font-weight: 600; font-size: 14px; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.accion-hora { font-size: 12px; color: #9ca3af; white-space: nowrap; }
+
 /* ── BADGE AYER (cooldown) ───────────────────────────── */
 .badge-ayer {
   display: inline-block;
