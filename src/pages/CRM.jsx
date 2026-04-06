@@ -44,7 +44,8 @@ function TabHoy() {
   const gestionesDB    = useGestionesHoy()   // null = cargando, {} = listo (puede estar vacío)
   const [overrides, setOverrides] = useState({}) // acciones de esta sesión
   const [filtro, setFiltro]       = useState('sin_contactar')
-  const [modalInfo, setModalInfo] = useState(null) // null | { cliente, texto }
+  const [modalInfo, setModalInfo] = useState(null)   // null | { cliente, texto }
+  const [cambiando, setCambiando] = useState(new Set()) // teléfonos en modo "cambiar resultado"
 
   const recientes     = useGestionesRecientes(2)   // teléfonos contactados ayer (cooldown)
   const enRiesgo      = useEnRiesgoUrgente(70)       // En riesgo con score > 70
@@ -338,9 +339,42 @@ function TabHoy() {
                   <div className="card-loading">Guardando resultado...</div>
                 )}
 
-                {res && (
-                  <div className={`result-badge ${estado}`}>
-                    {res.icon} {res.texto}
+                {res && !cambiando.has(c.telefono) && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div className={`result-badge ${estado}`} style={{ flex: 1 }}>
+                      {res.icon} {res.texto}
+                    </div>
+                    <button
+                      onClick={() => setCambiando(s => new Set([...s, c.telefono]))}
+                      style={{ fontSize: 11, padding: '4px 9px', background: 'none', border: '1px solid #d1d5db', borderRadius: 6, color: '#6b7280', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                    >
+                      ✏️ Cambiar
+                    </button>
+                  </div>
+                )}
+
+                {res && cambiando.has(c.telefono) && (
+                  <div>
+                    <div style={{ fontSize: 11, color: '#9ca3af', marginBottom: 6 }}>
+                      Estaba: {res.icon} {res.texto} — elegí el nuevo resultado:
+                    </div>
+                    <div className="btn-resultado-grid">
+                      {Object.entries(RESULTADO_LABEL).map(([key, val]) => (
+                        <button key={key} className={`btn-res ${key}`}
+                          onClick={() => {
+                            setCambiando(s => { const n = new Set(s); n.delete(c.telefono); return n })
+                            handleResultado(c.telefono, key)
+                          }}>
+                          {val.icon} {val.texto}
+                        </button>
+                      ))}
+                    </div>
+                    <button
+                      onClick={() => setCambiando(s => { const n = new Set(s); n.delete(c.telefono); return n })}
+                      style={{ marginTop: 6, fontSize: 11, padding: '4px 0', background: 'none', border: 'none', color: '#9ca3af', cursor: 'pointer' }}
+                    >
+                      Cancelar
+                    </button>
                   </div>
                 )}
 
