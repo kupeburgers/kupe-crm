@@ -39,10 +39,9 @@ function matchFiltro(estado, filtro) {
   return estado === filtro
 }
 
-function TabHoy() {
+function TabHoy({ overrides, setOverrides }) {
   const { clientes, loading: loadingCli } = useTop20()
   const gestionesDB    = useGestionesHoy()   // null = cargando, {} = listo (puede estar vacío)
-  const [overrides, setOverrides] = useState({}) // acciones de esta sesión
   const [filtro, setFiltro]       = useState('sin_contactar')
   const [modalInfo, setModalInfo] = useState(null)   // null | { cliente, texto }
   const [cambiando, setCambiando] = useState(new Set()) // teléfonos en modo "cambiar resultado"
@@ -503,16 +502,21 @@ function TabPlantillas() {
 }
 
 // ── Tab Acciones ───────────────────────────────────────────────────────────────
-function TabAcciones() {
+function TabAcciones({ overrides }) {
   const { clientes } = useTop20()
   const gestionesDB  = useGestionesHoy()
 
   if (!gestionesDB) return <div className="loading">Cargando acciones...</div>
 
   const acciones = Object.entries(gestionesDB)
+    // Si en esta sesión se hizo reset (estado === null), excluir de acciones
+    .filter(([tel]) => overrides[tel]?.estado !== null || !(tel in (overrides || {})))
     .map(([tel, g]) => {
+      // Usar el estado del override si existe (ej: resultado cambiado en sesión)
+      const estadoFinal = overrides[tel]?.estado !== undefined ? overrides[tel].estado : g.estado
+      const horaFinal   = overrides[tel]?.hora   !== undefined ? overrides[tel].hora   : g.hora
       const cli = clientes.find(c => String(c.telefono) === String(tel))
-      return { telefono: tel, ...g, nombre: cli?.nombre || tel, segmento: cli?.segmento }
+      return { telefono: tel, id: g.id, estado: estadoFinal, hora: horaFinal, nombre: cli?.nombre || tel, segmento: cli?.segmento }
     })
     .sort((a, b) => new Date(b.hora || 0) - new Date(a.hora || 0))
 
@@ -707,7 +711,8 @@ function TabClientes({ segs }) {
 // ── CRM principal ───────────────────────────────────────────────────────────────
 export default function CRM() {
   const { data, loading: loadingSnap } = useSnapshot()
-  const [vista, setVista] = useState('hoy')
+  const [vista, setVista]   = useState('hoy')
+  const [overrides, setOverrides] = useState({}) // compartido entre TabHoy y TabAcciones
 
   const segs = data?.SEGS || data?.['payload->SEGS'] || []
 
@@ -735,8 +740,8 @@ export default function CRM() {
         ))}
       </div>
 
-      {vista === 'hoy'        && <TabHoy />}
-      {vista === 'acciones'   && <TabAcciones />}
+      {vista === 'hoy'        && <TabHoy overrides={overrides} setOverrides={setOverrides} />}
+      {vista === 'acciones'   && <TabAcciones overrides={overrides} />}
       {vista === 'crm'        && <TabClientes segs={segs} />}
       {vista === 'plantillas' && <TabPlantillas />}
     </div>
