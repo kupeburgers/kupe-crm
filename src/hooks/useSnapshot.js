@@ -1,0 +1,123 @@
+import { useState, useEffect } from 'react'
+import { SUPABASE_URL, SUPABASE_ANON } from '../config'
+
+const HEADERS = { apikey: SUPABASE_ANON, Authorization: `Bearer ${SUPABASE_ANON}` }
+
+// Gestiones de hoy desde DB → mapa { telefono: { id, estado } }
+export function useGestionesHoy() {
+  const [gestiones, setGestiones] = useState(null) // null = cargando
+
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0]
+    fetch(
+      `${SUPABASE_URL}/rest/v1/gestion_comercial?select=id,telefono,resultado&fecha_contacto=eq.${today}&order=id.asc`,
+      { headers: HEADERS }
+    )
+      .then(r => r.json())
+      .then(rows => {
+        const map = {}
+        ;(rows || []).forEach(r => {
+          map[r.telefono] = { id: r.id, estado: r.resultado ?? 'pendiente' }
+        })
+        setGestiones(map)
+      })
+      .catch(() => setGestiones({}))
+  }, [])
+
+  return gestiones // null mientras carga, objeto cuando listo
+}
+
+// Top 20 a contactar hoy: Tibio/Enfriando/En riesgo, recencia > 7d, score DESC
+export function useTop20() {
+  const [clientes, setClientes] = useState([])
+  const [loading, setLoading]   = useState(true)
+
+  useEffect(() => {
+    fetch(
+      `${SUPABASE_URL}/rest/v1/clientes?select=nombre,telefono,recencia_dias,frecuencia,ticket_promedio,valor_total,score_comercial,segmento,ultima_compra&recencia_dias=gt.7&segmento=neq.Perdido&order=score_comercial.desc&limit=20`,
+      { headers: HEADERS }
+    )
+      .then(r => r.json())
+      .then(rows => setClientes(rows || []))
+      .catch(() => setClientes([]))
+      .finally(() => setLoading(false))
+  }, [])
+
+  return { clientes, loading }
+}
+
+// RPC: crear gestión (idempotente en el día)
+export async function iniciarContacto(telefono, canal = 'whatsapp', accion = 'contacto_inicial') {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/iniciar_contacto`, {
+    method: 'POST',
+    headers: { ...HEADERS, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ p_telefono: telefono, p_canal: canal, p_accion: accion })
+  })
+  if (!res.ok) throw new Error('iniciar_contacto falló')
+  return res.json() // bigint id
+}
+
+// RPC: actualizar resultado sobre la misma gestión
+export async function cerrarGestion(id, resultado) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/cerrar_gestion`, {
+    method: 'POST',
+    headers: { ...HEADERS, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ p_id: id, p_resultado: resultado })
+  })
+  if (!res.ok) throw new Error('cerrar_gestion falló')
+}
+
+// Dashboard: solo las claves livianas del snapshot (sin CLIENTES)
+export function useSnapshot() {
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    fetch(
+      `${SUPABASE_URL}/rest/v1/dashboard_snapshot?select=payload->MON,payload->SEGS,payload->MOV_SEGS,payload->PRODS,payload->MAR_DIAS,payload->MAR_PEDS,payload->MAR_PRODS&order=id.desc&limit=1`,
+      { headers: HEADERS }
+    )
+      .then(r => r.json())
+      .then(rows => {
+        if (rows && rows[0]) setData(rows[0])
+        else setError('Sin datos')
+      })
+      .catch(e => setError(e.message))
+      .finally(() => setLoading(false))
+  }, [])
+
+  return { data, loading, error }
+}
+
+// CRM: clientes directos de la tabla con paginación
+export function useClientes(segmento, page = 0, pageSize = 50) {
+  const [clientes, setClientes] = useState([])
+  const [total, setTotal] = useState(0)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    setLoading(true)
+    const segFilter = segmento && segmento !== 'Todos'
+      ? `&segmento=eq.${encodeURIComponent(segmento)}`
+      : ''
+    const from = page * pageSize
+    const to = from + pageSize - 1
+
+    fetch(
+      `${SUPABASE_URL}/rest/v1/clientes?select=nombre,telefono,segmento,score_comercial,rank_prioridad,recencia_dias,frecuencia,valor_total,ticket_promedio,tasa_recompra_30d,tasa_recompra_60d,intervalo_promedio_dias,ultima_compra${segFilter}&order=score_comercial.desc.nullslast,valor_total.desc&limit=${pageSize}&offset=${from}`,
+      { headers: { ...HEADERS, 'Range-Unit': 'items', Range: `${from}-${to}`, Prefer: 'count=exact' } }
+    )
+      .then(r => {
+        const ct = r.headers.get('Content-Range') || ''
+        const tot = ct.split('/')[1]
+        if (tot) setTotal(parseInt(tot))
+        return r.json()
+      })
+      .then(rows => setClientes(rows || []))
+      .catch(() => setClientes([]))
+      .finally(() => setLoading(false))
+  }, [segmento, page])
+
+  return { clientes, total, loading }
+}

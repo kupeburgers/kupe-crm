@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(export PATH=\"/c/Program Files/nodejs:$PATH\")",
+      "Bash(node -e \":*)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(\"C:\\\\Program Files\\\\nodejs\\\\node.exe\" \"C:\\\\Users\\\\kupeb\\\\OneDrive\\\\Escritorio\\\\supabase crm\\\\scripts\\\\update-data.js\" \"C:/Users/kupeb/Downloads/Libro1.xlsx\")",
+      "Bash(node -e \"console.log\\(require\\(''./package.json''\\).type\\)\")"
+    ]
+  }
+}
