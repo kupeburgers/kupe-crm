@@ -43,7 +43,7 @@ export function useTop20() {
 
   useEffect(() => {
     fetch(
-      `${SUPABASE_URL}/rest/v1/clientes?select=nombre,telefono,recencia_dias,frecuencia,ticket_promedio,valor_total,score_comercial,segmento,ultima_compra,producto_favorito,pan_favorito,hora_habitual,total_pedidos_historial,ultimo_producto,fecha_ultimo_pedido&recencia_dias=gt.7&segmento=neq.Perdido&order=score_comercial.desc&limit=20`,
+      `${SUPABASE_URL}/rest/v1/clientes_live?select=nombre,telefono,recencia_dias,frecuencia,ticket_promedio,valor_total,score_comercial,segmento,ultima_compra,producto_favorito,pan_favorito,hora_habitual,total_pedidos_historial,ultimo_producto,fecha_ultimo_pedido&recencia_dias=gt.7&segmento=neq.Perdido&order=score_comercial.desc&limit=20`,
       { headers: HEADERS }
     )
       .then(r => r.json())
@@ -124,7 +124,7 @@ export function useEnRiesgoUrgente(scoreMin = 70) {
   const [alertas, setAlertas] = useState([])
   useEffect(() => {
     fetch(
-      `${SUPABASE_URL}/rest/v1/clientes?select=nombre,telefono,recencia_dias,score_comercial&segmento=eq.${encodeURIComponent('En riesgo')}&score_comercial=gt.${scoreMin}&order=score_comercial.desc&limit=8`,
+      `${SUPABASE_URL}/rest/v1/clientes_live?select=nombre,telefono,recencia_dias,score_comercial&segmento=eq.${encodeURIComponent('En riesgo')}&score_comercial=gt.${scoreMin}&order=score_comercial.desc&limit=8`,
       { headers: HEADERS }
     )
       .then(r => r.json())
@@ -149,7 +149,7 @@ export function useClientes(segmento, page = 0, pageSize = 50) {
     const to = from + pageSize - 1
 
     fetch(
-      `${SUPABASE_URL}/rest/v1/clientes?select=nombre,telefono,segmento,score_comercial,rank_prioridad,recencia_dias,frecuencia,valor_total,ticket_promedio,tasa_recompra_30d,tasa_recompra_60d,intervalo_promedio_dias,ultima_compra,producto_favorito,pan_favorito,hora_habitual,total_pedidos_historial,ultimo_producto,fecha_ultimo_pedido,perfil_actualizado_at${segFilter}&order=score_comercial.desc.nullslast,valor_total.desc&limit=${pageSize}&offset=${from}`,
+      `${SUPABASE_URL}/rest/v1/clientes_live?select=nombre,telefono,segmento,score_comercial,rank_prioridad,recencia_dias,frecuencia,valor_total,ticket_promedio,tasa_recompra_30d,tasa_recompra_60d,intervalo_promedio_dias,ultima_compra,producto_favorito,pan_favorito,hora_habitual,total_pedidos_historial,ultimo_producto,fecha_ultimo_pedido,perfil_actualizado_at${segFilter}&order=score_comercial.desc.nullslast,valor_total.desc&limit=${pageSize}&offset=${from}`,
       { headers: { ...HEADERS, 'Range-Unit': 'items', Range: `${from}-${to}`, Prefer: 'count=exact' } }
     )
       .then(r => {
