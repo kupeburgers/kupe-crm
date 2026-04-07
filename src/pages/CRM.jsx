@@ -310,24 +310,22 @@ function TabHoy({ overrides, setOverrides }) {
                 {/* NAME */}
                 <div className="card-nombre">{c.nombre || <span style={{ color: '#ccc' }}>Sin nombre</span>}</div>
 
-                {/* PERFIL DE PRODUCTO */}
-                {c.producto_favorito && (
-                  <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 6, flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: 12, color: '#374151', background: '#f3f4f6', borderRadius: 6, padding: '2px 8px', fontWeight: 600 }}>
-                      🍔 {c.producto_favorito.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())}
-                    </span>
-                    {c.pan_favorito && (
-                      <span style={{ fontSize: 12, color: '#6b7280', background: '#f9fafb', borderRadius: 6, padding: '2px 8px' }}>
-                        🍞 {c.pan_favorito}
-                      </span>
-                    )}
-                    {c.hora_habitual != null && (
-                      <span style={{ fontSize: 12, color: '#6b7280', background: '#f9fafb', borderRadius: 6, padding: '2px 8px' }}>
-                        🕐 pide ~{c.hora_habitual}hs
-                      </span>
-                    )}
-                  </div>
-                )}
+                {/* PERFIL DE PRODUCTO — línea compacta accionable */}
+                {(c.producto_favorito || c.ultimo_producto) && (() => {
+                  const cap  = s => s ? s.toLowerCase().replace(/\b\w/g, l => l.toUpperCase()) : null
+                  const fav  = cap(c.producto_favorito)
+                  const ult  = cap(c.ultimo_producto)
+                  const pan  = c.pan_favorito ? ` c/${c.pan_favorito}` : ''
+                  const hora = c.hora_habitual != null ? ` · ~${c.hora_habitual}hs` : ''
+                  const texto = (fav && ult && fav !== ult)
+                    ? `último: ${ult} · fav: ${fav}${pan}${hora}`
+                    : `siempre pide: ${fav || ult}${pan}${hora}`
+                  return (
+                    <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 6, lineHeight: 1.4 }}>
+                      {texto}
+                    </div>
+                  )
+                })()}
 
                 {/* SECONDARY INFO */}
                 <div className="card-info">
@@ -448,11 +446,11 @@ function TabHoy({ overrides, setOverrides }) {
 const SEGS_PLANTILLAS = ['Activo', 'Tibio', 'Enfriando', 'En riesgo', 'Perdido']
 
 const PREVIEW_POR_SEG = {
-  Activo:     { nombre:'Juan García',   recencia_dias:8,  frecuencia:15, ticket_promedio:42000, ultima_compra:'29/03/2026', segmento:'Activo'     },
-  Tibio:      { nombre:'Lucas Marotta', recencia_dias:22, frecuencia:10, ticket_promedio:38000, ultima_compra:'15/03/2026', segmento:'Tibio'       },
-  Enfriando:  { nombre:'Agustín Solari',recencia_dias:45, frecuencia:8,  ticket_promedio:43000, ultima_compra:'22/02/2026', segmento:'Enfriando'   },
-  'En riesgo':{ nombre:'Martina Sosa',  recencia_dias:75, frecuencia:6,  ticket_promedio:48000, ultima_compra:'21/01/2026', segmento:'En riesgo'   },
-  Perdido:    { nombre:'Jorge Pérez',   recencia_dias:130,frecuencia:4,  ticket_promedio:46000, ultima_compra:'28/11/2025', segmento:'Perdido'     },
+  Activo:     { nombre:'Juan García',    recencia_dias:8,   frecuencia:15, ticket_promedio:42000, ultima_compra:'29/03/2026', segmento:'Activo',    producto_favorito:'CRISPY DOBLE',       ultimo_producto:'CRISPY DOBLE',       pan_favorito:'Pan De Papa',   hora_habitual:21, fecha_ultimo_pedido:'2026-03-29' },
+  Tibio:      { nombre:'Lucas Marotta',  recencia_dias:22,  frecuencia:10, ticket_promedio:38000, ultima_compra:'15/03/2026', segmento:'Tibio',     producto_favorito:'CHEESE BACON DOBLE', ultimo_producto:'CHEESE BACON DOBLE', pan_favorito:'Pan Parmesano', hora_habitual:22, fecha_ultimo_pedido:'2026-03-15' },
+  Enfriando:  { nombre:'Agustín Solari', recencia_dias:45,  frecuencia:8,  ticket_promedio:43000, ultima_compra:'22/02/2026', segmento:'Enfriando', producto_favorito:'DELUXE DOBLE',       ultimo_producto:'CUARTO DOBLE',       pan_favorito:'Pan De Papa',   hora_habitual:21, fecha_ultimo_pedido:'2026-02-22' },
+  'En riesgo':{ nombre:'Martina Sosa',   recencia_dias:75,  frecuencia:6,  ticket_promedio:48000, ultima_compra:'21/01/2026', segmento:'En riesgo', producto_favorito:'CUARTO DOBLE',       ultimo_producto:'ARGENTA SIMPLE',     pan_favorito:'Pan Parmesano', hora_habitual:null, fecha_ultimo_pedido:'2026-01-21' },
+  Perdido:    { nombre:'Jorge Pérez',    recencia_dias:130, frecuencia:4,  ticket_promedio:46000, ultima_compra:'28/11/2025', segmento:'Perdido',   producto_favorito:'ARGENTA DOBLE',      ultimo_producto:'ARGENTA DOBLE',      pan_favorito:'Pan De Papa',   hora_habitual:23, fecha_ultimo_pedido:'2025-11-28' },
 }
 
 function TabPlantillas() {
@@ -658,23 +656,35 @@ function TabClientes({ segs }) {
             </div>
           </div>
           {/* PERFIL DE PRODUCTO */}
-          {fichaCliente.producto_favorito && (
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
-              <span style={{ fontSize: 13, background: '#fef3c7', color: '#92400e', borderRadius: 8, padding: '4px 12px', fontWeight: 600 }}>
-                🍔 {fichaCliente.producto_favorito.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())}
-              </span>
-              {fichaCliente.pan_favorito && (
-                <span style={{ fontSize: 13, background: '#f3f4f6', color: '#6b7280', borderRadius: 8, padding: '4px 12px' }}>
-                  🍞 {fichaCliente.pan_favorito}
-                </span>
-              )}
-              {fichaCliente.hora_habitual != null && (
-                <span style={{ fontSize: 13, background: '#eff6ff', color: '#1d4ed8', borderRadius: 8, padding: '4px 12px' }}>
-                  🕐 Pide a las ~{fichaCliente.hora_habitual}hs
-                </span>
-              )}
-            </div>
-          )}
+          {(fichaCliente.producto_favorito || fichaCliente.ultimo_producto) && (() => {
+            const cap = s => s ? s.toLowerCase().replace(/\b\w/g, l => l.toUpperCase()) : null
+            const fav = cap(fichaCliente.producto_favorito)
+            const ult = cap(fichaCliente.ultimo_producto)
+            return (
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+                {fav && (
+                  <span style={{ fontSize: 13, background: '#fef3c7', color: '#92400e', borderRadius: 8, padding: '4px 12px', fontWeight: 600 }}>
+                    🍔 Fav: {fav}
+                  </span>
+                )}
+                {ult && ult !== fav && (
+                  <span style={{ fontSize: 13, background: '#f0fdf4', color: '#166534', borderRadius: 8, padding: '4px 12px' }}>
+                    🕒 Último: {ult}
+                  </span>
+                )}
+                {fichaCliente.pan_favorito && (
+                  <span style={{ fontSize: 13, background: '#f3f4f6', color: '#6b7280', borderRadius: 8, padding: '4px 12px' }}>
+                    🍞 {fichaCliente.pan_favorito}
+                  </span>
+                )}
+                {fichaCliente.hora_habitual != null && (
+                  <span style={{ fontSize: 13, background: '#eff6ff', color: '#1d4ed8', borderRadius: 8, padding: '4px 12px' }}>
+                    🕐 ~{fichaCliente.hora_habitual}hs
+                  </span>
+                )}
+              </div>
+            )
+          })()}
           <div className="ficha-grid">
             <div className="ficha-stat"><strong>{fichaCliente.total_pedidos_historial ?? fichaCliente.frecuencia}</strong>Pedidos hist.</div>
             <div className="ficha-stat"><strong>{fmt(fichaCliente.valor_total)}</strong>Revenue total</div>
@@ -684,6 +694,15 @@ function TabClientes({ segs }) {
             <div className="ficha-stat"><strong>{fichaCliente.tasa_recompra_60d ?? '—'}%</strong>Recompra 60d</div>
             <div className="ficha-stat"><strong>{fichaCliente.intervalo_promedio_dias > 0 ? `${fichaCliente.intervalo_promedio_dias}d` : '—'}</strong>Intervalo prom.</div>
             <div className="ficha-stat"><strong>{fichaCliente.ultima_compra || '—'}</strong>Última compra</div>
+            <div className="ficha-stat"><strong>{fichaCliente.fecha_ultimo_pedido || '—'}</strong>Último pedido</div>
+            <div className="ficha-stat">
+              <strong>
+                {fichaCliente.perfil_actualizado_at
+                  ? new Date(fichaCliente.perfil_actualizado_at).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: '2-digit' })
+                  : '—'}
+              </strong>
+              Perfil al
+            </div>
           </div>
           <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
             <button className="btn-accion" style={{ background: '#25d366' }}>💬 WhatsApp</button>

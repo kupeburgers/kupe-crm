@@ -46,16 +46,19 @@ async function main() {
   const rows = parseCsv(text)
   console.log(`   ${rows.length} clientes en el CSV`)
 
-  // Armar payload para upsert: solo campos de perfil de producto
+  // Armar payload para upsert: campos de perfil de producto v2.1
   const payload = rows
     .filter(r => r.telefono && r.telefono !== 'nan')
     .map(r => ({
       telefono:                 normalizarTel(r.telefono),
-      producto_favorito:        r.producto_favorito   || null,
-      pan_favorito:             r.pan_favorito        || null,
+      producto_favorito:        r.producto_favorito         || null,
+      pan_favorito:             r.pan_favorito              || null,
       hora_habitual:            r.hora_habitual && r.hora_habitual !== 'nan' ? parseInt(r.hora_habitual) : null,
-      total_pedidos_historial:  r.total_pedidos  ? parseInt(r.total_pedidos)  : null,
-      total_gastado_historial:  r.total_gastado  ? parseInt(r.total_gastado)  : null,
+      total_pedidos_historial:  r.total_pedidos             ? parseInt(r.total_pedidos)  : null,
+      total_gastado_historial:  r.total_gastado             ? parseInt(r.total_gastado)  : null,
+      ultimo_producto:          r.ultimo_producto           || null,
+      fecha_ultimo_pedido:      r.fecha_ultimo_pedido && r.fecha_ultimo_pedido !== 'None' ? r.fecha_ultimo_pedido : null,
+      perfil_actualizado_at:    r.perfil_actualizado_at     || null,
     }))
 
   console.log(`   ${payload.length} filas a cargar`)
@@ -80,9 +83,26 @@ async function main() {
     }
   }
 
-  console.log(`\n\n🎉 Listo! ${ok} clientes procesados, ${err} errores`)
+  const matcheados   = payload.filter(r => r.producto_favorito || r.ultimo_producto).length
+  const sinFavorito  = payload.filter(r => !r.producto_favorito).length
+  const conHora      = payload.filter(r => r.hora_habitual != null).length
+  const fechaActual  = payload[0]?.perfil_actualizado_at?.slice(0, 19).replace('T', ' ') || '—'
+
+  console.log('\n\n════════════════════════════════════════')
+  console.log('  RESUMEN DE CARGA')
+  console.log('════════════════════════════════════════')
+  console.log(`  Teléfonos en CSV         : ${payload.length}`)
+  console.log(`  Enviados a Supabase      : ${ok}`)
+  console.log(`  Errores                  : ${err}`)
+  console.log(`  Con producto_favorito    : ${matcheados - sinFavorito}`)
+  console.log(`  Sin producto_favorito    : ${sinFavorito}  (solo bebidas/papas/nuggets)`)
+  console.log(`  Con hora_habitual        : ${conHora}`)
+  console.log(`  Fecha de actualización   : ${fechaActual} UTC`)
+  console.log('════════════════════════════════════════')
   if (err === 0) {
-    console.log('   Las fichas del CRM ya muestran producto favorito y pan preferido.')
+    console.log('  ✅ El CRM ya tiene los datos actualizados.')
+  } else {
+    console.log('  ⚠️  Hubo errores — revisá los mensajes de arriba.')
   }
 }
 
