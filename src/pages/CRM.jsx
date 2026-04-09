@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useSnapshot, useClientes, useTop20, useGestionesHoy, useGestionesRecientes, useEnRiesgoUrgente, iniciarContacto, cerrarGestion, resetGestion } from '../hooks/useSnapshot'
+import { useSnapshot, useClientes, useTop20, useGestionesHoy, useGestionesRecientes, useEnRiesgoUrgente, iniciarContacto, cerrarGestion, resetGestion, useDatosMeta } from '../hooks/useSnapshot'
 import { getPlantillas, savePlantillas, buildMessage, PLANTILLAS_DEFAULT } from '../config/templates'
 
 const fmt = n => n >= 1_000_000 ? `$${(n/1_000_000).toFixed(1)}M` : n >= 1_000 ? `$${(n/1_000).toFixed(0)}K` : `$${Math.round(n)}`
@@ -769,14 +769,29 @@ export default function CRM() {
   const { data, loading: loadingSnap } = useSnapshot()
   const [vista, setVista]   = useState('hoy')
   const [overrides, setOverrides] = useState({}) // compartido entre TabHoy y TabAcciones
+  const datosMeta = useDatosMeta()
 
   const segs = data?.SEGS || data?.['payload->SEGS'] || []
 
   if (loadingSnap) return <div className="loading">Cargando CRM...</div>
 
+  const fechaPedidos = datosMeta?.fecha_ultimo_pedido
+    ? new Date(datosMeta.fecha_ultimo_pedido + 'T12:00:00').toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    : null
+  const fechaPerfil = datosMeta?.perfil_actualizado_at
+    ? new Date(datosMeta.perfil_actualizado_at).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    : null
+
   return (
     <div className="page">
       <div className="page-title">🎯 CRM — Acción comercial</div>
+      {/* INDICADOR DE DATOS */}
+      {fechaPedidos && (
+        <div style={{ fontSize: 12, color: '#9ca3af', marginTop: -12, marginBottom: 16, display: 'flex', gap: 16 }}>
+          <span>📦 Pedidos al <strong style={{ color: '#6b7280' }}>{fechaPedidos}</strong></span>
+          {fechaPerfil && <span>🔄 Perfil al <strong style={{ color: '#6b7280' }}>{fechaPerfil}</strong></span>}
+        </div>
+      )}
 
       {/* TABS */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>

@@ -165,3 +165,22 @@ export function useClientes(segmento, page = 0, pageSize = 50) {
 
   return { clientes, total, loading }
 }
+
+// Meta de datos: hasta qué fecha están cargados los pedidos
+export function useDatosMeta() {
+  const [meta, setMeta] = useState(null)
+
+  useEffect(() => {
+    fetch(
+      `${SUPABASE_URL}/rest/v1/clientes_live?select=fecha_ultimo_pedido,perfil_actualizado_at&order=fecha_ultimo_pedido.desc&limit=1`,
+      { headers: HEADERS }
+    )
+      .then(r => r.json())
+      .then(rows => {
+        if (rows && rows[0]) setMeta(rows[0])
+      })
+      .catch(() => {})
+  }, [])
+
+  return meta
+}
