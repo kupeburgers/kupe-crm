@@ -172,7 +172,7 @@ export function useDatosMeta() {
 
   useEffect(() => {
     fetch(
-      `${SUPABASE_URL}/rest/v1/clientes_live?select=fecha_ultimo_pedido,perfil_actualizado_at&order=fecha_ultimo_pedido.desc&limit=1`,
+      `${SUPABASE_URL}/rest/v1/clientes_live?select=fecha_ultimo_pedido,perfil_actualizado_at&fecha_ultimo_pedido=not.is.null&order=fecha_ultimo_pedido.desc&limit=1`,
       { headers: HEADERS }
     )
       .then(r => r.json())
