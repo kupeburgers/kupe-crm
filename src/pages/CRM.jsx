@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useSnapshot, useClientes, useTop20, useGestionesHoy, useGestionesRecientes, useEnRiesgoUrgente, iniciarContacto, cerrarGestion, resetGestion, useDatosMeta } from '../hooks/useSnapshot'
+import { useSnapshot, useClientes, useTop20, useGestionesHoy, useGestionesRecientes, useEnRiesgoUrgente, iniciarContacto, cerrarGestion, resetGestion, useDatosMeta, useProductos } from '../hooks/useSnapshot'
 import { getPlantillas, savePlantillas, buildMessage, PLANTILLAS_DEFAULT } from '../config/templates'
 
 const fmt = n => n >= 1_000_000 ? `$${(n/1_000_000).toFixed(1)}M` : n >= 1_000 ? `$${(n/1_000).toFixed(0)}K` : `$${Math.round(n)}`
@@ -584,6 +584,106 @@ function TabAcciones({ overrides }) {
   )
 }
 
+// ── Tab Productos ──────────────────────────────────────────────────────────────
+const fmtNum  = n => Math.round(n).toLocaleString('es-AR')
+const fmtMon  = n => n >= 1_000_000 ? `$${(n/1_000_000).toFixed(1)}M` : `$${Math.round(n/1_000).toLocaleString('es-AR')}K`
+const capTitle = s => s ? s.toLowerCase().replace(/\b\w/g, l => l.toUpperCase()) : s
+
+function TabProductos() {
+  const { productos, loading, meta } = useProductos()
+  const [orden, setOrden] = useState('facturado') // 'facturado' | 'unidades' | 'ganancia'
+
+  if (loading) return <div className="loading">Cargando productos...</div>
+  if (!productos.length) return <div style={{ color: '#9ca3af', padding: 24 }}>Sin datos. Corré el ACTUALIZAR.bat de la carpeta articulos.</div>
+
+  const sorted = [...productos].sort((a, b) => {
+    if (orden === 'unidades') return b.unidades_totales - a.unidades_totales
+    if (orden === 'ganancia') return b.ganancia_neta - a.ganancia_neta
+    return b.facturado_total - a.facturado_total
+  })
+
+  const totalFact   = productos.reduce((s, p) => s + (p.facturado_total  || 0), 0)
+  const totalUnid   = productos.reduce((s, p) => s + (p.unidades_totales || 0), 0)
+  const totalGan    = productos.reduce((s, p) => s + (p.ganancia_neta    || 0), 0)
+  const maxVal      = sorted[0]?.[orden === 'unidades' ? 'unidades_totales' : orden === 'ganancia' ? 'ganancia_neta' : 'facturado_total'] || 1
+
+  const fechaDesde = meta?.primera_venta ? new Date(meta.primera_venta + 'T12:00:00').toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : null
+  const fechaHasta = meta?.ultima_venta  ? new Date(meta.ultima_venta  + 'T12:00:00').toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : null
+
+  return (
+    <div>
+      {/* Resumen global */}
+      <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
+        {[
+          { label: 'Facturación total', val: fmtMon(totalFact), color: '#4f8ef7' },
+          { label: 'Unidades vendidas', val: fmtNum(totalUnid), color: '#00a65a' },
+          { label: 'Ganancia neta',     val: fmtMon(totalGan),  color: '#d97700' },
+          { label: 'Productos únicos',  val: productos.length,   color: '#6b7280' },
+        ].map(k => (
+          <div key={k.label} style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 10, padding: '10px 18px', minWidth: 140 }}>
+            <div style={{ fontSize: 11, color: '#9ca3af' }}>{k.label}</div>
+            <div style={{ fontSize: 22, fontWeight: 700, color: k.color }}>{k.val}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Período */}
+      {fechaDesde && (
+        <div style={{ fontSize: 12, color: '#9ca3af', marginBottom: 16 }}>
+          Período: <strong style={{ color: '#6b7280' }}>{fechaDesde}</strong> → <strong style={{ color: '#6b7280' }}>{fechaHasta}</strong>
+        </div>
+      )}
+
+      {/* Selector de orden */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+        {[
+          { key: 'facturado', label: '💰 Por facturación' },
+          { key: 'unidades',  label: '📦 Por unidades'    },
+          { key: 'ganancia',  label: '📈 Por ganancia'    },
+        ].map(o => (
+          <button key={o.key}
+            className={`seg-btn ${orden === o.key ? 'active' : ''}`}
+            style={orden === o.key ? { background: '#4f8ef7', color: '#fff', borderColor: 'transparent', fontWeight: 700 } : {}}
+            onClick={() => setOrden(o.key)}
+          >
+            {o.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Lista de productos */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {sorted.map((p, i) => {
+          const val     = orden === 'unidades' ? p.unidades_totales : orden === 'ganancia' ? p.ganancia_neta : p.facturado_total
+          const barPct  = Math.round((val / maxVal) * 100)
+          const label   = orden === 'unidades' ? `${fmtNum(val)} u` : fmtMon(val)
+          const subInfo = orden === 'facturado'
+            ? `${fmtNum(p.unidades_totales)} u · ganancia ${fmtMon(p.ganancia_neta)}`
+            : orden === 'unidades'
+            ? `facturado ${fmtMon(p.facturado_total)} · ganancia ${fmtMon(p.ganancia_neta)}`
+            : `${fmtNum(p.unidades_totales)} u · facturado ${fmtMon(p.facturado_total)}`
+
+          return (
+            <div key={p.articulo} style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 8, padding: '8px 14px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 12, color: '#9ca3af', fontWeight: 700, minWidth: 22 }}>#{i+1}</span>
+                  <span style={{ fontWeight: 600, fontSize: 14 }}>{capTitle(p.articulo)}</span>
+                </div>
+                <span style={{ fontWeight: 700, fontSize: 15, color: '#1f2937' }}>{label}</span>
+              </div>
+              <div style={{ background: '#e5e7eb', borderRadius: 4, height: 6, marginBottom: 4 }}>
+                <div style={{ background: '#4f8ef7', width: `${barPct}%`, height: 6, borderRadius: 4, transition: 'width 0.3s' }} />
+              </div>
+              <div style={{ fontSize: 11, color: '#9ca3af' }}>{subInfo}</div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 // ── Tab Clientes (CRM completo) ────────────────────────────────────────────────
 function TabClientes({ segs }) {
   const [filtroSeg, setFiltroSeg] = useState('Tibio')
@@ -799,6 +899,7 @@ export default function CRM() {
           { key: 'hoy',        label: '📋 Hoy'              },
           { key: 'acciones',   label: '✅ Acciones'          },
           { key: 'crm',        label: '👥 Clientes'          },
+          { key: 'productos',  label: '🍔 Productos'         },
           { key: 'plantillas', label: '✏️ Plantillas'        },
         ].map(t => (
           <button key={t.key}
@@ -814,6 +915,7 @@ export default function CRM() {
       {vista === 'hoy'        && <TabHoy overrides={overrides} setOverrides={setOverrides} />}
       {vista === 'acciones'   && <TabAcciones overrides={overrides} />}
       {vista === 'crm'        && <TabClientes segs={segs} />}
+      {vista === 'productos'  && <TabProductos />}
       {vista === 'plantillas' && <TabPlantillas />}
     </div>
   )

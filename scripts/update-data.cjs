@@ -20,8 +20,7 @@ const path  = require('path')
 const SUPABASE_URL = 'lqpzhzworncmcuptesjh.supabase.co'
 const ANON_KEY     = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxxcHpoendvcm5jbWN1cHRlc2poIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NDI2NDYsImV4cCI6MjA4OTUxODY0Nn0.sa4SrtesQLLpP898P4zKUGeYbbILxQ2PUoaOy-dXFjI'
 
-const DEFAULT_FILE = 'C:/Users/kupeb/OneDrive/Escritorio/supabase crm/datos/delivery/delivery.xlsx'
-const XLSX_FILE    = process.argv[2] || DEFAULT_FILE
+const DELIVERY_DIR = 'C:/Users/kupeb/OneDrive/Escritorio/supabase crm/datos/delivery'
 const BATCH_SIZE   = 500
 
 // ── HTTP helpers ─────────────────────────────────────────────────────────────
@@ -58,14 +57,12 @@ function rpc(fn) {
 
 // ── Leer xlsx ────────────────────────────────────────────────────────────────
 
-function readDelivery(filePath) {
-  console.log(`\n📂 Leyendo: ${filePath}`)
+const fs = require('fs')
+
+function readDeliveryFile(filePath) {
   const wb   = XLSX.readFile(filePath)
   const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: null })
-
   const valid = rows.filter(r => typeof r[0] === 'number' && Number.isInteger(r[0]))
-  console.log(`   Filas válidas encontradas: ${valid.length}`)
-
   return valid.map(r => ({
     'Pedido':    r[0]  != null ? String(r[0])  : null,
     'Fecha':     r[1]  != null ? String(r[1])  : null,
@@ -86,7 +83,31 @@ function readDelivery(filePath) {
   }))
 }
 
-// ── UPSERT por lotes ─────────────────────────────────────────────────────────
+function readDelivery() {
+  const files = fs.readdirSync(DELIVERY_DIR)
+    .filter(f => f.toLowerCase().endsWith('.xlsx'))
+    .sort()
+  if (files.length === 0) {
+    console.error('❌ No se encontraron archivos .xlsx en la carpeta delivery.')
+    process.exit(1)
+  }
+  console.log(`\n📂 Archivos detectados (${files.length}):`)
+  let all = []
+  for (const fname of files) {
+    const fullPath = `${DELIVERY_DIR}/${fname}`
+    const rows = readDeliveryFile(fullPath)
+    console.log(`   ${fname}: ${rows.length} filas`)
+    all = all.concat(rows)
+  }
+  // Deduplicar en memoria por Pedido (el más reciente gana, igual que el UPSERT)
+  const map = new Map()
+  for (const r of all) { if (r['Pedido']) map.set(r['Pedido'], r) }
+  const deduped = Array.from(map.values())
+  console.log(`   Total único por Pedido: ${deduped.length}`)
+  return deduped
+}
+
+// ── UPSERT por lotes vía RPC ─────────────────────────────────────────────────
 
 async function upsertStaging(records) {
   console.log(`\n📤 Paso 1/4 — UPSERT stg_entregas_raw (${records.length} filas, lotes de ${BATCH_SIZE})`)
@@ -94,16 +115,8 @@ async function upsertStaging(records) {
 
   for (let i = 0; i < records.length; i += BATCH_SIZE) {
     const batch = records.slice(i, i + BATCH_SIZE)
-    const res = await request(
-      'POST',
-      '/rest/v1/stg_entregas_raw',
-      batch,
-      {
-        // UPSERT: si el Pedido ya existe, actualiza. Nunca duplica.
-        'Prefer': 'resolution=merge-duplicates,return=minimal'
-      }
-    )
-    if (res.status !== 201 && res.status !== 200) {
+    const res = await request('POST', '/rest/v1/rpc/upsert_entregas', { data: batch })
+    if (res.status !== 200) {
       console.error(`   ❌ Error en lote ${i}: status ${res.status}`)
       console.error(`   ${res.body.slice(0, 300)}`)
       process.exit(1)
@@ -156,7 +169,7 @@ async function main() {
   console.log('  🚀 Kupe CRM — Actualización de datos')
   console.log('═══════════════════════════════════════')
 
-  const records = readDelivery(XLSX_FILE)
+  const records = readDelivery()
   await upsertStaging(records)
   await recalcClientes()
   await refreshSnapshot()

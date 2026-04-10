@@ -166,6 +166,36 @@ export function useClientes(segmento, page = 0, pageSize = 50) {
   return { clientes, total, loading }
 }
 
+// Resumen de artículos vendidos
+export function useProductos() {
+  const [productos, setProductos] = useState([])
+  const [loading, setLoading]     = useState(true)
+  const [meta, setMeta]           = useState(null) // { primera_venta, ultima_venta }
+
+  useEffect(() => {
+    fetch(
+      `${SUPABASE_URL}/rest/v1/resumen_articulos?select=articulo,unidades_totales,facturado_total,ganancia_neta,primera_venta,ultima_venta&order=facturado_total.desc`,
+      { headers: HEADERS }
+    )
+      .then(r => r.json())
+      .then(rows => {
+        setProductos(rows || [])
+        if (rows && rows.length > 0) {
+          const fechas = rows.map(r => r.primera_venta).filter(Boolean).sort()
+          const ultimas = rows.map(r => r.ultima_venta).filter(Boolean).sort()
+          setMeta({
+            primera_venta: fechas[0] || null,
+            ultima_venta:  ultimas[ultimas.length - 1] || null,
+          })
+        }
+      })
+      .catch(() => setProductos([]))
+      .finally(() => setLoading(false))
+  }, [])
+
+  return { productos, loading, meta }
+}
+
 // Meta de datos: hasta qué fecha están cargados los pedidos
 export function useDatosMeta() {
   const [meta, setMeta] = useState(null)

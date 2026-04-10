@@ -2,13 +2,13 @@
 chcp 65001 >nul
 echo.
 echo ================================================
-echo   KUPE CRM — Delivery
+echo   KUPE CRM — Articulos Vendidos
 echo ================================================
 echo.
 echo  Detectando archivos xlsx en esta carpeta...
 echo.
 
-"C:\Program Files\nodejs\node.exe" "C:\Users\kupeb\OneDrive\Escritorio\supabase crm\scripts\update-data.cjs"
+"C:\Program Files\nodejs\node.exe" "C:\Users\kupeb\OneDrive\Escritorio\supabase crm\scripts\update-articulos.cjs"
 
 if %ERRORLEVEL% NEQ 0 (
     echo.
