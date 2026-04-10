@@ -875,21 +875,21 @@ export default function CRM() {
 
   if (loadingSnap) return <div className="loading">Cargando CRM...</div>
 
-  const fechaPedidos = datosMeta?.fecha_ultimo_pedido
-    ? new Date(datosMeta.fecha_ultimo_pedido + 'T12:00:00').toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+  const fechaDelivery = datosMeta?.ultima_carga_delivery
+    ? new Date(datosMeta.ultima_carga_delivery + 'T12:00:00').toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' })
     : null
-  const fechaPerfil = datosMeta?.perfil_actualizado_at
-    ? new Date(datosMeta.perfil_actualizado_at).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+  const fechaPerfil = datosMeta?.ultima_carga_perfil
+    ? new Date(datosMeta.ultima_carga_perfil).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' })
     : null
 
   return (
     <div className="page">
       <div className="page-title">🎯 CRM — Acción comercial</div>
       {/* INDICADOR DE DATOS */}
-      {fechaPedidos && (
+      {(fechaDelivery || fechaPerfil) && (
         <div style={{ fontSize: 12, color: '#9ca3af', marginTop: -12, marginBottom: 16, display: 'flex', gap: 16 }}>
-          <span>📦 Pedidos al <strong style={{ color: '#6b7280' }}>{fechaPedidos}</strong></span>
-          {fechaPerfil && <span>🔄 Perfil al <strong style={{ color: '#6b7280' }}>{fechaPerfil}</strong></span>}
+          {fechaDelivery && <span>📦 Delivery al <strong style={{ color: '#6b7280' }}>{fechaDelivery}</strong></span>}
+          {fechaPerfil  && <span>🔄 Perfil al <strong style={{ color: '#6b7280' }}>{fechaPerfil}</strong></span>}
         </div>
       )}
 

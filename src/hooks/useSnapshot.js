@@ -196,13 +196,13 @@ export function useProductos() {
   return { productos, loading, meta }
 }
 
-// Meta de datos: hasta qué fecha están cargados los pedidos
+// Meta de datos: última carga de delivery y última actualización de perfil
 export function useDatosMeta() {
   const [meta, setMeta] = useState(null)
 
   useEffect(() => {
     fetch(
-      `${SUPABASE_URL}/rest/v1/clientes_live?select=fecha_ultimo_pedido,perfil_actualizado_at&fecha_ultimo_pedido=not.is.null&order=fecha_ultimo_pedido.desc&limit=1`,
+      `${SUPABASE_URL}/rest/v1/datos_meta?select=ultima_carga_delivery,ultima_carga_perfil`,
       { headers: HEADERS }
     )
       .then(r => r.json())
