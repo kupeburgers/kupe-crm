@@ -753,15 +753,6 @@ function TabGlosario() {
         ))}
       </Bloque>
 
-      <Bloque titulo="📋 R30 en las cards de segmento">
-        <p style={{ fontSize: 14, color: '#4b5563', margin: 0, lineHeight: 1.6 }}>
-          En el panel de segmentos vas a ver algo como <strong>"r30 12 — 14%"</strong>.
-          Significa: <strong>12 clientes</strong> de ese segmento compraron en los últimos 30 días,
-          lo que representa el <strong>14%</strong> de ese segmento.
-          Si Tibio tiene r30 bajo, hay muchos clientes que no están comprando y necesitan contacto.
-        </p>
-      </Bloque>
-
       <Bloque titulo="📋 Lista Hoy — lógica de prioridad">
         <p style={{ fontSize: 14, color: '#4b5563', margin: 0, lineHeight: 1.6 }}>
           La lista de contactos diarios mezcla score + urgencia por recencia.
@@ -851,10 +842,9 @@ function TabClientes({ segs }) {
             <div className="seg-sub">{s.rec}</div>
             <div className="seg-meta">
               <span className="seg-badge">Score {s.score_prom}</span>
-              <span className="seg-badge">r30 {s.recompra_30d}%</span>
             </div>
             {s.intervalo_prom > 0 && (
-              <div className="seg-mov">🔁 compran cada {s.intervalo_prom} días</div>
+              <div className="seg-mov">🔁 vuelven cada ~{s.intervalo_prom}d</div>
             )}
           </div>
         ))}
