@@ -14,7 +14,7 @@ const HEADERS = {
 }
 
 const CSV_PATH = path.join(
-  'C:\\Users\\kupeb\\OneDrive\\Documentos',
+  'C:\\Users\\kupeb\\OneDrive\\Escritorio\\supabase crm\\datos',
   'cliente_perfil_productos.csv'
 )
 

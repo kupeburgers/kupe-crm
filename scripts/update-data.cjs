@@ -20,7 +20,7 @@ const path  = require('path')
 const SUPABASE_URL = 'lqpzhzworncmcuptesjh.supabase.co'
 const ANON_KEY     = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxxcHpoendvcm5jbWN1cHRlc2poIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NDI2NDYsImV4cCI6MjA4OTUxODY0Nn0.sa4SrtesQLLpP898P4zKUGeYbbILxQ2PUoaOy-dXFjI'
 
-const DEFAULT_FILE = 'C:/Users/kupeb/OneDrive/Documentos/reporte delivery/delivery.xlsx'
+const DEFAULT_FILE = 'C:/Users/kupeb/OneDrive/Escritorio/supabase crm/datos/delivery/delivery.xlsx'
 const XLSX_FILE    = process.argv[2] || DEFAULT_FILE
 const BATCH_SIZE   = 500
 
