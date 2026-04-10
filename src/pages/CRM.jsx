@@ -1017,7 +1017,7 @@ function TabClientes({ segs }) {
             </div>
           </div>
           <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
-            <button className="btn-accion" style={{ background: '#25d366' }}>💬 WhatsApp</button>
+            <button className="btn-accion" style={{ background: '#25d366' }} onClick={() => handleAbrirModal(fichaCliente)}>💬 WhatsApp</button>
             <button className="btn-accion">📞 Llamar</button>
           </div>
         </div>
