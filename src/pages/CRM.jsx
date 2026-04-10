@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useSnapshot, useClientes, useTop20, useGestionesHoy, useGestionesRecientes, useEnRiesgoUrgente, iniciarContacto, cerrarGestion, resetGestion, useDatosMeta, useProductos, guardarContactoHistorial, actualizarResultadoHistorial, useConversiones } from '../hooks/useSnapshot'
 import { getPlantillas, savePlantillas, buildMessage, PLANTILLAS_DEFAULT } from '../config/templates'
 
@@ -876,10 +876,35 @@ function TabClientes({ segs }) {
   const [busqueda, setBusqueda]   = useState('')
   const [sortCol, setSortCol]     = useState(null)   // null = default (score desc)
   const [sortDir, setSortDir]     = useState('desc')
+  const [modalInfo, setModalInfo] = useState(null)
+  const fichaRef = useRef(null)
 
   const { clientes, total, loading: loadingCli } = useClientes(filtroSeg, page, 50, busqueda)
   // FIX: Validar que el cliente existe y tiene datos antes de renderizar
   const fichaCliente = fichaIdx !== null && clientes && clientes[fichaIdx] ? clientes[fichaIdx] : null
+
+  // Scroll automático a la ficha cuando se abre
+  useEffect(() => {
+    if (fichaIdx !== null && fichaRef.current) {
+      fichaRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }
+  }, [fichaIdx])
+
+  function handleAbrirModal(c) {
+    const plantillas = getPlantillas()
+    const template   = plantillas[c.segmento] || ''
+    setModalInfo({ cliente: c, texto: buildMessage(template, c) })
+  }
+
+  async function handleEnviarWhatsApp(cliente, texto) {
+    try {
+      await iniciarContacto(cliente.telefono)
+      const tel = String(cliente.telefono).replace(/\D/g, '')
+      window.open(`https://wa.me/549${tel}?text=${encodeURIComponent(texto)}`, '_blank')
+      guardarContactoHistorial(cliente.telefono, 'whatsapp', 'contacto_inicial').catch(() => {})
+    } catch { /* silencioso */ }
+    setModalInfo(null)
+  }
 
   // Sort client-side sobre la página actual
   const clientesSorted = sortCol
@@ -959,7 +984,7 @@ function TabClientes({ segs }) {
 
       {/* FICHA RÁPIDA */}
       {fichaCliente && (
-        <div className="ficha">
+        <div className="ficha" ref={fichaRef}>
           <div className="ficha-header">
             <div>
               <div className="ficha-nombre">{fichaCliente.nombre || 'Sin nombre'}</div>
@@ -1100,6 +1125,49 @@ function TabClientes({ segs }) {
           </div>
         )}
       </div>
+
+      {/* MODAL WHATSAPP */}
+      {modalInfo && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.55)', zIndex:1000, display:'flex', alignItems:'flex-end', justifyContent:'center' }}
+             onClick={e => e.target === e.currentTarget && setModalInfo(null)}>
+          <div style={{ background:'#fff', borderRadius:'20px 20px 0 0', padding:24, width:'100%', maxWidth:600, maxHeight:'85vh', overflowY:'auto' }}>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:14 }}>
+              <div>
+                <div style={{ fontWeight:700, fontSize:17 }}>{modalInfo.cliente.nombre}</div>
+                <div style={{ display:'flex', gap:8, alignItems:'center', marginTop:4 }}>
+                  <span className="seg-tag" style={{ background: SEG_COLORS[modalInfo.cliente.segmento] || '#666' }}>
+                    {SEG_ICONS[modalInfo.cliente.segmento]} {modalInfo.cliente.segmento}
+                  </span>
+                  <span style={{ fontSize:12, color:'#9ca3af' }}>{modalInfo.cliente.recencia_dias}d sin comprar</span>
+                </div>
+              </div>
+              <button onClick={() => setModalInfo(null)}
+                style={{ background:'none', border:'none', fontSize:22, cursor:'pointer', color:'#9ca3af', lineHeight:1 }}>✕</button>
+            </div>
+            <div style={{ fontSize:11, fontWeight:700, color:'#9ca3af', textTransform:'uppercase', letterSpacing:'.07em', marginBottom:6 }}>
+              Mensaje — editá si querés
+            </div>
+            <textarea
+              value={modalInfo.texto}
+              onChange={e => setModalInfo(m => ({ ...m, texto: e.target.value }))}
+              rows={6}
+              style={{ width:'100%', border:'1px solid #e5e7eb', borderRadius:10, padding:12, fontSize:14, resize:'vertical', outline:'none', fontFamily:'inherit', lineHeight:1.5 }}
+            />
+            <div style={{ display:'flex', gap:8, marginTop:14 }}>
+              <button onClick={() => setModalInfo(null)}
+                style={{ flex:1, padding:'12px', border:'1px solid #e5e7eb', borderRadius:10, background:'#fff', fontWeight:600, cursor:'pointer', fontSize:14 }}>
+                Cancelar
+              </button>
+              <button
+                onClick={() => handleEnviarWhatsApp(modalInfo.cliente, modalInfo.texto)}
+                disabled={!modalInfo.texto.trim()}
+                style={{ flex:2, padding:'12px', background:'#16a34a', color:'#fff', border:'none', borderRadius:10, fontWeight:700, cursor:'pointer', fontSize:15 }}>
+                💬 Enviar por WhatsApp
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }
