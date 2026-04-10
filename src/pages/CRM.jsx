@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useSnapshot, useClientes, useTop20, useGestionesHoy, useGestionesRecientes, useEnRiesgoUrgente, iniciarContacto, cerrarGestion, resetGestion, useDatosMeta, useProductos } from '../hooks/useSnapshot'
+import { useSnapshot, useClientes, useTop20, useGestionesHoy, useGestionesRecientes, useEnRiesgoUrgente, iniciarContacto, cerrarGestion, resetGestion, useDatosMeta, useProductos, guardarContactoHistorial, actualizarResultadoHistorial, useConversiones } from '../hooks/useSnapshot'
 import { getPlantillas, savePlantillas, buildMessage, PLANTILLAS_DEFAULT } from '../config/templates'
 
 const fmt = n => n >= 1_000_000 ? `$${(n/1_000_000).toFixed(1)}M` : n >= 1_000 ? `$${(n/1_000).toFixed(0)}K` : `$${Math.round(n)}`
@@ -121,6 +121,8 @@ function TabHoy({ overrides, setOverrides }) {
   async function handleEnviarWhatsApp(cliente, texto) {
     try {
       const id = await iniciarContacto(cliente.telefono)
+      // Persistir en histórico de contactos
+      await guardarContactoHistorial(cliente.telefono, 'whatsapp', 'contacto_inicial')
       setOverrides(o => ({ ...o, [cliente.telefono]: { id, estado: 'pendiente' } }))
       const tel = String(cliente.telefono).replace(/\D/g, '')
       window.open(`https://wa.me/549${tel}?text=${encodeURIComponent(texto)}`, '_blank')
@@ -146,6 +148,8 @@ function TabHoy({ overrides, setOverrides }) {
     setOverrides(o => ({ ...o, [telefono]: { id, estado: 'cerrando' } }))
     try {
       await cerrarGestion(id, resultado)
+      // Persistir resultado en histórico de contactos
+      await actualizarResultadoHistorial(telefono, resultado)
       setOverrides(o => ({ ...o, [telefono]: { id, estado: resultado } }))
     } catch {
       setOverrides(o => ({ ...o, [telefono]: { id, estado: 'pendiente' } }))
@@ -772,6 +776,89 @@ function TabGlosario() {
   )
 }
 
+// ── Tab Conversiones (Atribución de contactos a pedidos) ────────────────────────
+function TabConversiones() {
+  const { stats, loading, error } = useConversiones()
+
+  if (loading) return <p>📊 Cargando métricas de conversión...</p>
+  if (error) return <p>❌ Error: {error}</p>
+  if (!stats) return <p>📊 Sin datos de conversión aún</p>
+
+  const { total_contactados, total_conversiones, tasa_conversion, dias_promedio_a_orden, por_segmento } = stats
+
+  return (
+    <div>
+      <h2>📊 Conversiones — Últimos 30 Días</h2>
+
+      {/* Métricas principales */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 32 }}>
+        <div style={{ padding: 16, background: '#f0f9ff', border: '1px solid #0ea5e9', borderRadius: 8 }}>
+          <div style={{ fontSize: 12, color: '#0369a1', fontWeight: 600 }}>📞 Contactados</div>
+          <div style={{ fontSize: 32, fontWeight: 700, marginTop: 8 }}>{total_contactados}</div>
+          <div style={{ fontSize: 11, color: '#666', marginTop: 4 }}>contactos en últimos 30d</div>
+        </div>
+
+        <div style={{ padding: 16, background: '#f0fdf4', border: '1px solid #22c55e', borderRadius: 8 }}>
+          <div style={{ fontSize: 12, color: '#15803d', fontWeight: 600 }}>🛒 Conversiones</div>
+          <div style={{ fontSize: 32, fontWeight: 700, marginTop: 8 }}>{total_conversiones}</div>
+          <div style={{ fontSize: 11, color: '#666', marginTop: 4 }}>hicieron pedido después de contacto</div>
+        </div>
+
+        <div style={{ padding: 16, background: '#fef3c7', border: '1px solid #f59e0b', borderRadius: 8 }}>
+          <div style={{ fontSize: 12, color: '#92400e', fontWeight: 600 }}>📈 Tasa</div>
+          <div style={{ fontSize: 32, fontWeight: 700, marginTop: 8 }}>{tasa_conversion}%</div>
+          <div style={{ fontSize: 11, color: '#666', marginTop: 4 }}>tasa de conversión</div>
+        </div>
+
+        <div style={{ padding: 16, background: '#fce7f3', border: '1px solid #ec4899', borderRadius: 8 }}>
+          <div style={{ fontSize: 12, color: '#9d174d', fontWeight: 600 }}>⏱️ Promedio</div>
+          <div style={{ fontSize: 32, fontWeight: 700, marginTop: 8 }}>{dias_promedio_a_orden || '—'}</div>
+          <div style={{ fontSize: 11, color: '#666', marginTop: 4 }}>días entre contacto y pedido</div>
+        </div>
+      </div>
+
+      {/* Desglose por segmento */}
+      <div style={{ marginTop: 32 }}>
+        <h3>📊 Por Segmento</h3>
+        <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 12 }}>
+          <thead>
+            <tr style={{ borderBottom: '2px solid #ddd', background: '#f9fafb' }}>
+              <th style={{ padding: 12, textAlign: 'left', fontWeight: 600, color: '#333' }}>Segmento</th>
+              <th style={{ padding: 12, textAlign: 'right', fontWeight: 600, color: '#333' }}>Contactados</th>
+              <th style={{ padding: 12, textAlign: 'right', fontWeight: 600, color: '#333' }}>Conversiones</th>
+              <th style={{ padding: 12, textAlign: 'right', fontWeight: 600, color: '#333' }}>Tasa</th>
+              <th style={{ padding: 12, textAlign: 'right', fontWeight: 600, color: '#333' }}>Días Promedio</th>
+            </tr>
+          </thead>
+          <tbody>
+            {por_segmento && Object.entries(por_segmento).map(([seg, datos]) => (
+              <tr key={seg} style={{ borderBottom: '1px solid #eee', background: seg === 'En riesgo' ? '#fff5f5' : 'transparent' }}>
+                <td style={{ padding: 12, color: '#333' }}>
+                  {SEG_ICONS[seg] || '•'} {seg}
+                </td>
+                <td style={{ padding: 12, textAlign: 'right', color: '#666' }}>{datos.contactados}</td>
+                <td style={{ padding: 12, textAlign: 'right', color: '#16a34a', fontWeight: 600 }}>{datos.conversiones}</td>
+                <td style={{ padding: 12, textAlign: 'right', fontWeight: 600, color: datos.tasa > 30 ? '#16a34a' : datos.tasa > 15 ? '#f59e0b' : '#ef4444' }}>
+                  {datos.tasa}%
+                </td>
+                <td style={{ padding: 12, textAlign: 'right', color: '#666' }}>{datos.dias_promedio || '—'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Información */}
+      <div style={{ marginTop: 32, padding: 16, background: '#f0f9ff', border: '1px solid #0ea5e9', borderRadius: 8 }}>
+        <p style={{ margin: 0, fontSize: 12, color: '#0369a1' }}>
+          <strong>💡 Cómo leer:</strong> La tasa de conversión es el % de contactos que resultaron en un pedido después del contacto.
+          Los "días promedio" muestran cuánto tarda en pedirse después del contacto (datos solo para conversiones).
+        </p>
+      </div>
+    </div>
+  )
+}
+
 // ── Tab Clientes (CRM completo) ────────────────────────────────────────────────
 const SORT_COLS = {
   score:    'score_comercial',
@@ -1045,6 +1132,7 @@ export default function CRM() {
         {[
           { key: 'hoy',        label: '📋 Hoy'              },
           { key: 'acciones',   label: '✅ Acciones'          },
+          { key: 'conversiones', label: '📊 Conversiones'    },
           { key: 'crm',        label: '👥 Clientes'          },
           { key: 'productos',  label: '🍔 Productos'         },
           { key: 'plantillas', label: '✏️ Plantillas'        },
@@ -1062,6 +1150,7 @@ export default function CRM() {
 
       {vista === 'hoy'        && <TabHoy overrides={overrides} setOverrides={setOverrides} />}
       {vista === 'acciones'   && <TabAcciones overrides={overrides} />}
+      {vista === 'conversiones' && <TabConversiones />}
       {vista === 'crm'        && <TabClientes segs={segs} />}
       {vista === 'productos'  && <TabProductos />}
       {vista === 'plantillas' && <TabPlantillas />}

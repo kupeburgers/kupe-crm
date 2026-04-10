@@ -216,3 +216,62 @@ export function useDatosMeta() {
 
   return meta
 }
+
+// Persistencia de contactos: guardar nuevo contacto en histórico
+export async function guardarContactoHistorial(telefono, canal = 'whatsapp', accion = 'contacto_inicial') {
+  const hoy = new Date().toISOString().split('T')[0]
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/contactos_historial`,
+    {
+      method: 'POST',
+      headers: { ...HEADERS, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        cliente_telefono: telefono,
+        canal,
+        accion,
+        fecha_contacto: hoy,
+        resultado: null
+      })
+    }
+  )
+  if (!res.ok) throw new Error('guardarContactoHistorial falló')
+  return res.json()
+}
+
+// Actualizar resultado de un contacto en histórico
+export async function actualizarResultadoHistorial(telefono, resultado) {
+  const hoy = new Date().toISOString().split('T')[0]
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/contactos_historial?cliente_telefono=eq.${encodeURIComponent(telefono)}&fecha_contacto=eq.${hoy}`,
+    {
+      method: 'PATCH',
+      headers: { ...HEADERS, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ resultado })
+    }
+  )
+  if (!res.ok) throw new Error('actualizarResultadoHistorial falló')
+  return res.json()
+}
+
+// Conversiones: métricas de contacto-a-pedido de últimos 30 días
+export function useConversiones() {
+  const [stats, setStats] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    fetch(
+      `${SUPABASE_URL}/rest/v1/rpc/calcular_conversiones_30dias`,
+      { method: 'POST', headers: HEADERS }
+    )
+      .then(r => r.json())
+      .then(data => {
+        if (data && data[0]) setStats(data[0])
+        else setError('Sin datos de conversión')
+      })
+      .catch(e => setError(e.message))
+      .finally(() => setLoading(false))
+  }, [])
+
+  return { stats, loading, error }
+}
