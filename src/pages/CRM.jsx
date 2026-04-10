@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSnapshot, useClientes, useTop20, useGestionesHoy, useGestionesRecientes, useEnRiesgoUrgente, iniciarContacto, cerrarGestion, resetGestion, useDatosMeta, useProductos, guardarContactoHistorial, actualizarResultadoHistorial, useConversiones } from '../hooks/useSnapshot'
 import { getPlantillas, savePlantillas, buildMessage, PLANTILLAS_DEFAULT } from '../config/templates'
 
@@ -878,7 +878,8 @@ function TabClientes({ segs }) {
   const [sortDir, setSortDir]     = useState('desc')
 
   const { clientes, total, loading: loadingCli } = useClientes(filtroSeg, page, 50, busqueda)
-  const fichaCliente = fichaIdx !== null ? clientes[fichaIdx] : null
+  // FIX: Validar que el cliente existe y tiene datos antes de renderizar
+  const fichaCliente = fichaIdx !== null && clientes && clientes[fichaIdx] ? clientes[fichaIdx] : null
 
   // Sort client-side sobre la página actual
   const clientesSorted = sortCol
@@ -894,6 +895,11 @@ function TabClientes({ segs }) {
     else { setSortCol(col); setSortDir('desc') }
   }
 
+  // FIX: Resetear ficha cuando la página cambia (nuevos clientes)
+  useEffect(() => {
+    setFichaIdx(null)
+  }, [page])
+
   function ThSort({ col, children }) {
     const active = sortCol === col
     return (
@@ -908,7 +914,7 @@ function TabClientes({ segs }) {
   function cambiarSeg(seg) {
     setFiltroSeg(seg)
     setPage(0)
-    setFichaIdx(null)
+    setFichaIdx(null)  // FIX: Resetear ficha al cambiar segmento
     setBusqueda('')
   }
 
