@@ -134,22 +134,24 @@ export function useEnRiesgoUrgente(scoreMin = 70) {
   return alertas
 }
 
-// CRM: clientes directos de la tabla con paginación
-export function useClientes(segmento, page = 0, pageSize = 50) {
+// CRM: clientes directos de la tabla con paginación y búsqueda por teléfono
+export function useClientes(segmento, page = 0, pageSize = 50, busqueda = '') {
   const [clientes, setClientes] = useState([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     setLoading(true)
-    const segFilter = segmento && segmento !== 'Todos'
+    const tel = busqueda.replace(/\D/g, '')
+    const segFilter = (!tel && segmento && segmento !== 'Todos')
       ? `&segmento=eq.${encodeURIComponent(segmento)}`
       : ''
+    const telFilter = tel ? `&telefono=like.*${tel}*` : ''
     const from = page * pageSize
     const to = from + pageSize - 1
 
     fetch(
-      `${SUPABASE_URL}/rest/v1/clientes_live?select=nombre,telefono,segmento,score_comercial,rank_prioridad,recencia_dias,frecuencia,valor_total,ticket_promedio,tasa_recompra_30d,tasa_recompra_60d,intervalo_promedio_dias,ultima_compra,producto_favorito,pan_favorito,hora_habitual,total_pedidos_historial,ultimo_producto,fecha_ultimo_pedido,perfil_actualizado_at${segFilter}&order=score_comercial.desc.nullslast,valor_total.desc&limit=${pageSize}&offset=${from}`,
+      `${SUPABASE_URL}/rest/v1/clientes_live?select=nombre,telefono,segmento,score_comercial,rank_prioridad,recencia_dias,frecuencia,valor_total,ticket_promedio,tasa_recompra_30d,tasa_recompra_60d,intervalo_promedio_dias,ultima_compra,producto_favorito,pan_favorito,hora_habitual,total_pedidos_historial,ultimo_producto,fecha_ultimo_pedido,perfil_actualizado_at${segFilter}${telFilter}&order=score_comercial.desc.nullslast,valor_total.desc&limit=${pageSize}&offset=${from}`,
       { headers: { ...HEADERS, 'Range-Unit': 'items', Range: `${from}-${to}`, Prefer: 'count=exact' } }
     )
       .then(r => {
@@ -161,7 +163,7 @@ export function useClientes(segmento, page = 0, pageSize = 50) {
       .then(rows => setClientes(rows || []))
       .catch(() => setClientes([]))
       .finally(() => setLoading(false))
-  }, [segmento, page])
+  }, [segmento, page, busqueda])
 
   return { clientes, total, loading }
 }

@@ -222,34 +222,56 @@ function TabHoy({ overrides, setOverrides }) {
         </div>
       )}
 
-      {/* ALERTA EN RIESGO URGENTE */}
-      {enRiesgo.length > 0 && (
-        <div className="alerta-riesgo">
-          <div className="alerta-riesgo-title">
-            ⚠️ {enRiesgo.length} clientes En riesgo con score alto — última oportunidad antes de perderlos
+      {/* ALERTA EN RIESGO URGENTE — oculta los ya contactados hoy */}
+      {(() => {
+        const pendientes = enRiesgo.filter(c => {
+          const est = overrides[c.telefono]?.estado ?? gestionesDB?.[c.telefono]?.estado ?? null
+          return est === null  // solo mostrar los que no fueron contactados hoy
+        })
+        if (!pendientes.length) return null
+        return (
+          <div className="alerta-riesgo" style={{ borderLeft: '4px solid #dc2626' }}>
+            <div className="alerta-riesgo-title">
+              🚨 {pendientes.length} cliente{pendientes.length > 1 ? 's' : ''} En riesgo sin contactar hoy — score alto
+            </div>
+            <div style={{ fontSize: 12, color: '#b45309', marginBottom: 8, fontWeight: 400 }}>
+              Si no los contactás esta semana, pasan a <strong>Perdido</strong> y se vuelven muy difíciles de recuperar.
+            </div>
+            <div className="alerta-riesgo-list">
+              {pendientes.slice(0, 4).map(c => {
+                const diasParaPerdido = Math.max(0, 120 - (c.recencia_dias || 0))
+                return (
+                  <div key={c.telefono} className="alerta-riesgo-item" style={{ alignItems: 'flex-start', flexDirection: 'column', gap: 6 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                      <span style={{ fontWeight: 600 }}>{c.nombre || c.telefono}</span>
+                      <button
+                        className="btn-accion"
+                        style={{ background: '#dc2626', fontSize: 12, padding: '5px 12px' }}
+                        onClick={() => handleAbrirModal(c)}
+                      >
+                        💬 Contactar ahora
+                      </button>
+                    </div>
+                    <div style={{ display: 'flex', gap: 12, fontSize: 12, color: '#6b7280' }}>
+                      <span>⏱ {c.recencia_dias}d sin comprar</span>
+                      <span>🏆 Score {c.score_comercial}</span>
+                      {diasParaPerdido <= 30
+                        ? <span style={{ color: '#dc2626', fontWeight: 600 }}>⚠️ Pasa a Perdido en ~{diasParaPerdido}d</span>
+                        : <span>🗓 ~{diasParaPerdido}d para Perdido</span>
+                      }
+                    </div>
+                  </div>
+                )
+              })}
+              {pendientes.length > 4 && (
+                <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 4 }}>
+                  + {pendientes.length - 4} más — buscalos en la lista Clientes → En riesgo
+                </div>
+              )}
+            </div>
           </div>
-          <div className="alerta-riesgo-list">
-            {enRiesgo.slice(0, 4).map(c => (
-              <div key={c.telefono} className="alerta-riesgo-item">
-                <span>{c.nombre || c.telefono}</span>
-                <span style={{ color: '#9ca3af' }}>{c.recencia_dias}d · score {c.score_comercial}</span>
-                <button
-                  className="btn-accion"
-                  style={{ background: '#ea580c', fontSize: 11, padding: '4px 10px' }}
-                  onClick={() => handleAbrirModal(c)}
-                >
-                  Contactar
-                </button>
-              </div>
-            ))}
-            {enRiesgo.length > 4 && (
-              <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 4 }}>
-                + {enRiesgo.length - 4} más en la lista "Todos los clientes"
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+        )
+      })()}
 
       {/* BARRA DE FILTROS CON CONTEOS */}
       <div className="seg-filter-row" style={{ marginBottom: 16 }}>
@@ -684,19 +706,132 @@ function TabProductos() {
   )
 }
 
+// ── Tab Glosario ───────────────────────────────────────────────────────────────
+function TabGlosario() {
+  const Bloque = ({ titulo, children }) => (
+    <div style={{ marginBottom: 24, background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 12, padding: '16px 20px' }}>
+      <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 10, color: '#1f2937' }}>{titulo}</div>
+      {children}
+    </div>
+  )
+  const Row = ({ term, def }) => (
+    <div style={{ display: 'grid', gridTemplateColumns: '130px 1fr', gap: 8, marginBottom: 8, fontSize: 14 }}>
+      <span style={{ fontWeight: 600, color: '#374151' }}>{term}</span>
+      <span style={{ color: '#4b5563', lineHeight: 1.5 }}>{def}</span>
+    </div>
+  )
+
+  return (
+    <div style={{ maxWidth: 680 }}>
+      <Bloque titulo="📊 Métricas de cliente">
+        <Row term="Score (0-100)"
+          def="Puntaje de valor comercial. Combina recencia, frecuencia, gasto total, ticket y recompra. Más alto = más vale la pena recuperarlo." />
+        <Row term="Recencia"
+          def="Días desde la última compra. Verde < 30d · Amarillo 30-60d · Rojo > 60d." />
+        <Row term="Revenue"
+          def="Total gastado por el cliente en todo el historial." />
+        <Row term="Ticket"
+          def="Gasto promedio por pedido (revenue ÷ pedidos)." />
+        <Row term="R30D %"
+          def="Tasa de recompra en 30 días: % de meses en que el cliente compró al menos una vez. Ej: 75% = compró en 3 de los últimos 4 meses." />
+        <Row term="Intervalo prom."
+          def="Cada cuántos días suele volver a comprar, en promedio. Útil para saber cuándo contactarlo." />
+      </Bloque>
+
+      <Bloque titulo="🎯 Segmentos — criterios">
+        {[
+          { icon: '🟢', seg: 'Activo',    color: '#00a65a', def: 'Compró hace menos de 30 días. Mantenerlo activo con novedades o promociones.' },
+          { icon: '🎯', seg: 'Tibio',     color: '#d97700', def: 'Sin comprar entre 30 y 60 días. Ventana ideal para reactivar antes de que enfríe.' },
+          { icon: '🟠', seg: 'Enfriando', color: '#c05a00', def: 'Sin comprar entre 60 y 90 días. Urgente: cada día que pasa baja su probabilidad de volver.' },
+          { icon: '🔴', seg: 'En riesgo', color: '#cc2222', def: 'Sin comprar más de 90 días pero con historial valioso. Última oportunidad antes de perderlos.' },
+          { icon: '⬛', seg: 'Perdido',   color: '#666',    def: 'Inactivos hace más de 120 días. Difíciles de recuperar, pero con score alto vale el intento.' },
+        ].map(s => (
+          <div key={s.seg} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 8 }}>
+            <span className="seg-tag" style={{ background: s.color, flexShrink: 0 }}>{s.icon} {s.seg}</span>
+            <span style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.5, paddingTop: 2 }}>{s.def}</span>
+          </div>
+        ))}
+      </Bloque>
+
+      <Bloque titulo="📋 R30 en las cards de segmento">
+        <p style={{ fontSize: 14, color: '#4b5563', margin: 0, lineHeight: 1.6 }}>
+          En el panel de segmentos vas a ver algo como <strong>"r30 12 — 14%"</strong>.
+          Significa: <strong>12 clientes</strong> de ese segmento compraron en los últimos 30 días,
+          lo que representa el <strong>14%</strong> de ese segmento.
+          Si Tibio tiene r30 bajo, hay muchos clientes que no están comprando y necesitan contacto.
+        </p>
+      </Bloque>
+
+      <Bloque titulo="📋 Lista Hoy — lógica de prioridad">
+        <p style={{ fontSize: 14, color: '#4b5563', margin: 0, lineHeight: 1.6 }}>
+          La lista de contactos diarios mezcla score + urgencia por recencia.
+          Clientes con muchos días sin comprar reciben un bonus de urgencia para subir en la lista,
+          aunque su score base sea menor. El objetivo es que siempre veas primero al que más necesita atención.
+        </p>
+      </Bloque>
+
+      <Bloque titulo="⚠️ Alertas En riesgo">
+        <p style={{ fontSize: 14, color: '#4b5563', margin: 0, lineHeight: 1.6 }}>
+          Aparecen clientes En riesgo con score alto (&gt; 70). Son los más valiosos que están
+          a punto de pasar a Perdido. Una vez contactados, desaparecen de la alerta por ese día.
+          La acción recomendada es siempre contactar por WhatsApp con un mensaje personalizado.
+        </p>
+      </Bloque>
+    </div>
+  )
+}
+
 // ── Tab Clientes (CRM completo) ────────────────────────────────────────────────
+const SORT_COLS = {
+  score:    'score_comercial',
+  recencia: 'recencia_dias',
+  pedidos:  'frecuencia',
+  revenue:  'valor_total',
+  ticket:   'ticket_promedio',
+  r30d:     'tasa_recompra_30d',
+}
+
 function TabClientes({ segs }) {
   const [filtroSeg, setFiltroSeg] = useState('Tibio')
   const [page, setPage]           = useState(0)
   const [fichaIdx, setFichaIdx]   = useState(null)
+  const [busqueda, setBusqueda]   = useState('')
+  const [sortCol, setSortCol]     = useState(null)   // null = default (score desc)
+  const [sortDir, setSortDir]     = useState('desc')
 
-  const { clientes, total, loading: loadingCli } = useClientes(filtroSeg, page)
+  const { clientes, total, loading: loadingCli } = useClientes(filtroSeg, page, 50, busqueda)
   const fichaCliente = fichaIdx !== null ? clientes[fichaIdx] : null
+
+  // Sort client-side sobre la página actual
+  const clientesSorted = sortCol
+    ? [...clientes].sort((a, b) => {
+        const va = Number(a[SORT_COLS[sortCol]]) || 0
+        const vb = Number(b[SORT_COLS[sortCol]]) || 0
+        return sortDir === 'asc' ? va - vb : vb - va
+      })
+    : clientes
+
+  function handleSort(col) {
+    if (sortCol === col) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    else { setSortCol(col); setSortDir('desc') }
+  }
+
+  function ThSort({ col, children }) {
+    const active = sortCol === col
+    return (
+      <th onClick={() => handleSort(col)}
+        style={{ cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap',
+                 color: active ? '#4f8ef7' : undefined }}>
+        {children}{active ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ' ↕'}
+      </th>
+    )
+  }
 
   function cambiarSeg(seg) {
     setFiltroSeg(seg)
     setPage(0)
     setFichaIdx(null)
+    setBusqueda('')
   }
 
   return (
@@ -813,9 +948,26 @@ function TabClientes({ segs }) {
 
       {/* TABLA */}
       <div className="section">
-        <div className="section-title">
-          {filtroSeg === 'Todos' ? 'Todos los clientes' : `Clientes — ${filtroSeg}`}
-          <span style={{ fontWeight: 400, marginLeft: 8, color: '#aaa' }}>({total})</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12, flexWrap: 'wrap' }}>
+          <div className="section-title" style={{ margin: 0 }}>
+            {busqueda ? 'Búsqueda' : filtroSeg === 'Todos' ? 'Todos los clientes' : `Clientes — ${filtroSeg}`}
+            <span style={{ fontWeight: 400, marginLeft: 8, color: '#aaa' }}>({total})</span>
+          </div>
+          <input
+            type="text"
+            placeholder="🔍 Buscar por teléfono..."
+            value={busqueda}
+            onChange={e => { setBusqueda(e.target.value); setPage(0); setFichaIdx(null) }}
+            style={{ padding: '7px 12px', border: '1px solid #e5e7eb', borderRadius: 8, fontSize: 14,
+                     outline: 'none', width: 220, background: busqueda ? '#eff6ff' : '#fff' }}
+          />
+          {busqueda && (
+            <button onClick={() => { setBusqueda(''); setPage(0) }}
+              style={{ padding: '6px 12px', border: '1px solid #e5e7eb', borderRadius: 8,
+                       background: '#fff', cursor: 'pointer', fontSize: 13, color: '#6b7280' }}>
+              ✕ Limpiar
+            </button>
+          )}
         </div>
         {loadingCli ? (
           <div className="loading" style={{ height: 80 }}>Cargando clientes...</div>
@@ -824,12 +976,17 @@ function TabClientes({ segs }) {
             <thead>
               <tr>
                 <th>Rk</th><th>Cliente</th><th>Teléfono</th><th>Segmento</th>
-                <th>Score</th><th>Recencia</th><th>Pedidos</th><th>Revenue</th>
-                <th>Ticket</th><th>r30d</th><th>Última compra</th><th></th>
+                <ThSort col="score">Score</ThSort>
+                <ThSort col="recencia">Recencia</ThSort>
+                <ThSort col="pedidos">Pedidos</ThSort>
+                <ThSort col="revenue">Revenue</ThSort>
+                <ThSort col="ticket">Ticket</ThSort>
+                <ThSort col="r30d">r30d</ThSort>
+                <th>Última compra</th><th></th>
               </tr>
             </thead>
             <tbody>
-              {clientes.map((c, i) => (
+              {clientesSorted.map((c, i) => (
                 <tr key={i} style={fichaIdx === i ? { background: '#eff6ff' } : {}}>
                   <td style={{ color: '#aaa', fontSize: 11 }}>{c.rank_prioridad}</td>
                   <td style={{ fontWeight: 600 }}>{c.nombre || <span style={{ color: '#ccc' }}>Sin nombre</span>}</td>
@@ -901,6 +1058,7 @@ export default function CRM() {
           { key: 'crm',        label: '👥 Clientes'          },
           { key: 'productos',  label: '🍔 Productos'         },
           { key: 'plantillas', label: '✏️ Plantillas'        },
+          { key: 'glosario',   label: '❓ Glosario'          },
         ].map(t => (
           <button key={t.key}
             className={`seg-btn ${vista === t.key ? 'active' : ''}`}
@@ -917,6 +1075,7 @@ export default function CRM() {
       {vista === 'crm'        && <TabClientes segs={segs} />}
       {vista === 'productos'  && <TabProductos />}
       {vista === 'plantillas' && <TabPlantillas />}
+      {vista === 'glosario'   && <TabGlosario />}
     </div>
   )
 }
