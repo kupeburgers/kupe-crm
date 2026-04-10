@@ -121,11 +121,11 @@ function TabHoy({ overrides, setOverrides }) {
   async function handleEnviarWhatsApp(cliente, texto) {
     try {
       const id = await iniciarContacto(cliente.telefono)
-      // Persistir en histórico de contactos
-      await guardarContactoHistorial(cliente.telefono, 'whatsapp', 'contacto_inicial')
       setOverrides(o => ({ ...o, [cliente.telefono]: { id, estado: 'pendiente' } }))
       const tel = String(cliente.telefono).replace(/\D/g, '')
       window.open(`https://wa.me/549${tel}?text=${encodeURIComponent(texto)}`, '_blank')
+      // Persistir en histórico en segundo plano (no bloquear si falla)
+      guardarContactoHistorial(cliente.telefono, 'whatsapp', 'contacto_inicial').catch(() => {})
     } catch {
       // Si falla la RPC no abrimos WhatsApp ni actualizamos estado
     }
@@ -148,9 +148,9 @@ function TabHoy({ overrides, setOverrides }) {
     setOverrides(o => ({ ...o, [telefono]: { id, estado: 'cerrando' } }))
     try {
       await cerrarGestion(id, resultado)
-      // Persistir resultado en histórico de contactos
-      await actualizarResultadoHistorial(telefono, resultado)
       setOverrides(o => ({ ...o, [telefono]: { id, estado: resultado } }))
+      // Persistir resultado en histórico en segundo plano (no bloquear si falla)
+      actualizarResultadoHistorial(telefono, resultado).catch(() => {})
     } catch {
       setOverrides(o => ({ ...o, [telefono]: { id, estado: 'pendiente' } }))
     }
