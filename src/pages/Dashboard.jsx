@@ -169,12 +169,17 @@ export default function Dashboard() {
                 <span className="seg-badge">{fmt(s.revenue)}</span>
                 <span className="seg-badge">tk {fmt(s.ticket)}</span>
               </div>
-              {(s.entraron > 0 || s.salieron > 0) && (
-                <div className="seg-mov">
-                  {s.entraron > 0 && `↑${s.entraron} `}
-                  {s.salieron > 0 && `↓${s.salieron}`}
-                </div>
-              )}
+              {(() => {
+                const mov = movs.find(m => m.segmento === s.segmento)
+                if (!mov || (mov.entraron === 0 && mov.salieron === 0)) return null
+                const fmtDesglose = obj => obj ? Object.entries(obj).sort((a,b) => b[1] - a[1]).map(([seg, n]) => `${seg} ${n}`).join(' · ') : ''
+                return (
+                  <div className="seg-mov" style={{ fontSize: 11, lineHeight: 1.4, textAlign: 'left' }}>
+                    {mov.entraron > 0 && (<div>↑ {mov.entraron} entraron<br/><span style={{ opacity: 0.85 }}>  de {fmtDesglose(mov.entraron_desde)}</span></div>)}
+                    {mov.salieron > 0 && (<div>↓ {mov.salieron} salieron<br/><span style={{ opacity: 0.85 }}>  a {fmtDesglose(mov.salieron_hacia)}</span></div>)}
+                  </div>
+                )
+              })()}
             </div>
           ))}
         </div>

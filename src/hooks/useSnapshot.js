@@ -151,7 +151,7 @@ export function useClientes(segmento, page = 0, pageSize = 50, busqueda = '') {
     const to = from + pageSize - 1
 
     fetch(
-      `${SUPABASE_URL}/rest/v1/clientes_live?select=nombre,telefono,segmento,score_comercial,rank_prioridad,recencia_dias,frecuencia,valor_total,ticket_promedio,tasa_recompra_30d,tasa_recompra_60d,intervalo_promedio_dias,ultima_compra,producto_favorito,pan_favorito,hora_habitual,total_pedidos_historial,ultimo_producto,fecha_ultimo_pedido,perfil_actualizado_at${segFilter}${telFilter}&order=score_comercial.desc.nullslast,valor_total.desc&limit=${pageSize}&offset=${from}`,
+      `${SUPABASE_URL}/rest/v1/clientes_live?select=nombre,telefono,segmento,score_comercial,rank_prioridad,recencia_dias,frecuencia,valor_total,ticket_promedio,intervalo_promedio_dias,producto_favorito,pan_favorito,hora_habitual,total_pedidos_historial,ultimo_producto,fecha_ultimo_pedido,perfil_actualizado_at,meses_con_compra,frecuencia_mensual,pedidos_ultimos_30d,pedidos_ultimos_60d,fecha_anteultimo_pedido,cliente_sensible_precio,score_fidelizar${segFilter}${telFilter}&order=score_comercial.desc.nullslast,valor_total.desc&limit=${pageSize}&offset=${from}`,
       { headers: { ...HEADERS, 'Range-Unit': 'items', Range: `${from}-${to}`, Prefer: 'count=exact' } }
     )
       .then(r => {
