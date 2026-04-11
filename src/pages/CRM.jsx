@@ -1028,16 +1028,25 @@ function TabClientes({ segs }) {
               </div>
             )
           })()}
+          {fichaCliente.cliente_sensible_precio && (
+            <div style={{ marginBottom: 12 }}>
+              <span style={{ fontSize: 13, background: '#fef2f2', color: '#dc2626', borderRadius: 8, padding: '4px 12px', fontWeight: 600, border: '1px solid #fecaca' }}>
+                💲 Sensible a precio
+              </span>
+            </div>
+          )}
           <div className="ficha-grid">
             <div className="ficha-stat"><strong>{fichaCliente.total_pedidos_historial ?? fichaCliente.frecuencia}</strong>Pedidos hist.</div>
             <div className="ficha-stat"><strong>{fmt(fichaCliente.valor_total)}</strong>Revenue total</div>
             <div className="ficha-stat"><strong>{fmt(fichaCliente.ticket_promedio)}</strong>Ticket prom.</div>
             <div className="ficha-stat"><strong>{fichaCliente.recencia_dias}d</strong>Recencia</div>
-            <div className="ficha-stat"><strong>{fichaCliente.tasa_recompra_30d ?? '—'}%</strong>Recompra 30d</div>
-            <div className="ficha-stat"><strong>{fichaCliente.tasa_recompra_60d ?? '—'}%</strong>Recompra 60d</div>
+            <div className="ficha-stat"><strong>{fichaCliente.pedidos_ultimos_30d ?? 0}</strong>Ped. 30d</div>
+            <div className="ficha-stat"><strong>{fichaCliente.pedidos_ultimos_60d ?? 0}</strong>Ped. 60d</div>
+            <div className="ficha-stat"><strong>{fichaCliente.frecuencia_mensual ?? '—'}</strong>Freq. mensual</div>
             <div className="ficha-stat"><strong>{fichaCliente.intervalo_promedio_dias > 0 ? `${fichaCliente.intervalo_promedio_dias}d` : '—'}</strong>Intervalo prom.</div>
-            <div className="ficha-stat"><strong>{fichaCliente.ultima_compra || '—'}</strong>Última compra</div>
             <div className="ficha-stat"><strong>{fichaCliente.fecha_ultimo_pedido || '—'}</strong>Último pedido</div>
+            <div className="ficha-stat"><strong>{fichaCliente.fecha_anteultimo_pedido || '—'}</strong>Anteúltimo ped.</div>
+            <div className="ficha-stat"><strong>{fichaCliente.score_fidelizar ?? '—'}</strong>Score fidelizar</div>
             <div className="ficha-stat">
               <strong>
                 {fichaCliente.perfil_actualizado_at
@@ -1089,8 +1098,7 @@ function TabClientes({ segs }) {
                 <ThSort col="pedidos">Pedidos</ThSort>
                 <ThSort col="revenue">Revenue</ThSort>
                 <ThSort col="ticket">Ticket</ThSort>
-                <ThSort col="r30d">r30d</ThSort>
-                <th>Última compra</th><th></th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -1109,8 +1117,6 @@ function TabClientes({ segs }) {
                   <td>{c.frecuencia}</td>
                   <td>{fmt(c.valor_total)}</td>
                   <td>{fmt(c.ticket_promedio)}</td>
-                  <td style={{ color: c.tasa_recompra_30d >= 50 ? '#22c55e' : '#f59e0b' }}>{c.tasa_recompra_30d ?? '—'}%</td>
-                  <td style={{ color: '#888', fontSize: 12 }}>{c.ultima_compra}</td>
                   <td><button className="btn-accion" onClick={() => setFichaIdx(fichaIdx === i ? null : i)}>{fichaIdx === i ? 'Cerrar' : 'Ver'}</button></td>
                 </tr>
               ))}
