@@ -4,7 +4,7 @@
     {
       "name": "kupe-crm",
       "runtimeExecutable": "C:\\Program Files\\nodejs\\node.exe",
-      "runtimeArgs": ["node_modules/vite/bin/vite.js", "--host"],
+      "runtimeArgs": ["C:\\Users\\kupeb\\OneDrive\\Escritorio\\supabase crm\\node_modules\\vite\\bin\\vite.js", "--host"],
       "autoPort": true
     }
   ]
