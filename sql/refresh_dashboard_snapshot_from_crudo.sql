@@ -125,15 +125,55 @@ begin
     order by mr.mes_ini
   ),
 
+  -- Retención mensual: % de clientes del mes anterior que volvieron a comprar
+  mes_clientes as (
+    select distinct
+      date_trunc('month', fecha)::date as mes,
+      telefono
+    from d_ok
+    where telefono is not null
+  ),
+
+  prev_count as (
+    select mes, count(*) as total
+    from mes_clientes
+    group by mes
+  ),
+
+  retained as (
+    select c.mes, count(*) as retenidos
+    from mes_clientes c
+    join mes_clientes p
+      on p.telefono = c.telefono
+      and p.mes = (c.mes - interval '1 month')::date
+    group by c.mes
+  ),
+
+  ret_agg as (
+    select
+      mr.mes_ini,
+      coalesce(
+        case
+          when coalesce(pc.total, 0) = 0 then 0
+          else round(100.0 * coalesce(r.retenidos, 0) / pc.total)::int
+        end, 0
+      ) as retencion
+    from m_range mr
+    left join prev_count pc on pc.mes = (mr.mes_ini - interval '1 month')::date
+    left join retained r on r.mes = mr.mes_ini
+  ),
+
   mon_json as (
     select jsonb_build_object(
-      'meses', jsonb_agg(initcap(to_char(mes_ini,'Mon')) order by mes_ini),
-      'pedidos', jsonb_agg(pedidos order by mes_ini),
-      'revenue', jsonb_agg(revenue order by mes_ini),
-      'ticket', jsonb_agg(ticket order by mes_ini),
-      'clientes', jsonb_agg(clientes order by mes_ini)
+      'meses',     jsonb_agg(initcap(to_char(ma.mes_ini,'Mon')) order by ma.mes_ini),
+      'pedidos',   jsonb_agg(ma.pedidos   order by ma.mes_ini),
+      'revenue',   jsonb_agg(ma.revenue   order by ma.mes_ini),
+      'ticket',    jsonb_agg(ma.ticket    order by ma.mes_ini),
+      'clientes',  jsonb_agg(ma.clientes  order by ma.mes_ini),
+      'retencion', jsonb_agg(coalesce(ra.retencion, 0) order by ma.mes_ini)
     ) as mon
-    from m_agg
+    from m_agg ma
+    left join ret_agg ra on ra.mes_ini = ma.mes_ini
   ),
 
   ins as (
