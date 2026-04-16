@@ -76,7 +76,7 @@ export async function cerrarGestion(id, resultado) {
   if (!res.ok) throw new Error('cerrar_gestion falló')
 }
 
-// Dashboard: solo las claves livianas del snapshot (sin CLIENTES)
+// Dashboard: snapshot con MON, SEGS, MOV_SEGS, y META (fechas de actualización)
 export function useSnapshot() {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -84,7 +84,7 @@ export function useSnapshot() {
 
   useEffect(() => {
     fetch(
-      `${SUPABASE_URL}/rest/v1/dashboard_snapshot?select=payload->MON,payload->SEGS,payload->MOV_SEGS,payload->PRODS,payload->MAR_DIAS,payload->MAR_PEDS,payload->MAR_PRODS&order=id.desc&limit=1`,
+      `${SUPABASE_URL}/rest/v1/dashboard_snapshot?select=payload&order=id.desc&limit=1`,
       { headers: HEADERS }
     )
       .then(r => r.json())

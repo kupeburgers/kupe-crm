@@ -10,9 +10,31 @@ export default function Dashboard() {
   if (loading) return <div className="loading">Cargando datos...</div>
   if (error)   return <div className="loading" style={{color:'#ef4444'}}>Error: {error}</div>
 
-  const mon   = data?.MON  || data?.['payload->MON']  || {}
-  const segs  = data?.SEGS || data?.['payload->SEGS'] || []
-  const movs  = data?.MOV_SEGS || data?.['payload->MOV_SEGS'] || []
+  const mon   = data?.payload?.MON  || {}
+  const segs  = data?.payload?.SEGS || []
+  const movs  = data?.payload?.MOV_SEGS || []
+  const meta  = data?.payload?.META || {}
+
+  // Formato de fecha
+  const fmtDate = (dateStr) => {
+    if (!dateStr) return 'Sin datos'
+    try {
+      const d = new Date(dateStr)
+      return d.toLocaleString('es-AR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' })
+    } catch {
+      return 'Fecha inválida'
+    }
+  }
+
+  const fmtDateShort = (dateStr) => {
+    if (!dateStr) return 'Sin datos'
+    try {
+      const d = new Date(dateStr)
+      return d.toLocaleString('es-AR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+    } catch {
+      return 'Fecha inválida'
+    }
+  }
 
   const meses    = mon.meses    || []
   const pedidos  = mon.pedidos  || []
@@ -59,6 +81,33 @@ export default function Dashboard() {
   return (
     <div className="page">
       <div className="page-title">📊 Dashboard — Contexto histórico</div>
+
+      {/* INFORMACIÓN DE ACTUALIZACIÓN */}
+      <div style={{ background: '#f5f5f5', padding: '12px 16px', borderRadius: '6px', marginBottom: '16px', fontSize: '12px' }}>
+        <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', alignItems: 'center' }}>
+          <div>
+            <strong>📦 Delivery:</strong>
+            <div style={{ color: '#666', marginTop: '2px' }}>
+              {fmtDateShort(meta?.ultima_entrega) || 'Sin datos'}
+            </div>
+          </div>
+          <div>
+            <strong>🛒 Pedidos:</strong>
+            <div style={{ color: '#666', marginTop: '2px' }}>
+              {fmtDateShort(meta?.ultima_pedido) || 'Sin datos'}
+            </div>
+          </div>
+          <div>
+            <strong>📊 Artículos:</strong>
+            <div style={{ color: '#666', marginTop: '2px' }}>
+              {fmtDateShort(meta?.ultima_articulo) || 'Sin datos'}
+            </div>
+          </div>
+          <div style={{ marginLeft: 'auto', textAlign: 'right', color: '#999', fontSize: '11px' }}>
+            <div>Actualizado: {fmtDateShort(meta?.actualizado_at) || 'Sin datos'}</div>
+          </div>
+        </div>
+      </div>
 
       {/* KPI STRIP */}
       <div className="kpi-row">
