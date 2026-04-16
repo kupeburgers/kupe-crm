@@ -1,0 +1,78 @@
+════════════════════════════════════════════════════════════════════════════════
+  🚀 KUPE CRM — GUÍA RÁPIDA DE USO
+════════════════════════════════════════════════════════════════════════════════
+
+📌 ¿QUÉ ES update-data.cjs?
+───────────────────────────────────────────────────────────────────────────────
+El script UNIFICADO que procesa TODO en un solo flujo:
+
+  1️⃣  Busca el archivo .xlsx más reciente en:
+      • C:/Users/kupeb/OneDrive/Escritorio/supabase crm/datos/delivery/
+      • C:/Users/kupeb/OneDrive/Escritorio/supabase crm/datos/pedidos/
+      • C:/Users/kupeb/OneDrive/Escritorio/supabase crm/datos/articulos/
+
+  2️⃣  Procesa los datos y desduplicados:
+      • Delivery → stg_entregas_raw
+      • Pedidos → stg_pedidos_pendiente_raw
+      • Artículos → stg_articulos_ventas_raw
+
+  3️⃣  Ejecuta 4 RPC automáticamente:
+      • rebuild_clientes_from_crudo() — Recalcula clientes
+      • refresh_dashboard_snapshot_from_crudo() — Genera dashboard
+      • snapshot_segmentos_diario() — Registra segmentos
+      • calcular_transiciones_segmento_hoy() — Calcula movimientos
+
+════════════════════════════════════════════════════════════════════════════════
+
+⚡ ¿CÓMO USAR?
+───────────────────────────────────────────────────────────────────────────────
+
+OPCIÓN 1 — Doble click (MÁS FÁCIL):
+  • En el Desktop busca: 🚀-ACTUALIZAR-CRM.bat
+  • Doble click → Listo, se ejecuta todo
+
+OPCIÓN 2 — Desde la carpeta del proyecto:
+  • Ve a: C:\Users\kupeb\OneDrive\Escritorio\supabase crm\
+  • Doble click en: EJECUTAR-ACTUALIZAR-CRM.bat
+
+OPCIÓN 3 — Línea de comandos (si quieres ver detalles):
+  • Abre cmd o PowerShell
+  • Navega a: C:\Users\kupeb\OneDrive\Escritorio\supabase crm
+  • Ejecuta: node scripts/update-data.cjs
+
+════════════════════════════════════════════════════════════════════════════════
+
+📊 ¿CUÁNDO EJECUTARLO?
+───────────────────────────────────────────────────────────────────────────────
+ANTES de revisar el Dashboard, cuando tengas:
+
+  ✅ Archivos nuevos en /datos/delivery/
+  ✅ Archivos nuevos en /datos/pedidos/
+  ✅ Archivos nuevos en /datos/articulos/
+
+El script:
+  • Busca automáticamente el .xlsx más reciente
+  • No necesitas especificar el nombre
+  • Ignora carpetas vacías (continúa sin error)
+  • Tarda ~5-10 segundos
+
+════════════════════════════════════════════════════════════════════════════════
+
+❌ ¿SI ALGO FALLA?
+───────────────────────────────────────────────────────────────────────────────
+Si ves errores en la consola:
+
+  • "No se encontraron archivos .xlsx" → Verifica que los .xlsx estén en /datos/
+  • "Error en lote X" → Hay datos inválidos (fechas, números incorrectos)
+  • "PGRST202" → Error de conexión a Supabase
+
+════════════════════════════════════════════════════════════════════════════════
+
+💡 IMPORTANTE
+───────────────────────────────────────────────────────────────────────────────
+• NO necesitas ejecutar tres scripts separados
+• TODO está unificado en un único script
+• El Dashboard se actualiza automáticamente después
+• Puedes ejecutarlo varias veces sin problema (desduplicación automática)
+
+════════════════════════════════════════════════════════════════════════════════
