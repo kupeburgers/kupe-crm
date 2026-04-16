@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
-import { useSnapshot, useClientes, useTop20, useGestionesHoy, useGestionesRecientes, useEnRiesgoUrgente, iniciarContacto, cerrarGestion, resetGestion, useDatosMeta, useProductos, guardarContactoHistorial, actualizarResultadoHistorial, useConversiones } from '../hooks/useSnapshot'
+import { useSnapshot, useClientes, useGestionesHoy, useGestionesRecientes, useEnRiesgoUrgente, iniciarContacto, cerrarGestion, resetGestion, useDatosMeta, useProductos, guardarContactoHistorial, actualizarResultadoHistorial, useConversiones } from '../hooks/useSnapshot'
+import { useAccionHoy } from '../hooks/useAccionHoy'
 import { getPlantillas, savePlantillas, buildMessage, PLANTILLAS_DEFAULT } from '../config/templates'
 
 const fmt = n => n >= 1_000_000 ? `$${(n/1_000_000).toFixed(1)}M` : n >= 1_000 ? `$${(n/1_000).toFixed(0)}K` : `$${Math.round(n)}`
@@ -40,7 +41,7 @@ function matchFiltro(estado, filtro) {
 }
 
 function TabHoy({ overrides, setOverrides }) {
-  const { clientes, loading: loadingCli } = useTop20()
+  const { clientes, loading: loadingCli, error } = useAccionHoy()
   const gestionesDB    = useGestionesHoy()   // null = cargando, {} = listo (puede estar vacío)
   const [filtro, setFiltro]       = useState('sin_contactar')
   const [modalInfo, setModalInfo] = useState(null)   // null | { cliente, texto }
@@ -49,10 +50,12 @@ function TabHoy({ overrides, setOverrides }) {
   const recientes     = useGestionesRecientes(2)   // teléfonos contactados ayer (cooldown)
   const enRiesgo      = useEnRiesgoUrgente(70)       // En riesgo con score > 70
 
-  const loading = loadingCli || gestionesDB === null
+  // IMPORTANTE: No bloquear por gestionesDB. Si está null, usar {} (sin gestiones)
+  const loading = loadingCli
+  const gestionsDB_safe = gestionesDB ?? {}
 
   // Estado efectivo = DB (persistido) sobreescrito por acciones de esta sesión
-  const getEstado    = tel => overrides[tel]?.estado ?? gestionesDB?.[tel]?.estado ?? null
+  const getEstado    = tel => overrides[tel]?.estado ?? gestionsDB_safe?.[tel]?.estado ?? null
   const getGestionId = tel => overrides[tel]?.id     ?? gestionesDB?.[tel]?.id     ?? null
   const getHora      = tel => {
     const raw = overrides[tel]?.hora ?? gestionesDB?.[tel]?.hora ?? null
@@ -63,7 +66,7 @@ function TabHoy({ overrides, setOverrides }) {
   // Estado con cooldown: si fue contactado ayer y hoy no tiene gestión → 'contactado_ayer'
   const getEstadoEfectivo = tel => {
     const est = getEstado(tel)
-    if (est === null && recientes.has(String(tel))) return 'contactado_ayer'
+    if (est === null && recientes && recientes.has(String(tel))) return 'contactado_ayer'
     return est
   }
 
@@ -114,7 +117,12 @@ function TabHoy({ overrides, setOverrides }) {
   function handleAbrirModal(c) {
     const plantillas = getPlantillas()
     const template   = plantillas[c.segmento] || ''
-    setModalInfo({ cliente: c, texto: buildMessage(template, c) })
+    setModalInfo({
+      cliente: c,
+      texto: c.mensaje_sugerido || buildMessage(template, c),
+      accionSugerida: c.accion_sugerida,
+      urgencia: c.urgencia
+    })
   }
 
   // Confirmación: crea gestión → abre WhatsApp → cierra modal
@@ -167,7 +175,7 @@ function TabHoy({ overrides, setOverrides }) {
           {/* Header */}
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:14 }}>
             <div>
-              <div style={{ fontWeight:700, fontSize:17 }}>{modalInfo.cliente.nombre}</div>
+              <div style={{ fontWeight:700, fontSize:17 }}>{modalInfo.cliente.nombre || modalInfo.cliente.cliente || 'Sin nombre'}</div>
               <div style={{ display:'flex', gap:8, alignItems:'center', marginTop:4 }}>
                 <span className="seg-tag" style={{ background: SEG_COLORS[modalInfo.cliente.segmento] || '#666' }}>
                   {SEG_ICONS[modalInfo.cliente.segmento]} {modalInfo.cliente.segmento}
@@ -178,6 +186,26 @@ function TabHoy({ overrides, setOverrides }) {
             <button onClick={() => setModalInfo(null)}
               style={{ background:'none', border:'none', fontSize:22, cursor:'pointer', color:'#9ca3af', lineHeight:1 }}>✕</button>
           </div>
+
+          {/* BADGE DE URGENCIA */}
+          {modalInfo.urgencia && (
+            <div style={{
+              padding: '10px 12px',
+              borderRadius: '8px',
+              marginBottom: '14px',
+              background: modalInfo.urgencia === 'alta' ? '#fee2e2' : modalInfo.urgencia === 'media' ? '#fef3c7' : '#f0fdf4',
+              color: modalInfo.urgencia === 'alta' ? '#7f1d1d' : modalInfo.urgencia === 'media' ? '#92400e' : '#166534',
+              fontWeight: '600',
+              fontSize: '13px'
+            }}>
+              {modalInfo.urgencia === 'alta' ? '🔴 URGENCIA ALTA' : modalInfo.urgencia === 'media' ? '🟠 Urgencia Media' : '🟢 Baja Urgencia'}
+              {modalInfo.accionSugerida && (
+                <div style={{ fontSize: '12px', marginTop: '4px', opacity: 0.85, fontWeight: '500' }}>
+                  Acción: {modalInfo.accionSugerida}
+                </div>
+              )}
+            </div>
+          )}
           {/* Mensaje editable */}
           <div style={{ fontSize:11, fontWeight:700, color:'#9ca3af', textTransform:'uppercase', letterSpacing:'.07em', marginBottom:6 }}>
             Mensaje — editá si querés
@@ -333,6 +361,22 @@ function TabHoy({ overrides, setOverrides }) {
                   </span>
                 </div>
 
+                {/* BADGE DE URGENCIA Y ACCIÓN SUGERIDA */}
+                {c.urgencia && (
+                  <div style={{
+                    padding: '8px 10px',
+                    borderRadius: '6px',
+                    marginTop: '8px',
+                    marginBottom: '8px',
+                    background: c.urgencia === 'alta' ? '#fee2e2' : c.urgencia === 'media' ? '#fef3c7' : '#f0fdf4',
+                    color: c.urgencia === 'alta' ? '#7f1d1d' : c.urgencia === 'media' ? '#92400e' : '#166534',
+                    fontWeight: '600',
+                    fontSize: '12px'
+                  }}>
+                    {c.urgencia === 'alta' ? '🔴' : c.urgencia === 'media' ? '🟠' : '🟢'} {c.accion_sugerida || 'Seguimiento'}
+                  </div>
+                )}
+
                 {/* NAME */}
                 <div className="card-nombre">{c.nombre || <span style={{ color: '#ccc' }}>Sin nombre</span>}</div>
 
@@ -352,6 +396,23 @@ function TabHoy({ overrides, setOverrides }) {
                     </div>
                   )
                 })()}
+
+                {/* MENSAJE SUGERIDO */}
+                {c.mensaje_sugerido && (
+                  <div style={{
+                    fontSize: 12,
+                    color: '#555',
+                    marginBottom: 8,
+                    padding: '8px',
+                    background: '#f9fafb',
+                    borderRadius: '6px',
+                    borderLeft: '3px solid #4f8ef7',
+                    lineHeight: 1.4,
+                    fontStyle: 'italic'
+                  }}>
+                    💬 "{c.mensaje_sugerido}"
+                  </div>
+                )}
 
                 {/* SECONDARY INFO */}
                 <div className="card-info">

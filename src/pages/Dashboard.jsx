@@ -1,4 +1,5 @@
 import { useSnapshot } from '../hooks/useSnapshot'
+import { useAccionHoy } from '../hooks/useAccionHoy'
 
 const fmt = n => n >= 1_000_000
   ? `$${(n / 1_000_000).toFixed(1)}M`
@@ -6,6 +7,7 @@ const fmt = n => n >= 1_000_000
 
 export default function Dashboard() {
   const { data, loading, error } = useSnapshot()
+  const { clientes: clientesAccion, loading: loadingAccion } = useAccionHoy()
 
   if (loading) return <div className="loading">Cargando datos...</div>
   if (error)   return <div className="loading" style={{color:'#ef4444'}}>Error: {error}</div>
@@ -59,6 +61,10 @@ export default function Dashboard() {
   const perdido = segs.find(s => s.segmento === 'Perdido')
   const enRiesgo = segs.find(s => s.segmento === 'En riesgo')
   const tibio = segs.find(s => s.segmento === 'Tibio')
+
+  // Nuevas métricas comerciales desde crm_accion_hoy
+  const urgentesNoContactados = (clientesAccion || []).filter(c => c.urgencia === 'alta' && c.contactos_hoy === 0).length
+
   const alertas = [
     perdido && {
       tipo: 'danger',
@@ -75,6 +81,10 @@ export default function Dashboard() {
     kpiRet < 30 && {
       tipo: 'warn',
       txt: `Retención del último mes: ${kpiRet}% — por debajo del umbral saludable (30%)`
+    },
+    urgentesNoContactados > 0 && {
+      tipo: 'danger',
+      txt: `⚡ ${urgentesNoContactados} cliente(s) URGENTE sin contactar hoy — acción inmediata`
     },
   ].filter(Boolean)
 
