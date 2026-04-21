@@ -1,4 +1,5 @@
-import { useSnapshot } from '../hooks/useSnapshot'
+import { useState } from 'react'
+import { useSnapshot, fetchMovimientosHoy } from '../hooks/useSnapshot'
 import { useAccionHoy } from '../hooks/useAccionHoy'
 
 const fmt = n => n >= 1_000_000
@@ -8,6 +9,26 @@ const fmt = n => n >= 1_000_000
 export default function Dashboard() {
   const { data, loading, error } = useSnapshot()
   const { clientes: clientesAccion, loading: loadingAccion } = useAccionHoy()
+
+  const [detalle, setDetalle]               = useState(null)   // { titulo, segNuevo, segAnterior }
+  const [detalleClientes, setDetalleClientes] = useState([])
+  const [detalleLoading, setDetalleLoading] = useState(false)
+  const [detalleError, setDetalleError]     = useState(null)
+
+  async function abrirDetalle(segNuevo, segAnterior, titulo) {
+    setDetalle({ titulo, segNuevo, segAnterior })
+    setDetalleClientes([])
+    setDetalleError(null)
+    setDetalleLoading(true)
+    try {
+      const cls = await fetchMovimientosHoy(segNuevo, segAnterior)
+      setDetalleClientes(cls)
+    } catch (e) {
+      setDetalleError(e.message)
+    } finally {
+      setDetalleLoading(false)
+    }
+  }
 
   if (loading) return <div className="loading">Cargando datos...</div>
   if (error)   return <div className="loading" style={{color:'#ef4444'}}>Error: {error}</div>
@@ -231,11 +252,33 @@ export default function Dashboard() {
               {(() => {
                 const mov = movs.find(m => m.segmento === s.segmento)
                 if (!mov || (mov.entraron === 0 && mov.salieron === 0)) return null
-                const fmtDesglose = obj => obj ? Object.entries(obj).sort((a,b) => b[1] - a[1]).map(([seg, n]) => `${seg} ${n}`).join(' · ') : ''
+                const chipStyle = { cursor: 'pointer', textDecoration: 'underline', textDecorationStyle: 'dotted', whiteSpace: 'nowrap' }
+                const DesgloseTappable = ({ obj, buildSegNuevo, buildSegAnterior }) => {
+                  if (!obj) return null
+                  return Object.entries(obj).sort((a,b) => b[1]-a[1]).map(([seg, n], i) => (
+                    <span key={seg}>
+                      {i > 0 && ' · '}
+                      <span style={chipStyle}
+                        onClick={() => abrirDetalle(buildSegNuevo(seg), buildSegAnterior(seg), `${buildSegAnterior(seg)} → ${buildSegNuevo(seg)}`)}>
+                        {seg} {n}
+                      </span>
+                    </span>
+                  ))
+                }
                 return (
-                  <div className="seg-mov" style={{ fontSize: 11, lineHeight: 1.4, textAlign: 'left' }}>
-                    {mov.entraron > 0 && (<div>↑ {mov.entraron} entraron<br/><span style={{ opacity: 0.85 }}>  de {fmtDesglose(mov.entraron_desde)}</span></div>)}
-                    {mov.salieron > 0 && (<div>↓ {mov.salieron} salieron<br/><span style={{ opacity: 0.85 }}>  a {fmtDesglose(mov.salieron_hacia)}</span></div>)}
+                  <div className="seg-mov" style={{ fontSize: 11, lineHeight: 1.6, textAlign: 'left' }}>
+                    {mov.entraron > 0 && (
+                      <div>
+                        ↑ {mov.entraron} entraron<br/>
+                        <span style={{ opacity: 0.85 }}>de <DesgloseTappable obj={mov.entraron_desde} buildSegNuevo={() => s.segmento} buildSegAnterior={seg => seg} /></span>
+                      </div>
+                    )}
+                    {mov.salieron > 0 && (
+                      <div>
+                        ↓ {mov.salieron} salieron<br/>
+                        <span style={{ opacity: 0.85 }}>a <DesgloseTappable obj={mov.salieron_hacia} buildSegNuevo={seg => seg} buildSegAnterior={() => s.segmento} /></span>
+                      </div>
+                    )}
                   </div>
                 )
               })()}
@@ -243,6 +286,61 @@ export default function Dashboard() {
           ))}
         </div>
       </div>
+
+      {/* MODAL DRILL-DOWN MOVIMIENTO */}
+      {detalle && (
+        <div
+          style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.55)', zIndex:1000, display:'flex', alignItems:'flex-end', justifyContent:'center' }}
+          onClick={e => e.target === e.currentTarget && setDetalle(null)}
+        >
+          <div style={{ background:'#fff', width:'100%', maxWidth:540, borderRadius:'16px 16px 0 0', padding:'20px 16px 32px', maxHeight:'80vh', overflowY:'auto' }}>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
+              <div style={{ fontWeight:700, fontSize:15 }}>{detalle.titulo}</div>
+              <button onClick={() => setDetalle(null)} style={{ background:'none', border:'none', fontSize:22, cursor:'pointer', color:'#666', lineHeight:1 }}>✕</button>
+            </div>
+
+            {detalleLoading && (
+              <div style={{ textAlign:'center', padding:'24px 0', color:'#999', fontSize:14 }}>Cargando clientes...</div>
+            )}
+            {detalleError && (
+              <div style={{ color:'#ef4444', fontSize:13, padding:'12px 0' }}>Error: {detalleError}</div>
+            )}
+            {!detalleLoading && !detalleError && detalleClientes.length === 0 && (
+              <div style={{ textAlign:'center', padding:'24px 0', color:'#999', fontSize:14 }}>Sin datos de movimiento para hoy</div>
+            )}
+
+            {detalleClientes.map(c => {
+              const tel = String(c.telefono || '').replace(/\D/g, '')
+              const fecha = c.fecha_ultimo_pedido
+                ? new Date(c.fecha_ultimo_pedido).toLocaleDateString('es-AR', { day:'2-digit', month:'2-digit', year:'2-digit' })
+                : '—'
+              const tk = c.ticket_promedio >= 1000
+                ? `$${Math.round(c.ticket_promedio / 1000)}K`
+                : c.ticket_promedio ? `$${Math.round(c.ticket_promedio)}` : ''
+              return (
+                <div key={c.telefono} style={{ padding:'11px 0', borderBottom:'1px solid #f0f0f0', display:'flex', justifyContent:'space-between', alignItems:'center', gap:8 }}>
+                  <div style={{ minWidth:0 }}>
+                    <div style={{ fontWeight:600, fontSize:14, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{c.nombre || 'Sin nombre'}</div>
+                    <div style={{ fontSize:12, color:'#888', marginTop:2 }}>
+                      {c.recencia_dias}d sin comprar · últ. {fecha}{tk ? ` · tk ${tk}` : ''}
+                    </div>
+                  </div>
+                  {tel && (
+                    <a
+                      href={`https://wa.me/549${tel}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{ flexShrink:0, background:'#25D366', color:'#fff', borderRadius:8, padding:'8px 13px', fontSize:13, textDecoration:'none', fontWeight:600 }}
+                    >
+                      WA
+                    </a>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
