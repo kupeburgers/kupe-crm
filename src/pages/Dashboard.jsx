@@ -6,6 +6,20 @@ const fmt = n => n >= 1_000_000
   ? `$${(n / 1_000_000).toFixed(1)}M`
   : n >= 1_000 ? `$${(n / 1_000).toFixed(0)}K` : `$${n}`
 
+const chipStyle = { cursor: 'pointer', textDecoration: 'underline', textDecorationStyle: 'dotted', whiteSpace: 'nowrap' }
+
+function renderDesglose(obj, buildSegNuevo, buildSegAnterior, onTap) {
+  if (!obj) return null
+  return Object.entries(obj).sort((a, b) => b[1] - a[1]).map(([seg, n], i) => (
+    <span key={seg}>
+      {i > 0 && ' · '}
+      <span style={chipStyle} onClick={() => onTap(buildSegNuevo(seg), buildSegAnterior(seg), `${buildSegAnterior(seg)} → ${buildSegNuevo(seg)}`)}>
+        {seg} {n}
+      </span>
+    </span>
+  ))
+}
+
 export default function Dashboard() {
   const { data, loading, error } = useSnapshot()
   const { clientes: clientesAccion, loading: loadingAccion } = useAccionHoy()
@@ -252,31 +266,18 @@ export default function Dashboard() {
               {(() => {
                 const mov = movs.find(m => m.segmento === s.segmento)
                 if (!mov || (mov.entraron === 0 && mov.salieron === 0)) return null
-                const chipStyle = { cursor: 'pointer', textDecoration: 'underline', textDecorationStyle: 'dotted', whiteSpace: 'nowrap' }
-                const DesgloseTappable = ({ obj, buildSegNuevo, buildSegAnterior }) => {
-                  if (!obj) return null
-                  return Object.entries(obj).sort((a,b) => b[1]-a[1]).map(([seg, n], i) => (
-                    <span key={seg}>
-                      {i > 0 && ' · '}
-                      <span style={chipStyle}
-                        onClick={() => abrirDetalle(buildSegNuevo(seg), buildSegAnterior(seg), `${buildSegAnterior(seg)} → ${buildSegNuevo(seg)}`)}>
-                        {seg} {n}
-                      </span>
-                    </span>
-                  ))
-                }
                 return (
                   <div className="seg-mov" style={{ fontSize: 11, lineHeight: 1.6, textAlign: 'left' }}>
                     {mov.entraron > 0 && (
                       <div>
                         ↑ {mov.entraron} entraron<br/>
-                        <span style={{ opacity: 0.85 }}>de <DesgloseTappable obj={mov.entraron_desde} buildSegNuevo={() => s.segmento} buildSegAnterior={seg => seg} /></span>
+                        <span style={{ opacity: 0.85 }}>de {renderDesglose(mov.entraron_desde, () => s.segmento, seg => seg, abrirDetalle)}</span>
                       </div>
                     )}
                     {mov.salieron > 0 && (
                       <div>
                         ↓ {mov.salieron} salieron<br/>
-                        <span style={{ opacity: 0.85 }}>a <DesgloseTappable obj={mov.salieron_hacia} buildSegNuevo={seg => seg} buildSegAnterior={() => s.segmento} /></span>
+                        <span style={{ opacity: 0.85 }}>a {renderDesglose(mov.salieron_hacia, seg => seg, () => s.segmento, abrirDetalle)}</span>
                       </div>
                     )}
                   </div>
