@@ -152,13 +152,23 @@ async function refreshSnapshot() {
 }
 
 async function snapshotSegmentos() {
-  console.log('\n📈 Paso 4/4 — Snapshot de segmentos del día...')
+  console.log('\n📈 Paso 4/5 — Snapshot de segmentos del día...')
   const res = await rpc('snapshot_segmentos_diario')
   if (res.status !== 200 && res.status !== 204) {
     console.error(`   ❌ Error: ${res.body.slice(0, 300)}`)
     process.exit(1)
   }
   console.log(`   ✅ Segmentos registrados`)
+}
+
+async function calcularTransiciones() {
+  console.log('\n🔄 Paso 5/5 — Calculando transiciones de segmento...')
+  const res = await rpc('calcular_transiciones_segmento_hoy')
+  if (res.status !== 200 && res.status !== 204) {
+    console.warn(`   ⚠️  Transiciones no calculadas (status ${res.status}) — el resto del update está OK`)
+    return
+  }
+  console.log(`   ✅ Transiciones registradas`)
 }
 
 // ── Main ─────────────────────────────────────────────────────────────────────
@@ -174,6 +184,7 @@ async function main() {
   await recalcClientes()
   await refreshSnapshot()
   await snapshotSegmentos()
+  await calcularTransiciones()
 
   const secs = ((Date.now() - start) / 1000).toFixed(1)
   console.log('\n═══════════════════════════════════════')
