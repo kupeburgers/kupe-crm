@@ -253,7 +253,8 @@ export async function actualizarResultadoHistorial(telefono, resultado) {
   return res.json()
 }
 
-// Fetch bajo demanda: clientes que se movieron hacia/desde un segmento hoy
+// Fetch bajo demanda: clientes que se movieron hacia/desde un segmento hoy.
+// Intenta la tabla de transiciones; si no existe cae a clientes_live filtrado por segmento.
 export async function fetchMovimientosHoy(segmentoNuevo, segmentoAnterior = null) {
   const hoy = new Date().toISOString().split('T')[0]
   const anteriorFilter = segmentoAnterior
@@ -263,20 +264,33 @@ export async function fetchMovimientosHoy(segmentoNuevo, segmentoAnterior = null
     `${SUPABASE_URL}/rest/v1/cliente_movimiento_segmento?select=telefono,segmento_anterior&segmento_nuevo=eq.${encodeURIComponent(segmentoNuevo)}&fecha=eq.${hoy}${anteriorFilter}&limit=500`,
     { headers: HEADERS }
   )
-  if (!movRes.ok) throw new Error(`Error ${movRes.status} al obtener movimientos`)
-  const movs = await movRes.json()
-  if (!Array.isArray(movs) || movs.length === 0) return []
 
-  const telefonos = [...new Set(movs.map(m => m.telefono).filter(Boolean))]
-  const segPorTel = Object.fromEntries(movs.map(m => [String(m.telefono), m.segmento_anterior]))
+  // Si la tabla existe y responde bien, usamos esos datos
+  if (movRes.ok) {
+    const movs = await movRes.json()
+    if (Array.isArray(movs) && movs.length > 0) {
+      const telefonos = [...new Set(movs.map(m => m.telefono).filter(Boolean))]
+      const segPorTel = Object.fromEntries(movs.map(m => [String(m.telefono), m.segmento_anterior]))
+      const clRes = await fetch(
+        `${SUPABASE_URL}/rest/v1/clientes_live?select=nombre,telefono,recencia_dias,fecha_ultimo_pedido,ticket_promedio&telefono=in.(${telefonos.join(',')})&order=recencia_dias.asc&limit=500`,
+        { headers: HEADERS }
+      )
+      if (clRes.ok) {
+        const cls = await clRes.json()
+        return (cls || []).map(c => ({ ...c, segmento_anterior: segPorTel[String(c.telefono)] }))
+      }
+    }
+    return [] // tabla vacía o sin datos para hoy
+  }
 
+  // Fallback: tabla no disponible → mostrar todos los clientes del segmento destino
   const clRes = await fetch(
-    `${SUPABASE_URL}/rest/v1/clientes_live?select=nombre,telefono,recencia_dias,fecha_ultimo_pedido,ticket_promedio&telefono=in.(${telefonos.join(',')})&order=recencia_dias.asc&limit=500`,
+    `${SUPABASE_URL}/rest/v1/clientes_live?select=nombre,telefono,recencia_dias,fecha_ultimo_pedido,ticket_promedio&segmento=eq.${encodeURIComponent(segmentoNuevo)}&order=fecha_ultimo_pedido.desc&limit=200`,
     { headers: HEADERS }
   )
   if (!clRes.ok) throw new Error(`Error ${clRes.status} al obtener clientes`)
   const cls = await clRes.json()
-  return (cls || []).map(c => ({ ...c, segmento_anterior: segPorTel[String(c.telefono)] }))
+  return (cls || []).map(c => ({ ...c, _fallback: true }))
 }
 
 // Conversiones: métricas de contacto-a-pedido de últimos 30 días

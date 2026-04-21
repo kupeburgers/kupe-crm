@@ -307,7 +307,12 @@ export default function Dashboard() {
               <div style={{ color:'#ef4444', fontSize:13, padding:'12px 0' }}>Error: {detalleError}</div>
             )}
             {!detalleLoading && !detalleError && detalleClientes.length === 0 && (
-              <div style={{ textAlign:'center', padding:'24px 0', color:'#999', fontSize:14 }}>Sin datos de movimiento para hoy</div>
+              <div style={{ textAlign:'center', padding:'24px 0', color:'#999', fontSize:14 }}>Sin datos para hoy</div>
+            )}
+            {!detalleLoading && !detalleError && detalleClientes.length > 0 && detalleClientes[0]?._fallback && (
+              <div style={{ background:'#fffbeb', border:'1px solid #f59e0b', borderRadius:8, padding:'8px 12px', fontSize:12, color:'#92400e', marginBottom:12 }}>
+                Sin historial de transición disponible — mostrando todos los clientes en {detalle?.segNuevo} ordenados por última compra
+              </div>
             )}
 
             {detalleClientes.map(c => {
