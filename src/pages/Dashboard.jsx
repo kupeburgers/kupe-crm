@@ -311,7 +311,7 @@ export default function Dashboard() {
             )}
             {!detalleLoading && !detalleError && detalleClientes.length > 0 && detalleClientes[0]?._fallback && (
               <div style={{ background:'#fffbeb', border:'1px solid #f59e0b', borderRadius:8, padding:'8px 12px', fontSize:12, color:'#92400e', marginBottom:12 }}>
-                Sin historial de transición disponible — mostrando todos los clientes en {detalle?.segNuevo} ordenados por última compra
+                Aproximación por historial de compras — ejecutá el update para ver la lista exacta
               </div>
             )}
 
