@@ -283,17 +283,19 @@ export async function fetchMovimientosHoy(segmentoNuevo, segmentoAnterior = null
     return []
   }
 
-  // Fallback: tabla no disponible → traer clientes del segmento destino con fecha_anteultimo_pedido
-  // y aproximar el segmento anterior en base a cuánto tiempo llevaban sin comprar antes del último pedido
+  // Fallback: tabla no disponible → traer clientes del segmento destino con fechas de pedidos
+  // y aproximar el segmento anterior en base al gap entre los últimos dos pedidos
   const clRes = await fetch(
-    `${SUPABASE_URL}/rest/v1/clientes_live?select=nombre,telefono,recencia_dias,fecha_ultimo_pedido,fecha_anteultimo_pedido,ticket_promedio&segmento=eq.${encodeURIComponent(segmentoNuevo)}&order=fecha_ultimo_pedido.desc&limit=500`,
+    `${SUPABASE_URL}/rest/v1/clientes_live?select=nombre,telefono,recencia_dias,ultima_compra,fecha_anteultimo_pedido,ticket_promedio&segmento=eq.${encodeURIComponent(segmentoNuevo)}&order=ultima_compra.desc&limit=500`,
     { headers: HEADERS }
   )
   if (!clRes.ok) throw new Error(`Error ${clRes.status} al obtener clientes`)
   const cls = await clRes.json() || []
 
-  const today = new Date()
-  const daysSince = dateStr => dateStr ? Math.floor((today - new Date(dateStr)) / 86400000) : null
+  const daysBetween = (d1, d2) => {
+    if (!d1 || !d2) return null
+    return Math.floor((new Date(d1) - new Date(d2)) / 86400000)
+  }
   const segFromDays = days => {
     if (days === null) return null
     if (days <= 15)  return 'Activo'
@@ -305,13 +307,13 @@ export async function fetchMovimientosHoy(segmentoNuevo, segmentoAnterior = null
 
   const conSegAnterior = cls.map(c => ({
     ...c,
-    _segAnteriorAprox: segFromDays(daysSince(c.fecha_anteultimo_pedido)),
+    fecha_ultimo_pedido: c.ultima_compra,
+    _segAnteriorAprox: segFromDays(daysBetween(c.ultima_compra, c.fecha_anteultimo_pedido)),
     _fallback: true,
   }))
 
   if (segmentoAnterior) {
     const filtrados = conSegAnterior.filter(c => c._segAnteriorAprox === segmentoAnterior)
-    // Si el filtro dio resultados los devolvemos; si no (ej: clientes sin anteultimo) devolvemos todo
     return filtrados.length > 0 ? filtrados : conSegAnterior
   }
   return conSegAnterior
