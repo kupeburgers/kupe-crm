@@ -226,7 +226,7 @@ export async function guardarContactoHistorial(telefono, canal = 'whatsapp', acc
       method: 'POST',
       headers: { ...HEADERS, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        cliente_telefono: telefono,
+        cliente_telefono: String(telefono),
         canal,
         accion,
         fecha_contacto: hoy,
@@ -235,22 +235,39 @@ export async function guardarContactoHistorial(telefono, canal = 'whatsapp', acc
     }
   )
   if (!res.ok) throw new Error('guardarContactoHistorial falló')
-  return res.json()
 }
 
-// Actualizar resultado de un contacto en histórico
-export async function actualizarResultadoHistorial(telefono, resultado) {
+// Guardar resultado: PATCH si ya existe la fila, INSERT si no → garantiza que conversiones lo ve
+export async function guardarResultadoContacto(telefono, resultado) {
   const hoy = new Date().toISOString().split('T')[0]
-  const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/contactos_historial?cliente_telefono=eq.${encodeURIComponent(telefono)}&fecha_contacto=eq.${hoy}`,
+  const patchRes = await fetch(
+    `${SUPABASE_URL}/rest/v1/contactos_historial?cliente_telefono=eq.${encodeURIComponent(String(telefono))}&fecha_contacto=eq.${hoy}`,
     {
       method: 'PATCH',
-      headers: { ...HEADERS, 'Content-Type': 'application/json' },
+      headers: { ...HEADERS, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
       body: JSON.stringify({ resultado })
     }
   )
-  if (!res.ok) throw new Error('actualizarResultadoHistorial falló')
-  return res.json()
+  if (!patchRes.ok) throw new Error('PATCH contacto falló')
+  const patched = await patchRes.json()
+  if (Array.isArray(patched) && patched.length > 0) return  // actualizado OK
+
+  // No había fila previa → insertar directo con resultado
+  const postRes = await fetch(
+    `${SUPABASE_URL}/rest/v1/contactos_historial`,
+    {
+      method: 'POST',
+      headers: { ...HEADERS, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        cliente_telefono: String(telefono),
+        canal: 'whatsapp',
+        accion: 'contacto_inicial',
+        resultado,
+        fecha_contacto: hoy
+      })
+    }
+  )
+  if (!postRes.ok) throw new Error('INSERT contacto falló')
 }
 
 // Fetch bajo demanda: clientes que se movieron hacia/desde un segmento hoy.

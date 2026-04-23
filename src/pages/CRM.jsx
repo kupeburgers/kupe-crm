@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useSnapshot, useClientes, useGestionesHoy, useGestionesRecientes, useEnRiesgoUrgente, iniciarContacto, cerrarGestion, resetGestion, useDatosMeta, useProductos, guardarContactoHistorial, actualizarResultadoHistorial, useConversiones } from '../hooks/useSnapshot'
+import { useSnapshot, useClientes, useGestionesHoy, useGestionesRecientes, useEnRiesgoUrgente, iniciarContacto, cerrarGestion, resetGestion, useDatosMeta, useProductos, guardarContactoHistorial, guardarResultadoContacto, useConversiones } from '../hooks/useSnapshot'
 import { useAccionHoy } from '../hooks/useAccionHoy'
 import { getPlantillas, savePlantillas, buildMessage, PLANTILLAS_DEFAULT } from '../config/templates'
 
@@ -157,8 +157,8 @@ function TabHoy({ overrides, setOverrides }) {
     try {
       await cerrarGestion(id, resultado)
       setOverrides(o => ({ ...o, [telefono]: { id, estado: resultado } }))
-      // Persistir resultado en histórico en segundo plano (no bloquear si falla)
-      actualizarResultadoHistorial(telefono, resultado).catch(() => {})
+      // Persistir en contactos_historial (upsert: actualiza si existe, inserta si no)
+      guardarResultadoContacto(telefono, resultado).catch(() => {})
     } catch {
       setOverrides(o => ({ ...o, [telefono]: { id, estado: 'pendiente' } }))
     }
