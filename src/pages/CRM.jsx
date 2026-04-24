@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useSnapshot, useClientes, useGestionesHoy, useGestionesRecientes, useEnRiesgoUrgente, iniciarContacto, cerrarGestion, resetGestion, useDatosMeta, useProductos, guardarContactoHistorial, guardarResultadoContacto, useConversiones } from '../hooks/useSnapshot'
+import { useSnapshot, useClientes, useTop20, useGestionesHoy, useGestionesRecientes, useEnRiesgoUrgente, iniciarContacto, cerrarGestion, resetGestion, useDatosMeta, useProductos, guardarContactoHistorial, guardarResultadoContacto, useConversiones } from '../hooks/useSnapshot'
 import { useAccionHoy } from '../hooks/useAccionHoy'
 import { getPlantillas, savePlantillas, buildMessage, PLANTILLAS_DEFAULT } from '../config/templates'
 
