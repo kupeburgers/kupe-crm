@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useSnapshot, useClientes, useTop20, useGestionesHoy, useGestionesRecientes, useEnRiesgoUrgente, iniciarContacto, cerrarGestion, resetGestion, useDatosMeta, useProductos, guardarContactoHistorial, guardarResultadoContacto, useConversiones } from '../hooks/useSnapshot'
+import { useSnapshot, useClientes, useTop20, useGestionesHoy, useGestionesRecientes, useEnRiesgoUrgente, useGestionesPendientesResultado, iniciarContacto, cerrarGestion, resetGestion, useDatosMeta, useProductos, guardarContactoHistorial, guardarResultadoContacto, useConversiones } from '../hooks/useSnapshot'
 import { useAccionHoy } from '../hooks/useAccionHoy'
 import { getPlantillas, savePlantillas, buildMessage, PLANTILLAS_DEFAULT } from '../config/templates'
 
@@ -40,7 +40,11 @@ function matchFiltro(estado, filtro) {
   return estado === filtro
 }
 
-function TabHoy({ overrides, setOverrides }) {
+function diasDesde(fechaStr) {
+  return Math.floor((new Date() - new Date(fechaStr)) / 86400000)
+}
+
+function TabHoy({ overrides, setOverrides, pendientesCerrar = [], onCerrarPendiente }) {
   const { clientes, loading: loadingCli, error } = useAccionHoy()
   const gestionesDB    = useGestionesHoy()   // null = cargando, {} = listo (puede estar vacío)
   const [filtro, setFiltro]       = useState('sin_contactar')
@@ -49,6 +53,18 @@ function TabHoy({ overrides, setOverrides }) {
 
   const recientes     = useGestionesRecientes(2)   // teléfonos contactados ayer (cooldown)
   const enRiesgo      = useEnRiesgoUrgente(70)       // En riesgo con score > 70
+  const [seccionPendientesExpanded, setSeccionPendientesExpanded] = useState(false)
+
+  // Todos los pendientes sin resultado (para la sección visible)
+  const pendientes7d = pendientesCerrar
+
+  async function cerrarPendienteResultado(id, telefono, resultado) {
+    try {
+      await cerrarGestion(id, resultado)
+      guardarResultadoContacto(telefono, resultado).catch(() => {})
+      onCerrarPendiente(id)
+    } catch { /* silencioso */ }
+  }
 
   // IMPORTANTE: No bloquear por gestionesDB. Si está null, usar {} (sin gestiones)
   const loading = loadingCli
@@ -169,64 +185,66 @@ function TabHoy({ overrides, setOverrides }) {
   return (
     <>
     {modalInfo && (
-      <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.55)', zIndex:1000, display:'flex', alignItems:'flex-end', justifyContent:'center' }}
+      <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.6)', zIndex:1000, display:'flex', alignItems:'flex-end', justifyContent:'center' }}
            onClick={e => e.target === e.currentTarget && setModalInfo(null)}>
-        <div style={{ background:'#fff', borderRadius:'20px 20px 0 0', padding:24, width:'100%', maxWidth:600, maxHeight:'85vh', overflowY:'auto' }}>
+        <div style={{ background:'#fff', borderRadius:0, padding:28, width:'100%', maxWidth:600, maxHeight:'85vh', overflowY:'auto', borderTop:'2px solid #111111' }}>
           {/* Header */}
-          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:14 }}>
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:16 }}>
             <div>
-              <div style={{ fontWeight:700, fontSize:17 }}>{modalInfo.cliente.nombre || modalInfo.cliente.cliente || 'Sin nombre'}</div>
-              <div style={{ display:'flex', gap:8, alignItems:'center', marginTop:4 }}>
+              <div style={{ fontWeight:500, fontSize:18, color:'#111111', letterSpacing:'-0.01em' }}>{modalInfo.cliente.nombre || modalInfo.cliente.cliente || 'Sin nombre'}</div>
+              <div style={{ display:'flex', gap:8, alignItems:'center', marginTop:6 }}>
                 <span className="seg-tag" style={{ background: SEG_COLORS[modalInfo.cliente.segmento] || '#666' }}>
-                  {SEG_ICONS[modalInfo.cliente.segmento]} {modalInfo.cliente.segmento}
+                  {modalInfo.cliente.segmento}
                 </span>
-                <span style={{ fontSize:12, color:'#9ca3af' }}>{modalInfo.cliente.recencia_dias}d sin comprar</span>
+                <span style={{ fontSize:12, color:'#707072', fontWeight:500 }}>{modalInfo.cliente.recencia_dias}d sin comprar</span>
               </div>
             </div>
             <button onClick={() => setModalInfo(null)}
-              style={{ background:'none', border:'none', fontSize:22, cursor:'pointer', color:'#9ca3af', lineHeight:1 }}>✕</button>
+              style={{ background:'none', border:'none', fontSize:20, cursor:'pointer', color:'#707072', lineHeight:1, fontFamily:'inherit' }}>✕</button>
           </div>
 
           {/* BADGE DE URGENCIA */}
           {modalInfo.urgencia && (
             <div style={{
-              padding: '10px 12px',
-              borderRadius: '8px',
-              marginBottom: '14px',
-              background: modalInfo.urgencia === 'alta' ? '#fee2e2' : modalInfo.urgencia === 'media' ? '#fef3c7' : '#f0fdf4',
-              color: modalInfo.urgencia === 'alta' ? '#7f1d1d' : modalInfo.urgencia === 'media' ? '#92400e' : '#166534',
-              fontWeight: '600',
-              fontSize: '13px'
+              padding: '8px 14px',
+              borderRadius: 30,
+              marginBottom: 16,
+              border: `1.5px solid ${modalInfo.urgencia === 'alta' ? '#D30005' : modalInfo.urgencia === 'media' ? '#f59e0b' : '#CACACB'}`,
+              color: modalInfo.urgencia === 'alta' ? '#D30005' : modalInfo.urgencia === 'media' ? '#f59e0b' : '#707072',
+              fontWeight: 500,
+              fontSize: 12,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              letterSpacing: '.03em',
             }}>
-              {modalInfo.urgencia === 'alta' ? '🔴 URGENCIA ALTA' : modalInfo.urgencia === 'media' ? '🟠 Urgencia Media' : '🟢 Baja Urgencia'}
+              {modalInfo.urgencia === 'alta' ? '↑ Alta urgencia' : modalInfo.urgencia === 'media' ? '→ Urgencia media' : '— Baja urgencia'}
               {modalInfo.accionSugerida && (
-                <div style={{ fontSize: '12px', marginTop: '4px', opacity: 0.85, fontWeight: '500' }}>
-                  Acción: {modalInfo.accionSugerida}
-                </div>
+                <span style={{ opacity: 0.8 }}>· {modalInfo.accionSugerida}</span>
               )}
             </div>
           )}
           {/* Mensaje editable */}
-          <div style={{ fontSize:11, fontWeight:700, color:'#9ca3af', textTransform:'uppercase', letterSpacing:'.07em', marginBottom:6 }}>
-            Mensaje — editá si querés
+          <div style={{ fontSize:10, fontWeight:500, color:'#707072', textTransform:'uppercase', letterSpacing:'.1em', marginBottom:8 }}>
+            Mensaje
           </div>
           <textarea
             value={modalInfo.texto}
             onChange={e => setModalInfo(m => ({ ...m, texto: e.target.value }))}
             rows={6}
-            style={{ width:'100%', border:'1px solid #e5e7eb', borderRadius:10, padding:12, fontSize:14, resize:'vertical', outline:'none', fontFamily:'inherit', lineHeight:1.5 }}
+            style={{ width:'100%', border:'1.5px solid #CACACB', borderRadius:0, padding:14, fontSize:14, resize:'vertical', outline:'none', fontFamily:'inherit', lineHeight:1.6, color:'#111111', transition:'border-color 200ms ease' }}
           />
           {/* Acciones */}
           <div style={{ display:'flex', gap:8, marginTop:14 }}>
             <button onClick={() => setModalInfo(null)}
-              style={{ flex:1, padding:'12px', border:'1px solid #e5e7eb', borderRadius:10, background:'#fff', fontWeight:600, cursor:'pointer', fontSize:14 }}>
+              style={{ flex:1, padding:'12px', border:'1.5px solid #CACACB', borderRadius:30, background:'#fff', fontWeight:500, cursor:'pointer', fontSize:13, fontFamily:'inherit', color:'#111111', letterSpacing:'.02em' }}>
               Cancelar
             </button>
             <button
               onClick={() => handleEnviarWhatsApp(modalInfo.cliente, modalInfo.texto)}
               disabled={!modalInfo.texto.trim()}
-              style={{ flex:2, padding:'12px', background:'#16a34a', color:'#fff', border:'none', borderRadius:10, fontWeight:700, cursor:'pointer', fontSize:15 }}>
-              💬 Enviar por WhatsApp
+              style={{ flex:2, padding:'14px', background:'#CC0000', color:'#fff', border:'none', borderRadius:30, fontWeight:800, cursor:'pointer', fontSize:14, fontFamily:'inherit', letterSpacing:'.03em', transition:'background 200ms ease', textTransform:'uppercase' }}>
+              Enviar por WhatsApp
             </button>
           </div>
         </div>
@@ -234,9 +252,9 @@ function TabHoy({ overrides, setOverrides }) {
     )}
     <div className="section">
       <div className="section-title">
-        📋 A contactar hoy — Top 20
-        <span style={{ fontWeight: 400, color: '#aaa', marginLeft: 8, fontSize: 13 }}>
-          pendientes primero · por score
+        A contactar hoy
+        <span style={{ fontWeight: 500, color: '#CACACB', marginLeft: 12, fontSize: 12, letterSpacing: '.04em', textTransform: 'uppercase' }}>
+          Top 20 · por score
         </span>
       </div>
 
@@ -305,13 +323,59 @@ function TabHoy({ overrides, setOverrides }) {
         )
       })()}
 
+      {/* SECCIÓN: PENDIENTES DE CERRAR (últimos 7 días) */}
+      {pendientes7d.length > 0 && (
+        <div style={{ border: '2px solid #E5E5E5', borderRadius: 16, marginBottom: 20, overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
+          <button
+            onClick={() => setSeccionPendientesExpanded(e => !e)}
+            style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                     padding: '14px 22px', background: '#F5F5F5', border: 'none', cursor: 'pointer',
+                     fontWeight: 700, fontSize: 12, color: '#111111', fontFamily: 'inherit',
+                     letterSpacing: '.08em', textTransform: 'uppercase' }}
+          >
+            <span>{pendientes7d.length} contacto{pendientes7d.length !== 1 ? 's' : ''} sin resultado</span>
+            <span style={{ fontSize: 11, color: '#707072', letterSpacing: '.04em' }}>{seccionPendientesExpanded ? '▲ ocultar' : '▼ ver'}</span>
+          </button>
+          {seccionPendientesExpanded && (
+            <div style={{ maxHeight: 320, overflowY: 'auto', background: '#FFFFFF' }}>
+              {[...pendientes7d].sort((a, b) => diasDesde(a.fecha_contacto) - diasDesde(b.fecha_contacto)).map(p => (
+                <div key={p.id} style={{ padding: '12px 20px', borderTop: '1px solid #E5E5E5' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontWeight: 500, fontSize: 14, color: '#111111' }}>{p.nombre || p.telefono}</span>
+                      {p.segmento && (
+                        <span className="seg-tag" style={{ background: SEG_COLORS[p.segmento] || '#666', fontSize: 10, padding: '1px 8px' }}>
+                          {p.segmento}
+                        </span>
+                      )}
+                    </div>
+                    <span style={{ fontSize: 11, color: '#707072', fontWeight: 500 }}>hace {diasDesde(p.fecha_contacto)}d</span>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
+                    {Object.entries(RESULTADO_LABEL).map(([key, val]) => (
+                      <button key={key}
+                        onClick={() => cerrarPendienteResultado(p.id, p.telefono, key)}
+                        style={{ padding: '6px 4px', border: '1.5px solid #CACACB', borderRadius: 30,
+                                 background: '#FFFFFF', fontSize: 11, cursor: 'pointer', fontWeight: 500,
+                                 color: '#111111', fontFamily: 'inherit', transition: 'border-color 200ms ease' }}>
+                        {val.icon} {val.texto}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* BARRA DE FILTROS CON CONTEOS */}
       <div className="seg-filter-row" style={{ marginBottom: 16 }}>
         {FILTROS.map(f => (
           <button
             key={f.key}
             className={`seg-btn ${filtro === f.key ? 'active' : ''}`}
-            style={filtro === f.key ? { background: '#4f8ef7', color: '#fff', borderColor: 'transparent' } : {}}
+            style={{}}
             onClick={() => setFiltro(f.key)}
           >
             {f.label} <span style={{ opacity: 0.75, fontSize: 11 }}>({conteos[f.key]})</span>
@@ -364,16 +428,18 @@ function TabHoy({ overrides, setOverrides }) {
                 {/* BADGE DE URGENCIA Y ACCIÓN SUGERIDA */}
                 {c.urgencia && (
                   <div style={{
-                    padding: '8px 10px',
-                    borderRadius: '6px',
-                    marginTop: '8px',
-                    marginBottom: '8px',
-                    background: c.urgencia === 'alta' ? '#fee2e2' : c.urgencia === 'media' ? '#fef3c7' : '#f0fdf4',
-                    color: c.urgencia === 'alta' ? '#7f1d1d' : c.urgencia === 'media' ? '#92400e' : '#166534',
-                    fontWeight: '600',
-                    fontSize: '12px'
+                    padding: '6px 12px',
+                    borderRadius: 30,
+                    marginTop: 6,
+                    marginBottom: 8,
+                    border: `1.5px solid ${c.urgencia === 'alta' ? '#D30005' : c.urgencia === 'media' ? '#f59e0b' : '#CACACB'}`,
+                    color: c.urgencia === 'alta' ? '#D30005' : c.urgencia === 'media' ? '#f59e0b' : '#707072',
+                    fontWeight: 500,
+                    fontSize: 11,
+                    letterSpacing: '.03em',
+                    display: 'inline-block',
                   }}>
-                    {c.urgencia === 'alta' ? '🔴' : c.urgencia === 'media' ? '🟠' : '🟢'} {c.accion_sugerida || 'Seguimiento'}
+                    {c.urgencia === 'alta' ? '↑ ' : c.urgencia === 'media' ? '→ ' : '— '}{c.accion_sugerida || 'Seguimiento'}
                   </div>
                 )}
 
@@ -401,16 +467,15 @@ function TabHoy({ overrides, setOverrides }) {
                 {c.mensaje_sugerido && (
                   <div style={{
                     fontSize: 12,
-                    color: '#555',
+                    color: '#707072',
                     marginBottom: 8,
-                    padding: '8px',
-                    background: '#f9fafb',
-                    borderRadius: '6px',
-                    borderLeft: '3px solid #4f8ef7',
-                    lineHeight: 1.4,
+                    padding: '10px 12px',
+                    background: '#F5F5F5',
+                    borderLeft: '2px solid #CACACB',
+                    lineHeight: 1.5,
                     fontStyle: 'italic'
                   }}>
-                    💬 "{c.mensaje_sugerido}"
+                    "{c.mensaje_sugerido}"
                   </div>
                 )}
 
@@ -433,7 +498,7 @@ function TabHoy({ overrides, setOverrides }) {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
                     <span className="badge-ayer">📅 Contactado ayer</span>
                     <button
-                      style={{ fontSize: 11, padding: '4px 10px', background: 'none', border: '1px solid #d1d5db', borderRadius: 6, color: '#6b7280', cursor: 'pointer' }}
+                      style={{ fontSize: 11, padding: '4px 12px', background: 'none', border: '1.5px solid #CACACB', borderRadius: 30, color: '#707072', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 500 }}
                       onClick={() => handleAbrirModal(c)}
                     >
                       Intentar igual
@@ -466,9 +531,9 @@ function TabHoy({ overrides, setOverrides }) {
                       </div>
                       <button
                         onClick={() => setCambiando(s => new Set([...s, c.telefono]))}
-                        style={{ fontSize: 11, padding: '4px 9px', background: 'none', border: '1px solid #d1d5db', borderRadius: 6, color: '#6b7280', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                        style={{ fontSize: 11, padding: '4px 12px', background: 'none', border: '1.5px solid #CACACB', borderRadius: 30, color: '#707072', cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit', fontWeight: 500 }}
                       >
-                        ✏️ Cambiar
+                        Cambiar
                       </button>
                     </div>
                     {getHora(c.telefono) && (
@@ -505,13 +570,13 @@ function TabHoy({ overrides, setOverrides }) {
                     <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
                       <button
                         onClick={() => handleReset(c.telefono)}
-                        style={{ flex: 1, fontSize: 12, padding: '7px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 7, color: '#dc2626', cursor: 'pointer', fontWeight: 600 }}
+                        style={{ flex: 1, fontSize: 12, padding: '7px', background: '#FFFFFF', border: '1.5px solid #D30005', borderRadius: 30, color: '#D30005', cursor: 'pointer', fontWeight: 500, fontFamily: 'inherit' }}
                       >
                         ↩️ No lo contacté — quitar
                       </button>
                       <button
                         onClick={() => setCambiando(s => { const n = new Set(s); n.delete(c.telefono); return n })}
-                        style={{ fontSize: 12, padding: '7px 12px', background: 'none', border: '1px solid #e5e7eb', borderRadius: 7, color: '#9ca3af', cursor: 'pointer' }}
+                        style={{ fontSize: 12, padding: '7px 14px', background: 'none', border: '1.5px solid #CACACB', borderRadius: 30, color: '#707072', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 500 }}
                       >
                         Cancelar
                       </button>
@@ -849,71 +914,63 @@ function TabConversiones() {
 
   return (
     <div>
-      <h2>📊 Conversiones — Últimos 30 Días</h2>
+      <h2 style={{ fontSize: 28, fontWeight: 800, color: '#111111', marginBottom: 28, letterSpacing: '-0.03em' }}>Conversiones — 30 días</h2>
 
       {/* Métricas principales */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 32 }}>
-        <div style={{ padding: 16, background: '#f0f9ff', border: '1px solid #0ea5e9', borderRadius: 8 }}>
-          <div style={{ fontSize: 12, color: '#0369a1', fontWeight: 600 }}>📞 Contactados</div>
-          <div style={{ fontSize: 32, fontWeight: 700, marginTop: 8 }}>{total_contactados}</div>
-          <div style={{ fontSize: 11, color: '#666', marginTop: 4 }}>contactos en últimos 30d</div>
-        </div>
-
-        <div style={{ padding: 16, background: '#f0fdf4', border: '1px solid #22c55e', borderRadius: 8 }}>
-          <div style={{ fontSize: 12, color: '#15803d', fontWeight: 600 }}>🛒 Conversiones</div>
-          <div style={{ fontSize: 32, fontWeight: 700, marginTop: 8 }}>{total_conversiones}</div>
-          <div style={{ fontSize: 11, color: '#666', marginTop: 4 }}>hicieron pedido después de contacto</div>
-        </div>
-
-        <div style={{ padding: 16, background: '#fef3c7', border: '1px solid #f59e0b', borderRadius: 8 }}>
-          <div style={{ fontSize: 12, color: '#92400e', fontWeight: 600 }}>📈 Tasa</div>
-          <div style={{ fontSize: 32, fontWeight: 700, marginTop: 8 }}>{tasa_conversion}%</div>
-          <div style={{ fontSize: 11, color: '#666', marginTop: 4 }}>tasa de conversión</div>
-        </div>
-
-        <div style={{ padding: 16, background: '#fce7f3', border: '1px solid #ec4899', borderRadius: 8 }}>
-          <div style={{ fontSize: 12, color: '#9d174d', fontWeight: 600 }}>⏱️ Promedio</div>
-          <div style={{ fontSize: 32, fontWeight: 700, marginTop: 8 }}>{dias_promedio_a_orden || '—'}</div>
-          <div style={{ fontSize: 11, color: '#666', marginTop: 4 }}>días entre contacto y pedido</div>
-        </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 36 }}>
+        {[
+          { label: 'Contactados', value: total_contactados, sub: 'últimos 30 días', accent: true },
+          { label: 'Conversiones', value: total_conversiones, sub: 'pedido post-contacto', accent: false },
+          { label: 'Tasa', value: `${tasa_conversion}%`, sub: 'tasa de conversión', accent: false },
+          { label: 'Días promedio', value: dias_promedio_a_orden || '—', sub: 'contacto a pedido', accent: false },
+        ].map(m => (
+          <div key={m.label} style={{
+            padding: '24px 22px',
+            background: '#FFFFFF',
+            borderRadius: 16,
+            boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+            borderTop: `3px solid ${m.accent ? '#CC0000' : '#E5E5E5'}`,
+          }}>
+            <div style={{ fontSize: 10, color: '#707072', fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 10 }}>{m.label}</div>
+            <div style={{ fontSize: 36, fontWeight: 800, color: m.accent ? '#CC0000' : '#111111', letterSpacing: '-0.04em', lineHeight: 1 }}>{m.value}</div>
+            <div style={{ fontSize: 11, color: '#707072', marginTop: 6, fontWeight: 500 }}>{m.sub}</div>
+          </div>
+        ))}
       </div>
 
       {/* Desglose por segmento */}
       <div style={{ marginTop: 32 }}>
-        <h3>📊 Por Segmento</h3>
-        <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 12 }}>
+        <div style={{ fontSize: 10, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '.1em', color: '#707072', marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid #E5E5E5' }}>Por segmento al momento del contacto</div>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
-            <tr style={{ borderBottom: '2px solid #ddd', background: '#f9fafb' }}>
-              <th style={{ padding: 12, textAlign: 'left', fontWeight: 600, color: '#333' }}>Segmento</th>
-              <th style={{ padding: 12, textAlign: 'right', fontWeight: 600, color: '#333' }}>Contactados</th>
-              <th style={{ padding: 12, textAlign: 'right', fontWeight: 600, color: '#333' }}>Conversiones</th>
-              <th style={{ padding: 12, textAlign: 'right', fontWeight: 600, color: '#333' }}>Tasa</th>
-              <th style={{ padding: 12, textAlign: 'right', fontWeight: 600, color: '#333' }}>Días Promedio</th>
+            <tr style={{ borderBottom: '2px solid #E5E5E5' }}>
+              {['Segmento','Contactados','Conversiones','Tasa','Días Prom.'].map(h => (
+                <th key={h} style={{ padding: '8px 12px', textAlign: h === 'Segmento' ? 'left' : 'right', fontSize: 10, fontWeight: 500, color: '#707072', textTransform: 'uppercase', letterSpacing: '.08em' }}>{h}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
             {por_segmento && Object.entries(por_segmento).map(([seg, datos]) => (
-              <tr key={seg} style={{ borderBottom: '1px solid #eee', background: seg === 'En riesgo' ? '#fff5f5' : 'transparent' }}>
-                <td style={{ padding: 12, color: '#333' }}>
-                  {SEG_ICONS[seg] || '•'} {seg}
+              <tr key={seg} style={{ borderBottom: '1px solid #F5F5F5' }}>
+                <td style={{ padding: '12px', color: '#111111', fontWeight: 500 }}>
+                  <span className="seg-tag" style={{ background: SEG_COLORS[seg] || '#666', fontSize: 10 }}>{seg}</span>
                 </td>
-                <td style={{ padding: 12, textAlign: 'right', color: '#666' }}>{datos.contactados}</td>
-                <td style={{ padding: 12, textAlign: 'right', color: '#16a34a', fontWeight: 600 }}>{datos.conversiones}</td>
-                <td style={{ padding: 12, textAlign: 'right', fontWeight: 600, color: datos.tasa > 30 ? '#16a34a' : datos.tasa > 15 ? '#f59e0b' : '#ef4444' }}>
+                <td style={{ padding: '12px', textAlign: 'right', color: '#707072', fontWeight: 500 }}>{datos.contactados}</td>
+                <td style={{ padding: '12px', textAlign: 'right', color: datos.conversiones > 0 ? '#007D48' : '#707072', fontWeight: 500 }}>{datos.conversiones}</td>
+                <td style={{ padding: '12px', textAlign: 'right', fontWeight: 500, color: datos.tasa > 30 ? '#007D48' : datos.tasa > 15 ? '#f59e0b' : datos.tasa > 0 ? '#D30005' : '#707072' }}>
                   {datos.tasa}%
                 </td>
-                <td style={{ padding: 12, textAlign: 'right', color: '#666' }}>{datos.dias_promedio || '—'}</td>
+                <td style={{ padding: '12px', textAlign: 'right', color: '#707072', fontWeight: 500 }}>{datos.dias_promedio || '—'}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      {/* Información */}
-      <div style={{ marginTop: 32, padding: 16, background: '#f0f9ff', border: '1px solid #0ea5e9', borderRadius: 8 }}>
-        <p style={{ margin: 0, fontSize: 12, color: '#0369a1' }}>
-          <strong>💡 Cómo leer:</strong> La tasa de conversión es el % de contactos que resultaron en un pedido después del contacto.
-          Los "días promedio" muestran cuánto tarda en pedirse después del contacto (datos solo para conversiones).
+      {/* Nota */}
+      <div style={{ marginTop: 24, padding: '12px 16px', background: '#F5F5F5', borderLeft: '2px solid #CACACB' }}>
+        <p style={{ margin: 0, fontSize: 12, color: '#707072', fontWeight: 500 }}>
+          Tasa = % de contactos que generaron un pedido posterior. Segmento registrado al momento del contacto.
         </p>
       </div>
     </div>
@@ -1246,6 +1303,16 @@ export default function CRM() {
   const [overrides, setOverrides] = useState({}) // compartido entre TabHoy y TabAcciones
   const datosMeta = useDatosMeta()
 
+  // Pendientes sin resultado: badge (14d) y sección (7d gestionados en TabHoy)
+  const pendientesCerrarAll = useGestionesPendientesResultado(30)
+  const [closedPendientesIds, setClosedPendientesIds] = useState(new Set())
+  const pendientesVivos = pendientesCerrarAll.filter(p => !closedPendientesIds.has(p.id))
+  const badgePendientes = pendientesVivos.length
+
+  function onCerrarPendiente(id) {
+    setClosedPendientesIds(s => new Set([...s, id]))
+  }
+
   const segs = data?.SEGS || data?.['payload->SEGS'] || []
 
   if (loadingSnap) return <div className="loading">Cargando CRM...</div>
@@ -1259,29 +1326,28 @@ export default function CRM() {
 
   return (
     <div className="page">
-      <div className="page-title">🎯 CRM — Acción comercial</div>
+      <div className="page-title">Acción comercial</div>
       {/* INDICADOR DE DATOS */}
       {(fechaDelivery || fechaPerfil) && (
-        <div style={{ fontSize: 12, color: '#9ca3af', marginTop: -12, marginBottom: 16, display: 'flex', gap: 16 }}>
-          {fechaDelivery && <span>📦 Delivery al <strong style={{ color: '#6b7280' }}>{fechaDelivery}</strong></span>}
-          {fechaPerfil  && <span>🔄 Perfil al <strong style={{ color: '#6b7280' }}>{fechaPerfil}</strong></span>}
+        <div style={{ fontSize: 12, color: '#707072', marginTop: 4, marginBottom: 28, display: 'flex', gap: 20, fontWeight: 500 }}>
+          {fechaDelivery && <span>Delivery al <strong style={{ color: '#111111', fontWeight: 700 }}>{fechaDelivery}</strong></span>}
+          {fechaPerfil  && <span>Perfil al <strong style={{ color: '#111111', fontWeight: 700 }}>{fechaPerfil}</strong></span>}
         </div>
       )}
 
       {/* TABS */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
         {[
-          { key: 'hoy',        label: '📋 Hoy'              },
-          { key: 'acciones',   label: '✅ Acciones'          },
-          { key: 'conversiones', label: '📊 Conversiones'    },
-          { key: 'crm',        label: '👥 Clientes'          },
-          { key: 'productos',  label: '🍔 Productos'         },
-          { key: 'plantillas', label: '✏️ Plantillas'        },
-          { key: 'glosario',   label: '❓ Glosario'          },
+          { key: 'hoy', label: badgePendientes > 0 ? `Hoy · ${badgePendientes}` : 'Hoy' },
+          { key: 'acciones',    label: 'Acciones'    },
+          { key: 'conversiones', label: 'Conversiones' },
+          { key: 'crm',         label: 'Clientes'    },
+          { key: 'productos',   label: 'Productos'   },
+          { key: 'plantillas',  label: 'Plantillas'  },
+          { key: 'glosario',    label: 'Glosario'    },
         ].map(t => (
           <button key={t.key}
             className={`seg-btn ${vista === t.key ? 'active' : ''}`}
-            style={vista === t.key ? { background: '#4f8ef7', color: '#fff', borderColor: 'transparent', fontWeight: 700 } : {}}
             onClick={() => setVista(t.key)}
           >
             {t.label}
@@ -1289,7 +1355,7 @@ export default function CRM() {
         ))}
       </div>
 
-      {vista === 'hoy'        && <TabHoy overrides={overrides} setOverrides={setOverrides} />}
+      {vista === 'hoy'        && <TabHoy overrides={overrides} setOverrides={setOverrides} pendientesCerrar={pendientesVivos} onCerrarPendiente={onCerrarPendiente} />}
       {vista === 'acciones'   && <TabAcciones overrides={overrides} />}
       {vista === 'conversiones' && <TabConversiones />}
       {vista === 'crm'        && <TabClientes segs={segs} />}

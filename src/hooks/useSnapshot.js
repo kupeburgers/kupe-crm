@@ -336,6 +336,47 @@ export async function fetchMovimientosHoy(segmentoNuevo, segmentoAnterior = null
   return conSegAnterior
 }
 
+// Gestiones sin resultado de los últimos N días (excluye hoy), deduplicadas por teléfono
+export function useGestionesPendientesResultado(dias = 30) {
+  const [pendientes, setPendientes] = useState([])
+
+  useEffect(() => {
+    const hoy = new Date().toISOString().split('T')[0]
+    const desde = new Date()
+    desde.setDate(desde.getDate() - dias)
+    const desdeStr = desde.toISOString().split('T')[0]
+
+    fetch(
+      `${SUPABASE_URL}/rest/v1/gestion_comercial?select=id,telefono,fecha_contacto&resultado=is.null&fecha_contacto=lt.${hoy}&fecha_contacto=gte.${desdeStr}&order=fecha_contacto.desc`,
+      { headers: HEADERS }
+    )
+      .then(r => r.json())
+      .then(async rows => {
+        if (!rows || rows.length === 0) { setPendientes([]); return }
+        // Keep most recent pending per phone
+        const byPhone = {}
+        rows.forEach(r => { if (!byPhone[r.telefono]) byPhone[r.telefono] = r })
+        const unique = Object.values(byPhone)
+        // Fetch names
+        const tels = unique.map(r => r.telefono).join(',')
+        const namesRes = await fetch(
+          `${SUPABASE_URL}/rest/v1/clientes_live?select=nombre,telefono,segmento&telefono=in.(${tels})`,
+          { headers: HEADERS }
+        )
+        const names = namesRes.ok ? await namesRes.json() : []
+        const nameMap = Object.fromEntries((names || []).map(c => [String(c.telefono), c]))
+        setPendientes(unique.map(r => ({
+          ...r,
+          nombre:   nameMap[String(r.telefono)]?.nombre   || null,
+          segmento: nameMap[String(r.telefono)]?.segmento || null,
+        })))
+      })
+      .catch(() => setPendientes([]))
+  }, [dias])
+
+  return pendientes
+}
+
 // Conversiones: métricas de contacto-a-pedido de últimos 30 días
 export function useConversiones() {
   const [stats, setStats] = useState(null)
