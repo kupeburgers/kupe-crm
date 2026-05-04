@@ -45,3 +45,5 @@ Thumbs.db
 # Local only
 datos/
 *.xlsx
+
+.vercel
