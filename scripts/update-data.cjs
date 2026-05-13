@@ -24,8 +24,24 @@ const https = require('https')
 const path  = require('path')
 const fs    = require('fs')
 
-const SUPABASE_URL = 'lqpzhzworncmcuptesjh.supabase.co'
-const ANON_KEY     = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxxcHpoendvcm5jbWN1cHRlc2poIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NDI2NDYsImV4cCI6MjA4OTUxODY0Nn0.sa4SrtesQLLpP898P4zKUGeYbbILxQ2PUoaOy-dXFjI'
+// ── Cargar credenciales desde .env (en raíz del proyecto) ────────────────────
+;(function loadDotEnv() {
+  const envPath = path.join(__dirname, '..', '.env')
+  if (!fs.existsSync(envPath)) return
+  for (const line of fs.readFileSync(envPath, 'utf8').split(/\r?\n/)) {
+    const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.+?)\s*$/)
+    if (m && !process.env[m[1]]) process.env[m[1]] = m[2].replace(/^['"]|['"]$/g, '')
+  }
+})()
+
+const SUPABASE_URL = process.env.SUPABASE_URL
+const SERVICE_KEY  = process.env.SUPABASE_SERVICE_KEY
+
+if (!SUPABASE_URL || !SERVICE_KEY) {
+  console.error('❌ Faltan SUPABASE_URL o SUPABASE_SERVICE_KEY en .env')
+  console.error('   Editá: C:/Users/kupeb/OneDrive/Escritorio/supabase crm/.env')
+  process.exit(1)
+}
 
 const DELIVERY_DIR  = 'C:/Users/kupeb/OneDrive/Escritorio/supabase crm/datos/delivery'
 const PEDIDOS_DIR   = 'C:/Users/kupeb/OneDrive/Escritorio/supabase crm/datos/pedidos'
@@ -44,8 +60,8 @@ function request(method, urlPath, body, extraHeaders = {}) {
       method,
       headers: {
         'Content-Type':  'application/json',
-        'apikey':        ANON_KEY,
-        'Authorization': `Bearer ${ANON_KEY}`,
+        'apikey':        SERVICE_KEY,
+        'Authorization': `Bearer ${SERVICE_KEY}`,
         'Prefer':        'return=minimal,resolution=merge-duplicates',
         ...(data ? { 'Content-Length': Buffer.byteLength(data) } : {}),
         ...extraHeaders
