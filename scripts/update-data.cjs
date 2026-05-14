@@ -43,10 +43,10 @@ if (!SUPABASE_URL || !SERVICE_KEY) {
   process.exit(1)
 }
 
-const DELIVERY_DIR  = 'C:/Users/kupeb/OneDrive/Escritorio/supabase crm/datos/delivery'
-const PEDIDOS_DIR   = 'C:/Users/kupeb/OneDrive/Escritorio/supabase crm/datos/pedidos'
-const ARTICULOS_DIR = 'C:/Users/kupeb/OneDrive/Escritorio/supabase crm/datos/articulos'
-const CLIENTES_DIR  = 'C:/Users/kupeb/OneDrive/Escritorio/supabase crm/datos/clientes'
+const DELIVERY_DIR  = 'C:/Users/kupeb/OneDrive/Escritorio/KupeBurgers ecosistema/crm/datos/delivery'
+const PEDIDOS_DIR   = 'C:/Users/kupeb/OneDrive/Escritorio/KupeBurgers ecosistema/crm/datos/pedidos'
+const ARTICULOS_DIR = 'C:/Users/kupeb/OneDrive/Escritorio/KupeBurgers ecosistema/crm/datos/articulos'
+const CLIENTES_DIR  = 'C:/Users/kupeb/OneDrive/Escritorio/KupeBurgers ecosistema/crm/datos/clientes'
 const BATCH_SIZE    = 100
 
 // ── HTTP helpers ─────────────────────────────────────────────────────────────
