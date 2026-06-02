@@ -47,7 +47,7 @@ export function useTop20() {
       { headers: HEADERS }
     )
       .then(r => r.json())
-      .then(rows => setClientes(rows || []))
+      .then(rows => setClientes(Array.isArray(rows) ? rows : []))
       .catch(() => setClientes([]))
       .finally(() => setLoading(false))
   }, [])
@@ -128,7 +128,7 @@ export function useEnRiesgoUrgente(scoreMin = 70) {
       { headers: HEADERS }
     )
       .then(r => r.json())
-      .then(rows => setAlertas(rows || []))
+      .then(rows => setAlertas(Array.isArray(rows) ? rows : []))
       .catch(() => setAlertas([]))
   }, [])
   return alertas
@@ -160,7 +160,7 @@ export function useClientes(segmento, page = 0, pageSize = 50, busqueda = '') {
         if (tot) setTotal(parseInt(tot))
         return r.json()
       })
-      .then(rows => setClientes(rows || []))
+      .then(rows => setClientes(Array.isArray(rows) ? rows : []))
       .catch(() => setClientes([]))
       .finally(() => setLoading(false))
   }, [segmento, page, busqueda])
