@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kupe CRM — Design System Preview</title>
+<style>
+/* ── RESET + TOKENS ─────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --red:     #CC0000;
+  --red-bg:  #fff5f5;
+  --black:   #111111;
+  --grey-1:  #F5F5F5;
+  --grey-2:  #E5E5E5;
+  --grey-3:  #CACACB;
+  --grey-4:  #707072;
+  --white:   #FFFFFF;
+  --shadow-card: 0 4px 20px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+  --shadow-hover: 0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
+  --radius-pill: 30px;
+}
+
+body {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  background: #EAEAEA;
+  color: var(--black);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── PREVIEW LAYOUT ─────────────────────────────────────── */
+.preview-wrap { max-width: 960px; margin: 0 auto; padding: 48px 24px 80px; }
+.preview-header {
+  text-align: center;
+  margin-bottom: 56px;
+}
+.preview-header h1 {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--grey-4);
+  margin-bottom: 10px;
+}
+.preview-header p {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--black);
+  letter-spacing: -0.03em;
+}
+
+.ds-section {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 36px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-card);
+}
+.ds-section-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--grey-4);
+  margin-bottom: 28px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--grey-2);
+}
+
+.ds-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+.ds-row:last-child { margin-bottom: 0; }
+
+.ds-label {
+  font-size: 10px;
+  color: var(--grey-4);
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.ds-item { display: flex; flex-direction: column; gap: 6px; }
+
+/* ── PALETA ─────────────────────────────────────────────── */
+.palette-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+}
+.swatch {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+.swatch-color { height: 72px; }
+.swatch-info {
+  padding: 10px 12px;
+  background: var(--white);
+  border-top: 1px solid var(--grey-2);
+}
+.swatch-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--black);
+  margin-bottom: 2px;
+}
+.swatch-hex { font-size: 10px; color: var(--grey-4); font-family: monospace; letter-spacing: .03em; }
+
+/* ── TIPOGRAFÍA ─────────────────────────────────────────── */
+.type-scale { display: flex; flex-direction: column; gap: 18px; }
+.type-row { display: flex; align-items: baseline; gap: 20px; border-bottom: 1px solid var(--grey-1); padding-bottom: 16px; }
+.type-row:last-child { border-bottom: none; padding-bottom: 0; }
+.type-meta { width: 110px; flex-shrink: 0; font-size: 10px; color: var(--grey-4); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; line-height: 1.4; }
+.type-sample { color: var(--black); }
+
+/* ── BOTONES ─────────────────────────────────────────────── */
+.btn-contactar {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 14px 24px;
+  background: var(--red);
+  color: var(--white);
+  border: none;
+  border-radius: var(--radius-pill);
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  letter-spacing: .03em;
+  font-family: inherit;
+  transition: background 200ms ease, transform 100ms ease;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+.btn-contactar:hover { background: #aa0000; }
+.btn-contactar:active { transform: scale(.99); }
+
+.btn-accion {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 9px 20px;
+  border-radius: var(--radius-pill);
+  background: var(--black);
+  color: var(--white);
+  border: none;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: .04em;
+  font-family: inherit;
+  transition: background 200ms ease;
+}
+.btn-accion:hover { background: #333; }
+.btn-accion.disabled { background: var(--grey-2); color: var(--grey-4); cursor: default; pointer-events: none; }
+
+.btn-outline {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 9px 20px;
+  border-radius: var(--radius-pill);
+  background: var(--white);
+  color: var(--black);
+  border: 2px solid var(--black);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: .04em;
+  font-family: inherit;
+  transition: all 200ms ease;
+}
+.btn-outline:hover { background: var(--black); color: var(--white); }
+
+.btn-ghost {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 9px 20px;
+  border-radius: var(--radius-pill);
+  background: var(--grey-1);
+  color: var(--grey-4);
+  border: 2px solid var(--grey-2);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: .04em;
+  font-family: inherit;
+  transition: all 200ms ease;
+}
+.btn-ghost:hover { border-color: var(--grey-4); background: var(--grey-2); color: var(--black); }
+
+/* resultado grid */
+.btn-res {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 12px 18px;
+  border: 2px solid var(--grey-2);
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  background: var(--white);
+  color: var(--black);
+  font-family: inherit;
+  transition: all 150ms ease;
+}
+.btn-res.respondio  { border-color: var(--black); color: var(--black); }
+.btn-res.respondio:hover  { background: var(--black); color: var(--white); }
+.btn-res.compro     { background: #16a34a; border-color: #16a34a; color: var(--white); }
+.btn-res.compro:hover     { background: #15803d; border-color: #15803d; }
+.btn-res.no_respondio     { border-color: var(--grey-3); color: var(--grey-4); }
+.btn-res.no_respondio:hover { border-color: var(--grey-4); background: var(--grey-1); }
+.btn-res.no_compro  { border-color: var(--grey-2); color: var(--grey-4); }
+.btn-res.no_compro:hover  { border-color: var(--grey-3); background: var(--grey-1); }
+
+/* ── SEG FILTER BUTTONS ─────────────────────────────────── */
+.seg-btn {
+  padding: 8px 18px;
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--grey-3);
+  background: var(--white);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--black);
+  white-space: nowrap;
+  letter-spacing: .02em;
+  font-family: inherit;
+  transition: border-color 200ms ease, background 200ms ease, color 200ms ease;
+}
+.seg-btn.active { background: var(--black); color: var(--white); border-color: var(--black); }
+.seg-btn:hover:not(.active) { border-color: var(--black); }
+
+/* ── CHIPS / PILLS ───────────────────────────────────────── */
+.score-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .03em;
+}
+.score-high { background: #fff0f0; color: var(--red); border: 1.5px solid var(--red); }
+.score-mid  { background: #fffbeb; color: #b45309; border: 1.5px solid #f59e0b; }
+.score-low  { background: var(--grey-1); color: var(--grey-4); border: 1.5px solid var(--grey-3); }
+
+.seg-tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.card-dias {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--grey-4);
+  background: var(--grey-1);
+  border-radius: var(--radius-pill);
+  padding: 3px 10px;
+  letter-spacing: .03em;
+}
+.card-dias.urgente { background: var(--red-bg); color: var(--red); font-weight: 800; }
+.card-dias.medio   { background: #fffbeb; color: #b45309; font-weight: 800; }
+.card-dias.ok      { background: #f0fdf4; color: #15803d; font-weight: 700; }
+
+.badge-ayer {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--grey-1);
+  color: var(--grey-4);
+  border-radius: var(--radius-pill);
+  padding: 4px 12px;
+  letter-spacing: .03em;
+}
+
+.result-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 700;
+}
+.result-badge.compro       { background: #dcfce7; color: #15803d; }
+.result-badge.respondio    { background: var(--grey-1); color: var(--black); }
+.result-badge.no_respondio { background: var(--grey-1); color: var(--grey-4); }
+.result-badge.no_compro    { background: var(--grey-1); color: var(--grey-4); }
+
+/* ── INPUTS ─────────────────────────────────────────────── */
+.search-bar {
+  width: 100%;
+  padding: 12px 20px;
+  border: 2px solid var(--grey-2);
+  border-radius: var(--radius-pill);
+  font-size: 14px;
+  outline: none;
+  background: var(--white);
+  font-family: inherit;
+  color: var(--black);
+  transition: border-color 200ms ease;
+}
+.search-bar::placeholder { color: var(--grey-4); }
+.search-bar:focus { border-color: var(--black); }
+
+.input-field {
+  width: 100%;
+  padding: 10px 16px;
+  border: 2px solid var(--grey-2);
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+  background: var(--white);
+  font-family: inherit;
+  color: var(--black);
+  transition: border-color 200ms ease;
+}
+.input-field::placeholder { color: var(--grey-4); }
+.input-field:focus { border-color: var(--black); }
+.input-field.error { border-color: var(--red); }
+.input-field.success { border-color: #16a34a; }
+
+.input-select {
+  width: 100%;
+  padding: 10px 16px;
+  border: 2px solid var(--grey-2);
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+  background: var(--white);
+  font-family: inherit;
+  color: var(--black);
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23707072' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+  transition: border-color 200ms ease;
+}
+.input-select:focus { border-color: var(--black); outline: none; }
+
+/* ── ALERTAS ─────────────────────────────────────────────── */
+.alert-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.alert-item.warn   { background: #fffbeb; border-left: 4px solid #f59e0b; }
+.alert-item.danger { background: var(--red-bg); border-left: 4px solid var(--red); }
+.alert-item.info   { background: #f0f4ff; border-left: 4px solid #3b82f6; }
+.alert-item.ok     { background: #f0fdf4; border-left: 4px solid #16a34a; }
+
+/* ── KPI ─────────────────────────────────────────────────── */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+.kpi {
+  background: var(--white);
+  padding: 22px 20px;
+  border-radius: 12px;
+  box-shadow: var(--shadow-card);
+  border-top: 3px solid var(--grey-2);
+}
+.kpi:first-child { border-top-color: var(--red); }
+.kpi-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--grey-4);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.kpi-value {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--black);
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+.kpi-sub { font-size: 11px; color: var(--grey-4); margin-top: 5px; font-weight: 500; }
+
+/* ── SEG CARDS ───────────────────────────────────────────── */
+.seg-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.seg-card {
+  border-radius: 14px;
+  padding: 22px;
+  color: #fff;
+  box-shadow: var(--shadow-card);
+}
+.seg-card .seg-icon { font-size: 18px; margin-bottom: 6px; }
+.seg-card .seg-name { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 10px; opacity: 0.8; }
+.seg-card .seg-num  { font-size: 36px; font-weight: 800; line-height: 1; letter-spacing: -0.04em; }
+.seg-card .seg-sub  { font-size: 11px; opacity: .7; margin-top: 4px; font-weight: 500; }
+.seg-card .seg-mov  { margin-top: 10px; font-size: 10px; font-weight: 700; background: rgba(255,255,255,.2); border-radius: var(--radius-pill); padding: 4px 10px; display: inline-block; letter-spacing: .06em; text-transform: uppercase; }
+
+/* ── CLIENTE CARD ────────────────────────────────────────── */
+.cliente-card {
+  background: var(--white);
+  padding: 22px 24px;
+  border-radius: 16px;
+  border-left: 4px solid var(--grey-2);
+  box-shadow: var(--shadow-card);
+  transition: box-shadow 150ms ease, transform 150ms ease;
+}
+.cliente-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-1px); }
+.cliente-card.urgencia-alta  { border-left-color: var(--red); }
+.cliente-card.urgencia-media { border-left-color: #f59e0b; }
+.cliente-card.urgencia-baja  { border-left-color: var(--grey-3); }
+.card-top { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.card-score { margin-left: auto; font-size: 30px; font-weight: 900; color: var(--black); letter-spacing: -0.05em; line-height: 1; }
+.card-score-label { font-size: 10px; font-weight: 700; color: var(--grey-4); margin-left: 1px; letter-spacing: .04em; text-transform: uppercase; }
+.card-nombre { font-size: 20px; font-weight: 800; color: var(--black); margin-bottom: 4px; letter-spacing: -0.02em; line-height: 1.2; }
+.card-info { font-size: 12px; color: var(--grey-4); margin-bottom: 18px; display: flex; gap: 14px; flex-wrap: wrap; font-weight: 500; }
+
+/* ── FICHA RÁPIDA ────────────────────────────────────────── */
+.ficha {
+  background: var(--grey-1);
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid var(--grey-2);
+}
+.ficha-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+.ficha-nombre { font-size: 16px; font-weight: 700; color: var(--black); }
+.ficha-tel    { font-size: 12px; color: var(--grey-4); font-weight: 500; }
+.ficha-grid   { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.ficha-stat   { font-size: 10px; color: var(--grey-4); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+.ficha-stat strong { display: block; font-size: 16px; color: var(--black); font-weight: 700; text-transform: none; letter-spacing: 0; margin-top: 3px; }
+
+/* ── RESUMEN DÍA ─────────────────────────────────────────── */
+.resumen-dia {
+  display: flex; gap: 20px; align-items: center; flex-wrap: wrap;
+  background: var(--white); border: 2px solid var(--grey-2);
+  border-radius: 12px; padding: 14px 20px;
+}
+.resumen-stat { font-size: 13px; color: var(--grey-4); font-weight: 500; }
+.resumen-stat strong { font-size: 20px; font-weight: 800; color: var(--black); margin-right: 4px; }
+.resumen-conversion { margin-left: auto; font-size: 16px; font-weight: 800; color: var(--black); }
+
+/* ── ALERTA RIESGO ───────────────────────────────────────── */
+.alerta-riesgo {
+  background: var(--red-bg); border: 1px solid #fecaca;
+  border-left: 4px solid var(--red); border-radius: 12px; padding: 18px 20px;
+}
+.alerta-riesgo-title { font-size: 12px; font-weight: 800; color: var(--red); margin-bottom: 10px; letter-spacing: .06em; text-transform: uppercase; }
+
+/* ── TABLE ───────────────────────────────────────────────── */
+.crm-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.crm-table th { text-align: left; padding: 10px 14px; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--grey-4); font-weight: 700; border-bottom: 2px solid var(--grey-2); }
+.crm-table td { padding: 13px 14px; border-bottom: 1px solid var(--grey-1); vertical-align: middle; }
+.crm-table tr:hover td { background: var(--grey-1); }
+
+/* ── LOADING ─────────────────────────────────────────────── */
+.loading { display: flex; align-items: center; justify-content: center; height: 80px; color: var(--grey-4); font-size: 14px; font-weight: 600; letter-spacing: .03em; }
+
+/* ── DIVIDER ─────────────────────────────────────────────── */
+.divider { height: 1px; background: var(--grey-2); margin: 20px 0; }
+
+.col-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.col-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+@media(max-width:600px){ .col-2,.col-3{ grid-template-columns:1fr; } .ficha-grid{ grid-template-columns:repeat(2,1fr); } }
+</style>
+</head>
+<body>
+
+<div class="preview-wrap">
+
+  <!-- HEADER -->
+  <div class="preview-header">
+    <h1>Kupe CRM</h1>
+    <p>Design System</p>
+  </div>
+
+
+  <!-- ① PALETA ──────────────────────────────────────────── -->
+  <div class="ds-section">
+    <div class="ds-section-title">01 — Paleta de colores</div>
+    <div class="palette-grid">
+      <div class="swatch">
+        <div class="swatch-color" style="background:#CC0000"></div>
+        <div class="swatch-info"><div class="swatch-name">Red</div><div class="swatch-hex">#CC0000</div></div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#fff5f5; border:1px solid #fecaca;"></div>
+        <div class="swatch-info"><div class="swatch-name">Red BG</div><div class="swatch-hex">#fff5f5</div></div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#111111"></div>
+        <div class="swatch-info"><div class="swatch-name">Black</div><div class="swatch-hex">#111111</div></div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#FFFFFF; border:1px solid #E5E5E5;"></div>
+        <div class="swatch-info"><div class="swatch-name">White</div><div class="swatch-hex">#FFFFFF</div></div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#F5F5F5; border:1px solid #E5E5E5;"></div>
+        <div class="swatch-info"><div class="swatch-name">Grey 1</div><div class="swatch-hex">#F5F5F5</div></div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#E5E5E5"></div>
+        <div class="swatch-info"><div class="swatch-name">Grey 2</div><div class="swatch-hex">#E5E5E5</div></div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#CACACB"></div>
+        <div class="swatch-info"><div class="swatch-name">Grey 3</div><div class="swatch-hex">#CACACB</div></div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#707072"></div>
+        <div class="swatch-info"><div class="swatch-name">Grey 4</div><div class="swatch-hex">#707072</div></div>
+      </div>
+      <!-- Semánticos -->
+      <div class="swatch">
+        <div class="swatch-color" style="background:#16a34a"></div>
+        <div class="swatch-info"><div class="swatch-name">Green</div><div class="swatch-hex">#16a34a</div></div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#f59e0b"></div>
+        <div class="swatch-info"><div class="swatch-name">Amber</div><div class="swatch-hex">#f59e0b</div></div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#3b82f6"></div>
+        <div class="swatch-info"><div class="swatch-name">Blue</div><div class="swatch-hex">#3b82f6</div></div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ② TIPOGRAFÍA ─────────────────────────────────────── -->
+  <div class="ds-section">
+    <div class="ds-section-title">02 — Tipografía</div>
+    <div class="type-scale">
+      <div class="type-row">
+        <div class="type-meta">Page Title<br>32px / 800<br>-0.03em / caps</div>
+        <div class="type-sample" style="font-size:32px;font-weight:800;letter-spacing:-0.03em;text-transform:uppercase;line-height:1.1">Clientes Hoy</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">Section H<br>20px / 800<br>-0.02em</div>
+        <div class="type-sample" style="font-size:20px;font-weight:800;letter-spacing:-0.02em">Juan Pablo Méndez</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">KPI Value<br>32px / 800<br>-0.04em</div>
+        <div class="type-sample" style="font-size:32px;font-weight:800;letter-spacing:-0.04em;line-height:1">2138</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">Score<br>30px / 900<br>-0.05em</div>
+        <div class="type-sample" style="font-size:30px;font-weight:900;letter-spacing:-0.05em;line-height:1">87 <span style="font-size:10px;font-weight:700;color:#707072;letter-spacing:.04em;text-transform:uppercase">pts</span></div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">Body<br>14px / 400<br>1.5</div>
+        <div class="type-sample" style="font-size:14px;color:#707072">Cliente frecuente · 8 pedidos · Ticket promedio $4.200</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">Small / Label<br>12px / 600<br>+0.02em</div>
+        <div class="type-sample" style="font-size:12px;font-weight:600;color:#707072;letter-spacing:.02em">Última compra hace 5 días</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">Caption / Tag<br>10px / 700<br>+0.08em / caps</div>
+        <div class="type-sample" style="font-size:10px;font-weight:700;color:#707072;letter-spacing:.08em;text-transform:uppercase">Segmento · Recencia</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ③ BOTONES ─────────────────────────────────────────── -->
+  <div class="ds-section">
+    <div class="ds-section-title">03 — Botones</div>
+
+    <div class="ds-label">Primario — Rojo (CTA principal)</div>
+    <div class="ds-row">
+      <button class="btn-contactar">Contactar por WhatsApp</button>
+      <button class="btn-contactar" style="padding:10px 20px;font-size:13px;">Acción roja sm</button>
+    </div>
+
+    <div class="divider"></div>
+    <div class="ds-label">Secundario — Negro filled / Outline</div>
+    <div class="ds-row">
+      <button class="btn-accion">Acción</button>
+      <button class="btn-accion">Ver ficha</button>
+      <button class="btn-accion disabled">Deshabilitado</button>
+      <button class="btn-outline">Outlined</button>
+      <button class="btn-ghost">Ghost</button>
+    </div>
+
+    <div class="divider"></div>
+    <div class="ds-label">Filtros de segmento (Seg Buttons)</div>
+    <div class="ds-row">
+      <button class="seg-btn active">Todos</button>
+      <button class="seg-btn">🟢 Activo</button>
+      <button class="seg-btn">🎯 Tibio</button>
+      <button class="seg-btn">🟠 Enfriando</button>
+      <button class="seg-btn">🔴 En riesgo</button>
+      <button class="seg-btn">⬛ Perdido</button>
+    </div>
+
+    <div class="divider"></div>
+    <div class="ds-label">Grid de resultado (2×2)</div>
+    <div style="max-width:380px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <button class="btn-res respondio">Respondió</button>
+      <button class="btn-res compro">Compró ✓</button>
+      <button class="btn-res no_respondio">Sin respuesta</button>
+      <button class="btn-res no_compro">No compró</button>
+    </div>
+  </div>
+
+
+  <!-- ④ CHIPS & PILLS ──────────────────────────────────── -->
+  <div class="ds-section">
+    <div class="ds-section-title">04 — Chips y Pills</div>
+
+    <div class="ds-label">Score Pills</div>
+    <div class="ds-row" style="align-items:center">
+      <span class="score-pill score-high">Score 87</span>
+      <span class="score-pill score-mid">Score 55</span>
+      <span class="score-pill score-low">Score 22</span>
+    </div>
+
+    <div class="divider"></div>
+    <div class="ds-label">Segmento Tags (seg-tag)</div>
+    <div class="ds-row" style="align-items:center">
+      <span class="seg-tag" style="background:#22c55e">Activo</span>
+      <span class="seg-tag" style="background:#d97700">Tibio</span>
+      <span class="seg-tag" style="background:#c05a00">Enfriando</span>
+      <span class="seg-tag" style="background:#cc2222">En riesgo</span>
+      <span class="seg-tag" style="background:#707072">Perdido</span>
+    </div>
+
+    <div class="divider"></div>
+    <div class="ds-label">Días de recencia (card-dias)</div>
+    <div class="ds-row" style="align-items:center">
+      <span class="card-dias ok">5d</span>
+      <span class="card-dias medio">22d</span>
+      <span class="card-dias urgente">67d</span>
+      <span class="card-dias">Normal</span>
+    </div>
+
+    <div class="divider"></div>
+    <div class="ds-label">Result Badges</div>
+    <div class="ds-row" style="align-items:center; flex-wrap:wrap;">
+      <span class="result-badge compro">✓ Compró</span>
+      <span class="result-badge respondio">💬 Respondió</span>
+      <span class="result-badge no_respondio">— Sin respuesta</span>
+      <span class="result-badge no_compro">✗ No compró</span>
+    </div>
+
+    <div class="divider"></div>
+    <div class="ds-label">Badge genérico</div>
+    <div class="ds-row">
+      <span class="badge-ayer">Ayer</span>
+      <span class="badge-ayer">hace 2h</span>
+    </div>
+  </div>
+
+
+  <!-- ⑤ INPUTS ─────────────────────────────────────────── -->
+  <div class="ds-section">
+    <div class="ds-section-title">05 — Inputs y controles</div>
+
+    <div class="ds-label">Search Bar (pill)</div>
+    <input class="search-bar" type="text" placeholder="Buscar cliente por nombre o teléfono…" style="margin-bottom:20px">
+
+    <div class="col-2">
+      <div>
+        <div class="ds-label">Input default</div>
+        <input class="input-field" type="text" placeholder="Escribí aquí…">
+      </div>
+      <div>
+        <div class="ds-label">Input con foco (simulated)</div>
+        <input class="input-field" type="text" value="Juan Pablo" style="border-color:var(--black)">
+      </div>
+      <div>
+        <div class="ds-label">Input error</div>
+        <input class="input-field error" type="text" value="texto inválido">
+      </div>
+      <div>
+        <div class="ds-label">Input success</div>
+        <input class="input-field success" type="text" value="Confirmado ✓">
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="ds-label">Select</div>
+    <div class="col-2">
+      <select class="input-select">
+        <option>Todos los segmentos</option>
+        <option>Activo</option>
+        <option>Tibio</option>
+        <option>En riesgo</option>
+      </select>
+      <select class="input-select">
+        <option>Ordenar por recencia</option>
+        <option>Score desc</option>
+        <option>Pedidos desc</option>
+      </select>
+    </div>
+  </div>
+
+
+  <!-- ⑥ ALERTAS ────────────────────────────────────────── -->
+  <div class="ds-section">
+    <div class="ds-section-title">06 — Alertas</div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="alert-item danger">🔴 <strong>446 clientes</strong>&nbsp;con segmento incorrecto detectados. Ejecutá un recálculo completo.</div>
+      <div class="alert-item warn">⚠️ <strong>23 clientes</strong>&nbsp;en riesgo no fueron contactados esta semana.</div>
+      <div class="alert-item info">ℹ️ El cron nocturno se ejecutó a las 01:30 ARG. 2138 clientes actualizados.</div>
+      <div class="alert-item ok">✅ CRM recalculado correctamente. 626 transiciones registradas.</div>
+    </div>
+  </div>
+
+
+  <!-- ⑦ KPI STRIP ──────────────────────────────────────── -->
+  <div class="ds-section">
+    <div class="ds-section-title">07 — KPI Strip</div>
+    <div class="kpi-row">
+      <div class="kpi">
+        <div class="kpi-label">Total clientes</div>
+        <div class="kpi-value">2138</div>
+        <div class="kpi-sub">+12 esta semana</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Activos</div>
+        <div class="kpi-value">384</div>
+        <div class="kpi-sub">18% del total</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">En riesgo</div>
+        <div class="kpi-value">211</div>
+        <div class="kpi-sub">Últimos 90 días</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Ticket promedio</div>
+        <div class="kpi-value">$4.8k</div>
+        <div class="kpi-sub">Últimos 60 días</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ⑧ SEGMENTOS CARDS ───────────────────────────────── -->
+  <div class="ds-section">
+    <div class="ds-section-title">08 — Segmento Cards</div>
+    <div class="seg-grid">
+      <div class="seg-card" style="background:#111">
+        <div class="seg-icon">🟢</div>
+        <div class="seg-name">Activo</div>
+        <div class="seg-num">384</div>
+        <div class="seg-sub">≤ 14 días</div>
+        <div class="seg-mov">+8 hoy</div>
+      </div>
+      <div class="seg-card" style="background:#d97700">
+        <div class="seg-icon">🎯</div>
+        <div class="seg-name">Tibio</div>
+        <div class="seg-num">290</div>
+        <div class="seg-sub">15–30 días</div>
+        <div class="seg-mov">−3</div>
+      </div>
+      <div class="seg-card" style="background:#c05a00">
+        <div class="seg-icon">🟠</div>
+        <div class="seg-name">Enfriando</div>
+        <div class="seg-num">315</div>
+        <div class="seg-sub">31–60 días</div>
+        <div class="seg-mov">+5</div>
+      </div>
+      <div class="seg-card" style="background:#CC0000">
+        <div class="seg-icon">🔴</div>
+        <div class="seg-name">En riesgo</div>
+        <div class="seg-num">211</div>
+        <div class="seg-sub">61–90 días</div>
+        <div class="seg-mov">−12</div>
+      </div>
+      <div class="seg-card" style="background:#444">
+        <div class="seg-icon">⬛</div>
+        <div class="seg-name">Perdido</div>
+        <div class="seg-num">938</div>
+        <div class="seg-sub">> 90 días</div>
+        <div class="seg-mov">−1</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ⑨ CLIENTE CARD ───────────────────────────────────── -->
+  <div class="ds-section">
+    <div class="ds-section-title">09 — Cliente Card</div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+
+      <!-- urgencia alta -->
+      <div class="cliente-card urgencia-alta">
+        <div class="card-top">
+          <span class="card-dias urgente">67d sin comprar</span>
+          <span class="seg-tag" style="background:#CC0000">En riesgo</span>
+          <span class="card-score">87 <span class="card-score-label">pts</span></span>
+        </div>
+        <div class="card-nombre">Juan Pablo Méndez</div>
+        <div class="card-info">
+          <span>📦 12 pedidos</span>
+          <span>💰 $5.400 promedio</span>
+          <span>📍 Palermo</span>
+        </div>
+        <button class="btn-contactar">Contactar por WhatsApp</button>
+      </div>
+
+      <!-- urgencia media -->
+      <div class="cliente-card urgencia-media">
+        <div class="card-top">
+          <span class="card-dias medio">22d sin comprar</span>
+          <span class="seg-tag" style="background:#d97700">Tibio</span>
+          <span class="card-score">54 <span class="card-score-label">pts</span></span>
+        </div>
+        <div class="card-nombre">María Florencia Gómez</div>
+        <div class="card-info">
+          <span>📦 5 pedidos</span>
+          <span>💰 $3.100 promedio</span>
+        </div>
+        <button class="btn-contactar">Contactar por WhatsApp</button>
+      </div>
+
+      <!-- urgencia baja / comprado -->
+      <div class="cliente-card urgencia-baja" style="opacity:.65;border-left-color:#16a34a">
+        <div class="card-top">
+          <span class="card-dias ok">3d</span>
+          <span class="seg-tag" style="background:#22c55e">Activo</span>
+          <span class="card-score" style="color:#16a34a">92 <span class="card-score-label">pts</span></span>
+        </div>
+        <div class="card-nombre">Carlos Rodríguez</div>
+        <div class="card-info"><span>📦 23 pedidos</span><span>💰 $6.200 promedio</span></div>
+        <div class="result-badge compro" style="margin-top:4px">✓ Compró hoy</div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ⑩ FICHA RÁPIDA ───────────────────────────────────── -->
+  <div class="ds-section">
+    <div class="ds-section-title">10 — Ficha rápida</div>
+    <div class="ficha">
+      <div class="ficha-header">
+        <div>
+          <div class="ficha-nombre">Juan Pablo Méndez</div>
+          <div class="ficha-tel">📞 11 5538-9412</div>
+        </div>
+        <span class="seg-tag" style="background:#CC0000">En riesgo</span>
+      </div>
+      <div class="ficha-grid">
+        <div class="ficha-stat">Pedidos<strong>12</strong></div>
+        <div class="ficha-stat">Ticket prom.<strong>$5.400</strong></div>
+        <div class="ficha-stat">Recencia<strong>67d</strong></div>
+        <div class="ficha-stat">Score<strong>87</strong></div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ⑪ RESUMEN DÍA ────────────────────────────────────── -->
+  <div class="ds-section">
+    <div class="ds-section-title">11 — Resumen del día</div>
+    <div class="resumen-dia">
+      <div class="resumen-stat"><strong>20</strong> para contactar</div>
+      <div class="resumen-stat"><strong>14</strong> contactados</div>
+      <div class="resumen-stat"><strong>6</strong> compraron</div>
+      <div class="resumen-conversion">43% conversión</div>
+    </div>
+  </div>
+
+
+  <!-- ⑫ TABLA CRM ──────────────────────────────────────── -->
+  <div class="ds-section">
+    <div class="ds-section-title">12 — Tabla CRM</div>
+    <input class="search-bar" type="text" placeholder="Buscar cliente por nombre o teléfono…" style="margin-bottom:16px">
+    <table class="crm-table">
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>Segmento</th>
+          <th>Recencia</th>
+          <th>Score</th>
+          <th>Pedidos</th>
+          <th>Ticket prom.</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Juan Pablo Méndez</strong><br><span style="color:#707072;font-size:11px">11 5538-9412</span></td>
+          <td><span class="seg-tag" style="background:#CC0000">En riesgo</span></td>
+          <td style="color:#ef4444;font-weight:700">67d</td>
+          <td><span class="score-pill score-high">87</span></td>
+          <td>12</td>
+          <td>$5.400</td>
+        </tr>
+        <tr>
+          <td><strong>María Florencia Gómez</strong><br><span style="color:#707072;font-size:11px">11 4421-0037</span></td>
+          <td><span class="seg-tag" style="background:#d97700">Tibio</span></td>
+          <td style="color:#f59e0b;font-weight:700">22d</td>
+          <td><span class="score-pill score-mid">54</span></td>
+          <td>5</td>
+          <td>$3.100</td>
+        </tr>
+        <tr>
+          <td><strong>Carlos Rodríguez</strong><br><span style="color:#707072;font-size:11px">11 7762-1188</span></td>
+          <td><span class="seg-tag" style="background:#22c55e">Activo</span></td>
+          <td style="color:#22c55e;font-weight:700">3d</td>
+          <td><span class="score-pill score-high">92</span></td>
+          <td>23</td>
+          <td>$6.200</td>
+        </tr>
+        <tr>
+          <td><strong>Lucía Torres</strong><br><span style="color:#707072;font-size:11px">11 3309-5544</span></td>
+          <td><span class="seg-tag" style="background:#707072">Perdido</span></td>
+          <td style="color:#ef4444;font-weight:700">134d</td>
+          <td><span class="score-pill score-low">18</span></td>
+          <td>2</td>
+          <td>$2.800</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+
+  <!-- ⑬ SOMBRAS & RELLENOS ────────────────────────────── -->
+  <div class="ds-section">
+    <div class="ds-section-title">13 — Sombras, radios y rellenos</div>
+    <div class="col-3">
+      <div>
+        <div class="ds-label">shadow-card</div>
+        <div style="background:white;border-radius:12px;padding:20px;box-shadow:var(--shadow-card);text-align:center;font-size:12px;font-weight:600;color:#707072">card default</div>
+      </div>
+      <div>
+        <div class="ds-label">shadow-hover</div>
+        <div style="background:white;border-radius:12px;padding:20px;box-shadow:var(--shadow-hover);text-align:center;font-size:12px;font-weight:600;color:#111">card hover</div>
+      </div>
+      <div>
+        <div class="ds-label">sin sombra</div>
+        <div style="background:var(--grey-1);border-radius:12px;padding:20px;text-align:center;font-size:12px;font-weight:600;color:#707072">ficha / bg</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="ds-label">Border Radius</div>
+    <div class="ds-row" style="align-items:center">
+      <div style="width:56px;height:56px;background:var(--black);border-radius:4px"></div>
+      <div style="width:56px;height:56px;background:var(--black);border-radius:10px"></div>
+      <div style="width:56px;height:56px;background:var(--black);border-radius:14px"></div>
+      <div style="width:56px;height:56px;background:var(--black);border-radius:16px"></div>
+      <div style="width:56px;height:56px;background:var(--black);border-radius:20px"></div>
+      <div style="width:56px;height:56px;background:var(--black);border-radius:30px"></div>
+      <div style="width:56px;height:56px;background:var(--black);border-radius:50%"></div>
+    </div>
+    <div class="ds-row" style="margin-top:4px">
+      <div style="width:56px;text-align:center;font-size:10px;color:#707072">4px</div>
+      <div style="width:56px;text-align:center;font-size:10px;color:#707072">10px</div>
+      <div style="width:56px;text-align:center;font-size:10px;color:#707072">14px</div>
+      <div style="width:56px;text-align:center;font-size:10px;color:#707072">16px</div>
+      <div style="width:56px;text-align:center;font-size:10px;color:#707072">20px</div>
+      <div style="width:56px;text-align:center;font-size:10px;color:#707072">pill</div>
+      <div style="width:56px;text-align:center;font-size:10px;color:#707072">circle</div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="ds-label">Espaciado (padding interno)</div>
+    <div class="ds-row" style="align-items:flex-end">
+      <div style="background:var(--grey-2);padding:4px 8px;font-size:10px;font-weight:600;color:#707072;border-radius:4px">4·8</div>
+      <div style="background:var(--grey-2);padding:8px 16px;font-size:10px;font-weight:600;color:#707072;border-radius:6px">8·16</div>
+      <div style="background:var(--grey-2);padding:12px 20px;font-size:10px;font-weight:600;color:#707072;border-radius:8px">12·20</div>
+      <div style="background:var(--grey-2);padding:14px 24px;font-size:10px;font-weight:600;color:#707072;border-radius:10px">14·24</div>
+      <div style="background:var(--grey-2);padding:22px 28px;font-size:10px;font-weight:600;color:#707072;border-radius:12px">22·28</div>
+    </div>
+  </div>
+
+
+  <!-- ⑭ LOADING ────────────────────────────────────────── -->
+  <div class="ds-section">
+    <div class="ds-section-title">14 — Estado loading</div>
+    <div class="loading">Cargando clientes…</div>
+  </div>
+
+</div>
+
+</body>
+</html>
