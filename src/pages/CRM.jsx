@@ -289,7 +289,7 @@ function TabHoy({ overrides, setOverrides, pendientesCerrar = [], onCerrarPendie
             </div>
             <div className="alerta-riesgo-list">
               {pendientes.slice(0, 4).map(c => {
-                const diasParaPerdido = Math.max(0, 120 - (c.recencia_dias || 0))
+                const diasParaPerdido = Math.max(0, 90 - (c.recencia_dias || 0))
                 return (
                   <div key={c.telefono} className="alerta-riesgo-item" style={{ alignItems: 'flex-start', flexDirection: 'column', gap: 6 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
@@ -870,11 +870,11 @@ function TabGlosario() {
 
       <Bloque titulo="🎯 Segmentos — criterios">
         {[
-          { icon: '🟢', seg: 'Activo',    color: '#00a65a', def: 'Compró hace menos de 30 días. Mantenerlo activo con novedades o promociones.' },
-          { icon: '🎯', seg: 'Tibio',     color: '#d97700', def: 'Sin comprar entre 30 y 60 días. Ventana ideal para reactivar antes de que enfríe.' },
-          { icon: '🟠', seg: 'Enfriando', color: '#c05a00', def: 'Sin comprar entre 60 y 90 días. Urgente: cada día que pasa baja su probabilidad de volver.' },
-          { icon: '🔴', seg: 'En riesgo', color: '#cc2222', def: 'Sin comprar más de 90 días pero con historial valioso. Última oportunidad antes de perderlos.' },
-          { icon: '⬛', seg: 'Perdido',   color: '#666',    def: 'Inactivos hace más de 120 días. Difíciles de recuperar, pero con score alto vale el intento.' },
+          { icon: '🟢', seg: 'Activo',    color: '#00a65a', def: 'Compró hace 14 días o menos. Mantenerlo activo con novedades o promociones.' },
+          { icon: '🎯', seg: 'Tibio',     color: '#d97700', def: 'Sin comprar entre 15 y 30 días. Ventana ideal para reactivar antes de que enfríe.' },
+          { icon: '🟠', seg: 'Enfriando', color: '#c05a00', def: 'Sin comprar entre 31 y 60 días. Urgente: cada día que pasa baja su probabilidad de volver.' },
+          { icon: '🔴', seg: 'En riesgo', color: '#cc2222', def: 'Sin comprar entre 61 y 90 días. Última oportunidad antes de perderlos.' },
+          { icon: '⬛', seg: 'Perdido',   color: '#666',    def: 'Inactivos hace más de 90 días. Difíciles de recuperar, pero con score alto vale el intento.' },
         ].map(s => (
           <div key={s.seg} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 8 }}>
             <span className="seg-tag" style={{ background: s.color, flexShrink: 0 }}>{s.icon} {s.seg}</span>
@@ -1231,7 +1231,7 @@ function TabClientes({ segs }) {
                     </span>
                   </td>
                   <td><span className={`score-pill ${scoreClass(c.score_comercial)}`}>{c.score_comercial}</span></td>
-                  <td style={{ color: c.recencia_dias > 60 ? '#ef4444' : c.recencia_dias > 30 ? '#f59e0b' : '#22c55e' }}>{c.recencia_dias}d</td>
+                  <td style={{ color: c.recencia_dias > 30 ? '#ef4444' : c.recencia_dias > 14 ? '#f59e0b' : '#22c55e' }}>{c.recencia_dias}d</td>
                   <td>{c.frecuencia}</td>
                   <td>{fmt(c.valor_total)}</td>
                   <td>{fmt(c.ticket_promedio)}</td>
