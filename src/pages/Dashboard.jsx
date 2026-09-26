@@ -6,6 +6,13 @@ const fmt = n => n >= 1_000_000
   ? `$${(n / 1_000_000).toFixed(1)}M`
   : n >= 1_000 ? `$${(n / 1_000).toFixed(0)}K` : `$${n}`
 
+// Gráficos mensuales con scroll horizontal: cada mes ocupa al menos
+// MES_MIN_PX y el scroll arranca al final (meses más recientes).
+const MES_MIN_PX = 44
+const scrollAlFinal = el => {
+  if (el && !el.dataset.init) { el.scrollLeft = el.scrollWidth; el.dataset.init = '1' }
+}
+
 const chipStyle = { cursor: 'pointer', textDecoration: 'underline', textDecorationStyle: 'dotted', whiteSpace: 'nowrap' }
 
 function renderDesglose(obj, buildSegNuevo, buildSegAnterior, onTap) {
@@ -206,7 +213,8 @@ export default function Dashboard() {
       {/* PEDIDOS POR MES */}
       <div className="section">
         <div className="section-title">Pedidos por mes</div>
-        <div className="bar-chart">
+        <div className="chart-scroll" ref={scrollAlFinal}>
+        <div className="bar-chart" style={{ minWidth: meses.length * MES_MIN_PX }}>
           {meses.map((m, i) => (
             <div key={i} className="bar-wrap">
               <div className="bar-val">{pedidos[i]}</div>
@@ -215,12 +223,14 @@ export default function Dashboard() {
             </div>
           ))}
         </div>
+        </div>
       </div>
 
       {/* REVENUE POR MES */}
       <div className="section">
         <div className="section-title">Revenue mensual</div>
-        <div className="bar-chart">
+        <div className="chart-scroll" ref={scrollAlFinal}>
+        <div className="bar-chart" style={{ minWidth: meses.length * MES_MIN_PX }}>
           {meses.map((m, i) => (
             <div key={i} className="bar-wrap">
               <div className="bar-val">{fmt(revenue[i])}</div>
@@ -229,11 +239,14 @@ export default function Dashboard() {
             </div>
           ))}
         </div>
+        </div>
       </div>
 
       {/* RETENCIÓN */}
       <div className="section">
         <div className="section-title">Retención mensual (%)</div>
+        <div className="chart-scroll" ref={scrollAlFinal}>
+        <div style={{ minWidth: meses.length * MES_MIN_PX }}>
         <div className="ret-row">
           {meses.map((m, i) => (
             <div key={i} className="ret-bar-wrap">
@@ -242,10 +255,12 @@ export default function Dashboard() {
             </div>
           ))}
         </div>
-        <div style={{display:'flex', gap:6, marginTop:4}}>
+        <div style={{display:'flex', gap:4, marginTop:4}}>
           {meses.map((m, i) => (
-            <div key={i} style={{flex:1, textAlign:'center', fontSize:9, color:'#bbb'}}>{m}</div>
+            <div key={i} style={{flex:1, minWidth:0, textAlign:'center', fontSize:9, color:'#bbb', whiteSpace:'nowrap'}}>{m}</div>
           ))}
+        </div>
+        </div>
         </div>
       </div>
 
