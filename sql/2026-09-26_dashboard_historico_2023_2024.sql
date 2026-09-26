@@ -11,6 +11,48 @@
 -- Cambios sobre 2026-09-26_dashboard_historial_completo.sql: m_range y m_agg.
 -- ============================================================
 
+-- 1) Tabla de totales mensuales (aplicado vía apply_migration dashboard_historico_mensual)
+create table if not exists public.dashboard_historico_mensual (
+  mes                     date primary key,
+  pedidos                 integer not null,
+  revenue                 numeric not null,
+  ticket                  numeric not null,
+  clientes                integer not null,
+  retencion               integer not null,
+  retencion_mes_siguiente integer,   -- solo dic 2024: retención de ene 2025
+  origen                  text not null,
+  created_at              timestamptz not null default now()
+);
+alter table public.dashboard_historico_mensual enable row level security;
+
+insert into public.dashboard_historico_mensual (mes,pedidos,revenue,ticket,clientes,retencion,retencion_mes_siguiente,origen) values
+('2023-01-01',1145,4076190.0,3560,0,0,null,'sistema_anterior'),
+('2023-02-01',1027,3903298.0,3801,0,0,null,'sistema_anterior'),
+('2023-03-01',1226,4703821.5,3837,0,0,null,'sistema_anterior'),
+('2023-04-01',1154,5278066.5,4574,0,0,null,'sistema_anterior'),
+('2023-05-01',1261,5785666.0,4588,0,0,null,'sistema_anterior'),
+('2023-06-01',1407,7545280.0,5363,0,0,null,'sistema_anterior'),
+('2023-07-01',1515,8879658.5,5861,0,0,null,'sistema_anterior'),
+('2023-08-01',1295,8075908.5,6236,0,0,null,'sistema_anterior'),
+('2023-09-01',1222,9152620.0,7490,0,0,null,'sistema_anterior'),
+('2023-10-01',1157,9604572.5,8301,9,0,null,'mixto'),
+('2023-11-01',941,9039992.5,9607,668,0,null,'bcn'),
+('2023-12-01',881,9761826.5,11080,646,36,null,'bcn'),
+('2024-01-01',731,9636386.5,13182,560,33,null,'bcn'),
+('2024-02-01',661,10067100.0,15230,523,32,null,'bcn'),
+('2024-03-01',630,10513412.0,16688,482,34,null,'bcn'),
+('2024-04-01',606,11854696.5,19562,472,34,null,'bcn'),
+('2024-05-01',789,14149044.6,17933,578,42,null,'bcn'),
+('2024-06-01',849,15395813.0,18134,599,35,null,'bcn'),
+('2024-07-01',719,14992210,20851,525,31,null,'bcn'),
+('2024-08-01',713,16275597.5,22827,515,36,null,'bcn'),
+('2024-09-01',643,13896032.5,21611,441,35,null,'bcn'),
+('2024-10-01',527,12861898,24406,387,33,null,'bcn'),
+('2024-11-01',533,13915929.5,26109,389,35,null,'bcn'),
+('2024-12-01',584,15053916,25777,415,40,37,'bcn')
+on conflict (mes) do nothing;
+
+-- 2) Función del snapshot (aplicado vía apply_migration dashboard_historico_2023_2024)
 CREATE OR REPLACE FUNCTION public.refresh_dashboard_snapshot_from_crudo()
  RETURNS bigint
  LANGUAGE plpgsql
